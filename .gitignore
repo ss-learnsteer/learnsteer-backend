@@ -1,0 +1,22 @@
+# Binaries
+/bin
+/dist
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Environment Variables (NEVER commit these)
+.env
+
+# IDE Specifics
+.vscode/
+.idea/
+.DS_Store
+
+# OS Specifics
+Thumbs.db
+
+# Vendor (if we decide to vendor dependencies later, usually ignored in Go modules)
+vendor/
