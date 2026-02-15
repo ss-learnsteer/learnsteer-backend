@@ -1,14 +1,21 @@
 package auth
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 // Handler holds the service dependency
 type Handler struct {
 	service *Service
+}
+
+// CheckNICRequest matches the incoming JSON payload exactly
+type CheckNICRequest struct {
+	NIC string `json:"NIC" binding:"required"`
 }
 
 // NewHandler initializes the auth handler
@@ -22,9 +29,8 @@ func (h *Handler) RegisterRoutes(r *gin.RouterGroup) {
 	{
 		authGroup.POST("/register", h.Register)
 		authGroup.POST("/login", h.Login)
-
-		// New Webhook Endpoint
 		authGroup.POST("/webhook/google-sheets", h.HandleGoogleSheetWebhook)
+		authGroup.POST("/check-nic", h.CheckNIC)
 	}
 }
 
@@ -104,5 +110,47 @@ func (h *Handler) Login(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"token": token,
 		"type":  "Bearer",
+	})
+}
+
+// CheckNIC responds to the frontend with success and exists boolean
+func (h *Handler) CheckNIC(c *gin.Context) {
+	var req CheckNICRequest
+
+	// 1. Bind the incoming JSON
+	if err := c.ShouldBindJSON(&req); err != nil {
+		// Return 400 Bad Request if the JSON is malformed or NIC is missing
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"error":   "Valid NIC is required in the payload",
+		})
+		return
+	}
+
+	// Fetch the user
+	user, err := h.service.GetUserByNIC(req.NIC)
+
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			// NIC does not exist
+			c.JSON(http.StatusOK, gin.H{
+				"success": true,
+				"exists":  false,
+			})
+			return
+		}
+		// Some other database error
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"error":   "Internal server error",
+		})
+		return
+	}
+
+	// NIC exists. Construct the response.
+	c.JSON(http.StatusOK, gin.H{
+		"success":       true,
+		"exists":        true,
+		"has_password":  user.PasswordHash != "",
 	})
 }

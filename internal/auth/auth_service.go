@@ -150,3 +150,27 @@ func (s *Service) ProcessWebhookRegistration(data WebhookPayload) error {
 
 	return result.Error
 }
+
+// CheckNICExists queries the database to see if the NIC is already registered
+func (s *Service) CheckNICExists(nic string) (bool, error) {
+	var count int64
+	
+	// Query the User table where the nic matches
+	err := s.db.Model(&User{}).Where("nic = ?", nic).Count(&count).Error
+	if err != nil {
+		return false, err
+	}
+	
+	// If count is greater than 0, the NIC exists
+	return count > 0, nil
+}
+
+// GetUserByNIC fetches the user by NIC so we can access their password hash
+func (s *Service) GetUserByNIC(nic string) (*User, error) {
+	var user User
+	err := s.db.Where("nic = ?", nic).First(&user).Error
+	if err != nil {
+		return nil, err // Returns gorm.ErrRecordNotFound if they don't exist
+	}
+	return &user, nil
+}
