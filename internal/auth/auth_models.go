@@ -23,4 +23,10 @@ type User struct {
 	Stream   string `json:"stream"`
 	District string `json:"district"`
 	School   string `json:"school"`
+
+	NIC      string `gorm:"uniqueIndex" json:"nic"`
+	WhatsappNumber string `json:"whatsapp_number"`
+	ALBatch  string    `json:"al_batch"`   // Exam Year
+	ALAttempt string    `json:"al_attempt"` // 1, 2, or 3
+	Medium   string `json:"medium"`     // Sinhala, Tamil, English
 }

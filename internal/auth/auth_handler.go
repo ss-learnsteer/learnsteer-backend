@@ -22,6 +22,9 @@ func (h *Handler) RegisterRoutes(r *gin.RouterGroup) {
 	{
 		authGroup.POST("/register", h.Register)
 		authGroup.POST("/login", h.Login)
+
+		// New Webhook Endpoint
+		authGroup.POST("/webhook/google-sheets", h.HandleGoogleSheetWebhook)
 	}
 }
 
