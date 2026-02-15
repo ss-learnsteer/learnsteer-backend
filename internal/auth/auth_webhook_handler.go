@@ -23,6 +23,7 @@ type WebhookPayload struct {
 	// Updated to String
 	ALBatch   string `json:"al_batch"`
 	ALAttempt string `json:"al_attempt"`
+	Role      string `json:"role"`
 }
 
 func (h *Handler) HandleGoogleSheetWebhook(c *gin.Context) {

@@ -105,6 +105,12 @@ func (s *Service) ProcessWebhookRegistration(data WebhookPayload) error {
 		return err
 	}
 
+	// Safety fallback: if no role is provided, default to student
+	assignedRole := data.Role
+	if assignedRole == "" {
+		assignedRole = "student"
+	}
+
 	if result.Error == nil {
 		// --- UPDATE EXISTING USER ---
 		// We update everything EXCEPT the password (in case they changed it manually)
@@ -118,6 +124,7 @@ func (s *Service) ProcessWebhookRegistration(data WebhookPayload) error {
 		user.Medium = data.Medium
 		user.ALBatch = data.ALBatch
 		user.ALAttempt = data.ALAttempt
+		user.Role = assignedRole
 		
 		return s.db.Save(&user).Error
 
@@ -126,7 +133,7 @@ func (s *Service) ProcessWebhookRegistration(data WebhookPayload) error {
 		newUser := User{
 			Email:          data.Email,
 			PasswordHash:   string(hashedPassword), // Default Password = NIC
-			Role:           "student",
+			Role:           assignedRole,
 			FirstName:      data.FirstName,
 			LastName:       data.LastName,
 			NIC:            data.NIC,
