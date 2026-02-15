@@ -1,0 +1,143 @@
+package auth
+
+import (
+	"bytes"
+	"encoding/json"
+	"net/http"
+	"net/http/httptest"
+	"os"
+	"testing"
+
+	"github.com/gin-gonic/gin"
+	"gorm.io/driver/sqlite"
+	"gorm.io/gorm"
+)
+
+// setupTestEnvironment initializes an in-memory DB and returns the Gin engine
+func setupTestEnvironment() (*gin.Engine, *gorm.DB) {
+	// 1. Setup In-Memory SQLite Database
+	db, err := gorm.Open(sqlite.Open("file::memory:?cache=shared"), &gorm.Config{})
+	if err != nil {
+		panic("Failed to connect to in-memory database")
+	}
+	db.AutoMigrate(&User{})
+
+	// 2. Setup Service and Handler
+	service := NewService(db)
+	handler := NewHandler(service)
+
+	// 3. Setup Gin Router in Test Mode
+	gin.SetMode(gin.TestMode)
+	router := gin.Default()
+	router.POST("/webhook", handler.HandleGoogleSheetWebhook)
+
+	return router, db
+}
+
+func TestHandleGoogleSheetWebhook(t *testing.T) {
+	// Set the environment variable just for this test
+	os.Setenv("WEBHOOK_SECRET", "test-secret")
+	defer os.Unsetenv("WEBHOOK_SECRET")
+
+	router, db := setupTestEnvironment()
+
+	// ---------------------------------------------------------
+	// TEST CASE 1: Successful New User Registration
+	// ---------------------------------------------------------
+	t.Run("Valid Webhook Payload - Creates New User", func(t *testing.T) {
+		payload := WebhookPayload{
+			Timestamp:      "2023-10-27T10:00:00Z",
+			FirstName:      "Kasun",
+			LastName:       "Perera",
+			NIC:            "200112345678",
+			Email:          "kasun@example.com",
+			WhatsappNumber: "0771234567",
+			School:         "Royal College",
+			District:       "Colombo",
+			Stream:         "Physical Science",
+			Medium:         "Sinhala",
+			ALBatch:        "2025",
+			ALAttempt:      "1",
+		}
+
+		body, _ := json.Marshal(payload)
+		req, _ := http.NewRequest("POST", "/webhook", bytes.NewBuffer(body))
+		req.Header.Set("X-Webhook-Secret", "test-secret")
+		req.Header.Set("Content-Type", "application/json")
+
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		// Assert HTTP Status
+		if w.Code != http.StatusOK {
+			t.Errorf("Expected status 200 OK, got %d", w.Code)
+		}
+
+		// Assert Database State
+		var user User
+		if err := db.Where("email = ?", "kasun@example.com").First(&user).Error; err != nil {
+			t.Errorf("Expected user to be created in DB, but got error: %v", err)
+		}
+		if user.FirstName != "Kasun" {
+			t.Errorf("Expected first name 'Kasun', got '%s'", user.FirstName)
+		}
+	})
+
+	// ---------------------------------------------------------
+	// TEST CASE 2: Successful Update (Upsert Logic)
+	// ---------------------------------------------------------
+	t.Run("Duplicate Email Payload - Updates Existing User", func(t *testing.T) {
+		// Kasun changes his district to Gampaha
+		payload := WebhookPayload{
+			FirstName:      "Kasun",
+			LastName:       "Perera",
+			NIC:            "200112345678",
+			Email:          "kasun@example.com", 
+			District:       "Gampaha", // <--- The changed field
+		}
+
+		body, _ := json.Marshal(payload)
+		req, _ := http.NewRequest("POST", "/webhook", bytes.NewBuffer(body))
+		req.Header.Set("X-Webhook-Secret", "test-secret")
+		req.Header.Set("Content-Type", "application/json")
+
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		if w.Code != http.StatusOK {
+			t.Errorf("Expected status 200 OK, got %d", w.Code)
+		}
+
+		// Verify the database was updated, not duplicated
+		var count int64
+		db.Model(&User{}).Where("email = ?", "kasun@example.com").Count(&count)
+		if count != 1 {
+			t.Errorf("Expected exactly 1 user with this email, found %d", count)
+		}
+
+		var updatedUser User
+		db.Where("email = ?", "kasun@example.com").First(&updatedUser)
+		if updatedUser.District != "Gampaha" {
+			t.Errorf("Expected district to be updated to 'Gampaha', got '%s'", updatedUser.District)
+		}
+	})
+
+	// ---------------------------------------------------------
+	// TEST CASE 3: Unauthorized (Wrong Secret)
+	// ---------------------------------------------------------
+	t.Run("Unauthorized - Wrong Secret Key", func(t *testing.T) {
+		payload := WebhookPayload{Email: "hacker@example.com"}
+		body, _ := json.Marshal(payload)
+		
+		req, _ := http.NewRequest("POST", "/webhook", bytes.NewBuffer(body))
+		req.Header.Set("X-Webhook-Secret", "wrong-secret-123") // Incorrect secret
+		req.Header.Set("Content-Type", "application/json")
+
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		if w.Code != http.StatusUnauthorized {
+			t.Errorf("Expected status 401 Unauthorized, got %d", w.Code)
+		}
+	})
+}
