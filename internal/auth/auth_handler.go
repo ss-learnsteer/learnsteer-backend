@@ -18,6 +18,11 @@ type CheckNICRequest struct {
 	NIC string `json:"NIC" binding:"required"`
 }
 
+type VerifyPasswordRequest struct {
+	NIC      string `json:"NIC" binding:"required"`
+	Password string `json:"password" binding:"required"`
+}
+
 // NewHandler initializes the auth handler
 func NewHandler(service *Service) *Handler {
 	return &Handler{service: service}
@@ -31,6 +36,7 @@ func (h *Handler) RegisterRoutes(r *gin.RouterGroup) {
 		authGroup.POST("/login", h.Login)
 		authGroup.POST("/webhook/google-sheets", h.HandleGoogleSheetWebhook)
 		authGroup.POST("/check-nic", h.CheckNIC)
+		authGroup.POST("/verify-password", h.VerifyPassword)
 	}
 }
 
@@ -152,5 +158,35 @@ func (h *Handler) CheckNIC(c *gin.Context) {
 		"success":       true,
 		"exists":        true,
 		"has_password":  user.PasswordHash != "",
+	})
+}
+
+// VerifyPassword responds to the microservice indicating if the credentials are valid
+func (h *Handler) VerifyPassword(c *gin.Context) {
+	var req VerifyPasswordRequest
+
+	// 1. Bind the JSON payload
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"error":   "Both NIC and password are required in the payload",
+		})
+		return
+	}
+
+	// 2. Check the credentials via the service
+	isValid, err := h.service.VerifyPasswordByNIC(req.NIC, req.Password)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"error":   "Internal server error while verifying credentials",
+		})
+		return
+	}
+
+	// 3. Return the exact verification status
+	c.JSON(http.StatusOK, gin.H{
+		"success":  true,
+		"is_valid": isValid,
 	})
 }

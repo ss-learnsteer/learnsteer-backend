@@ -62,33 +62,58 @@ func (s *Service) Register(req RegisterDTO) error {
 	return s.db.Create(&user).Error
 }
 
-// Login function remains the same...
 func (s *Service) Login(email, password string) (string, error) {
-    // ... (Keep existing Login logic)
-    // 1. Find User
     var user User
-    if err := s.db.Where("email = ?", email).First(&user).Error; err != nil {
-        return "", errors.New("invalid credentials")
-    }
 
-    // 2. Compare Passwords
-    if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(password)); err != nil {
-        return "", errors.New("invalid credentials")
-    }
+    // 1. Check if the user exists
+	err := s.db.Where("email = ?", email).First(&user).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			// Security Best Practice: Return a generic error so attackers 
+			// don't know if the email exists or the password was just wrong.
+			return "", errors.New("invalid email or password")
+		}
+		return "", err
+	}
 
-    // 3. Generate JWT
-    token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-        "sub":  user.ID,
-        "role": user.Role,
-        "exp":  time.Now().Add(time.Hour * 24 * 7).Unix(),
-    })
+    // 2. Verify the Password
+	// For students synced via the webhook, this compares the plain text NIC they 
+	// typed into the login form against the bcrypt hash in the database.
+	err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(password))
+	if err != nil {
+		return "", errors.New("invalid email or password")
+	}
 
-    secret := os.Getenv("JWT_SECRET")
-    if secret == "" {
-        return "", errors.New("JWT_SECRET not configured")
-    }
+	// 3. Generate the JWT Token
+	token, err := s.generateJWT(user)
+	if err != nil {
+		return "", errors.New("failed to generate authentication token")
+	}
 
-    return token.SignedString([]byte(secret))
+	return token, nil
+}
+
+// generateJWT is a private helper to create the token payload (claims)
+func (s *Service) generateJWT(user User) (string, error) {
+	// Define the claims (the data embedded inside the token)
+	claims := jwt.MapClaims{
+		"sub":  user.ID,         // Subject (User ID)
+		"role": user.Role,       // Important for Role-Based Access Control (student vs ss_member)
+		"exp":  time.Now().Add(time.Hour * 24).Unix(), // Token expires in 24 hours
+		"iat":  time.Now().Unix(),                     // Issued at
+	}
+
+	// Create a new token object, specifying the signing method and the claims
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+
+	// Sign the token with your server's secret key
+	secret := os.Getenv("JWT_SECRET")
+	if secret == "" {
+		return "", errors.New("JWT_SECRET environment variable is missing")
+	}
+
+	// Generate the encoded, secure token string
+	return token.SignedString([]byte(secret))
 }
 
 // ProcessWebhookRegistration handles the "Upsert" logic
@@ -173,4 +198,30 @@ func (s *Service) GetUserByNIC(nic string) (*User, error) {
 		return nil, err // Returns gorm.ErrRecordNotFound if they don't exist
 	}
 	return &user, nil
+}
+
+// VerifyPasswordByNIC checks if the provided password matches the user's hash
+func (s *Service) VerifyPasswordByNIC(nic, password string) (bool, error) {
+	var user User
+
+	// 1. Find the user by NIC
+	err := s.db.Where("nic = ?", nic).First(&user).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			// User doesn't exist, so the password is automatically invalid
+			return false, nil 
+		}
+		// An actual database connection error occurred
+		return false, err
+	}
+
+	// 2. Compare the provided password with the stored hash
+	err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(password))
+	if err != nil {
+		// Password does not match
+		return false, nil
+	}
+
+	// Password matches perfectly
+	return true, nil
 }
