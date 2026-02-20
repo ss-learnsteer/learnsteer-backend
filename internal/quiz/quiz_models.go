@@ -18,7 +18,7 @@ type Quiz struct {
 	DurationMin int    `json:"duration_min"` // 0 = unlimited
 
 	// HasMany relationship: A quiz has many questions
-	Questions []Question `json:"questions,omitempty"`
+	Questions []Question `json:"questions" gorm:"foreignKey:QuizID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 }
 
 // QuestionType enum helper
@@ -39,10 +39,10 @@ type Question struct {
 	TextMarkdown string `gorm:"type:text" json:"text_markdown"` // "What is **velocity**?"
 	ImageURL     string `json:"image_url,omitempty"`            // Optional diagram
 
-	Options []Option `json:"options"`
+	Options []Option `json:"options" gorm:"foreignKey:QuestionID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 
 	// Correct Answer (Hidden from frontend JSON usually, handled in service layer)
-	CorrectAnswer string `json:"-"` // e.g., "a" for MCQ or regex for Text
+	CorrectAnswer string `json:"correct_answer"` // e.g., "a" for MCQ or regex for Text
 	Points        int    `json:"points"`
 }
 

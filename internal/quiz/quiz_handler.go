@@ -119,6 +119,16 @@ func (h *Handler) StartQuiz(c *gin.Context) {
 		return
 	}
 
+	// 🔒 SECURITY SCRUB: Remove the correct answers before sending to the student
+	for i := range quiz.Questions {
+		quiz.Questions[i].CorrectAnswer = "" // Hide the regex/text answer
+		
+		// If you use the IsCorrect boolean on Options, hide that too!
+		for j := range quiz.Questions[i].Options {
+			quiz.Questions[i].Options[j].IsCorrect = false 
+		}
+	}
+
 	c.JSON(http.StatusOK, quiz)
 }
 
@@ -139,7 +149,7 @@ func (h *Handler) GetQuizQuestions(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,
-			"error":   "Failed to fetch questions for this quiz",
+			"error":   "Failed to fetch questions: " + err.Error(),
 		})
 		return
 	}

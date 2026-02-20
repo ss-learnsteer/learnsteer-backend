@@ -34,7 +34,10 @@ func (s *Service) GetStartQuiz(id uint) (*Quiz, error) {
 	var quiz Quiz
 
 	// Query: Select Quiz WHERE id = ? AND Preload Questions
-	err := s.db.Preload("Questions").First(&quiz, id).Error
+	err := s.db.Where("id = ?", id).
+		Preload("Questions").
+		Preload("Questions.Options").
+		First(&quiz).Error
 
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
