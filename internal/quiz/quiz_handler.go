@@ -26,12 +26,15 @@ func (h *Handler) RegisterRoutes(router *gin.RouterGroup) {
 		// GET /api/v1/quizzes?page=1&limit=10
 		routes.GET("", h.ListQuizzes)
 
-		// GET /api/v1/quizzes/:id/start (The "Mega-Fetch")
+		// GET /api/v1/quizzes/:id/start
 		routes.GET("/:id/start", h.StartQuiz)
 
-		// POST /api/v1/quizzes (Admin Create)
+		// GET /api/v1/quizzes/:id/questions
+		routes.GET("/:id/questions", h.GetQuizQuestions)
+
+		// POST /api/v1/quizzes (RESTful creation)
 		routes.POST(
-			"/", 
+			"", 
 			middleware.FeatureToggle("ENABLE_QUIZ_CREATION"), 
 			h.CreateQuiz,
 		)
@@ -43,19 +46,30 @@ func (h *Handler) CreateQuiz(c *gin.Context) {
 	var quiz Quiz
 
 	// 1. Bind JSON to Struct
-	// GORM + Gin will automatically map the nested Questions & Options JSON
 	if err := c.ShouldBindJSON(&quiz); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request payload: " + err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"error":   "Invalid request payload: " + err.Error(),
+		})
 		return
 	}
 
-	// 2. Call Service
+	// 2. Call Service to save to database
 	if err := h.service.Create(&quiz); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create quiz"})
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"error":   "Failed to create quiz",
+		})
 		return
 	}
 
-	c.JSON(http.StatusCreated, quiz)
+	// 3. Return the specific ID alongside a success message
+	// GORM automatically populates quiz.ID after a successful insert
+	c.JSON(http.StatusCreated, gin.H{
+		"success": true,
+		"message": "Quiz created successfully",
+		"quiz_id": quiz.ID,
+	})
 }
 
 // ListQuizzes returns a paginated list (Lightweight metadata only)
@@ -100,4 +114,33 @@ func (h *Handler) StartQuiz(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, quiz)
+}
+
+// GetQuizQuestions returns ONLY the questions for a specific quiz (NEW HANDLER)
+func (h *Handler) GetQuizQuestions(c *gin.Context) {
+	idParam := c.Param("id")
+	id, err := strconv.Atoi(idParam)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"error":   "Invalid quiz ID",
+		})
+		return
+	}
+
+	// Fetch questions using the service layer
+	questions, err := h.service.GetQuestionsByQuizID(uint(id))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"error":   "Failed to fetch questions for this quiz",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"quiz_id": id,
+		"data":    questions,
+	})
 }

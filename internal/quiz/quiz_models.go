@@ -3,7 +3,6 @@ package quiz
 import (
 	"time"
 
-	"gorm.io/datatypes"
 	"gorm.io/gorm"
 )
 
@@ -40,11 +39,16 @@ type Question struct {
 	TextMarkdown string `gorm:"type:text" json:"text_markdown"` // "What is **velocity**?"
 	ImageURL     string `json:"image_url,omitempty"`            // Optional diagram
 
-	// Options (JSONB) - stored as '[{"id":"a", "text":"10m/s"}, ...]'
-	// We use datatypes.JSON so GORM handles the serialization automatically.
-	Options datatypes.JSON `json:"options"`
+	Options []Option `json:"options"`
 
 	// Correct Answer (Hidden from frontend JSON usually, handled in service layer)
 	CorrectAnswer string `json:"-"` // e.g., "a" for MCQ or regex for Text
 	Points        int    `json:"points"`
+}
+
+type Option struct {
+	ID         uint   `gorm:"primaryKey" json:"id"`
+	QuestionID uint   `json:"question_id"`
+	Text       string `json:"text"`
+	IsCorrect  bool   `json:"-"` // Hidden from JSON so students can't cheat via the API!
 }

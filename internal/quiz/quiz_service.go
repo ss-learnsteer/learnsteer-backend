@@ -82,3 +82,23 @@ func (s *Service) Delete(id uint) error {
 	}
 	return nil
 }
+
+// GetQuestionsByQuizID fetches all questions for a given quiz.
+// It uses Preload to automatically fetch the associated multiple-choice options 
+// so the frontend has everything it needs to render the test.
+func (s *Service) GetQuestionsByQuizID(quizID uint) ([]Question, error) {
+	var questions []Question
+
+	// We query the questions table where the foreign key matches the quizID.
+	// Preload("Options") tells GORM to execute a second highly-optimized query 
+	// to fetch all related options and attach them to the correct questions in memory.
+	err := s.db.Where("quiz_id = ?", quizID).
+		Preload("Options"). 
+		Find(&questions).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	return questions, nil
+}
