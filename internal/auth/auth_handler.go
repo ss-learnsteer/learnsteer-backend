@@ -23,6 +23,22 @@ type VerifyPasswordRequest struct {
 	Password string `json:"password" binding:"required"`
 }
 
+// UserProfileResponse is a safe DTO (Data Transfer Object) that hides the password hash
+type UserProfileResponse struct {
+	FirstName      string `json:"first_name"`
+	LastName       string `json:"last_name"`
+	Email          string `json:"email"`
+	NIC            string `json:"nic"`
+	WhatsappNumber string `json:"whatsapp_number"`
+	School         string `json:"school"`
+	District       string `json:"district"`
+	Stream         string `json:"stream"`
+	Medium         string `json:"medium"`
+	ALBatch        string `json:"al_batch"`
+	ALAttempt      string `json:"al_attempt"`
+	Role           string `json:"role"`
+}
+
 // NewHandler initializes the auth handler
 func NewHandler(service *Service) *Handler {
 	return &Handler{service: service}
@@ -37,6 +53,7 @@ func (h *Handler) RegisterRoutes(r *gin.RouterGroup) {
 		authGroup.POST("/webhook/google-sheets", h.HandleGoogleSheetWebhook)
 		authGroup.POST("/check-nic", h.CheckNIC)
 		authGroup.POST("/verify-password", h.VerifyPassword)
+		authGroup.GET("/profile/:nic", h.GetProfile)
 	}
 }
 
@@ -188,5 +205,57 @@ func (h *Handler) VerifyPassword(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"success":  true,
 		"is_valid": isValid,
+	})
+}
+
+// GetProfile fetches a user's safe profile data by their NIC
+func (h *Handler) GetProfile(c *gin.Context) {
+	// 1. Extract the NIC from the URL path parameter (e.g., /profile/200112345678)
+	nic := c.Param("nic")
+	if nic == "" {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"error":   "NIC parameter is required",
+		})
+		return
+	}
+
+	// 2. Fetch the user using your existing service method
+	user, err := h.service.GetUserByNIC(nic)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{
+				"success": false,
+				"error":   "User profile not found",
+			})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"error":   "Internal server error",
+		})
+		return
+	}
+
+	// 3. Map the database model to our safe DTO
+	safeProfile := UserProfileResponse{
+		FirstName:      user.FirstName,
+		LastName:       user.LastName,
+		Email:          user.Email,
+		NIC:            user.NIC,
+		WhatsappNumber: user.WhatsappNumber,
+		School:         user.School,
+		District:       user.District,
+		Stream:         user.Stream,
+		Medium:         user.Medium,
+		ALBatch:        user.ALBatch,
+		ALAttempt:      user.ALAttempt,
+		Role:           user.Role,
+	}
+
+	// 4. Return the secure data
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"data":    safeProfile,
 	})
 }

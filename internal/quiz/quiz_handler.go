@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/sasnaka-learnsteer/ss-quiz-platform-backend/internal/middleware"
 )
 
 // Handler holds the service dependency
@@ -29,7 +30,11 @@ func (h *Handler) RegisterRoutes(router *gin.RouterGroup) {
 		routes.GET("/:id/start", h.StartQuiz)
 
 		// POST /api/v1/quizzes (Admin Create)
-		routes.POST("", h.CreateQuiz)
+		routes.POST(
+			"/", 
+			middleware.FeatureToggle("ENABLE_QUIZ_CREATION"), 
+			h.CreateQuiz,
+		)
 	}
 }
 
