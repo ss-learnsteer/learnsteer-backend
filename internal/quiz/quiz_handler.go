@@ -38,6 +38,12 @@ func (h *Handler) RegisterRoutes(router *gin.RouterGroup) {
 			middleware.FeatureToggle("ENABLE_QUIZ_CREATION"), 
 			h.CreateQuiz,
 		)
+
+		routes.PUT(
+			"/:id", 
+			middleware.FeatureToggle("ENABLE_QUIZ_CREATION"), 
+			h.UpdateQuiz,
+		)
 	}
 }
 
@@ -142,5 +148,45 @@ func (h *Handler) GetQuizQuestions(c *gin.Context) {
 		"success": true,
 		"quiz_id": id,
 		"data":    questions,
+	})
+}
+
+// UpdateQuiz handles the full replacement of a quiz's questions
+func (h *Handler) UpdateQuiz(c *gin.Context) {
+	// 1. Get the Quiz ID from the URL parameter
+	idParam := c.Param("id")
+	quizID, err := strconv.Atoi(idParam)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"error":   "Invalid quiz ID",
+		})
+		return
+	}
+
+	// 2. Bind the incoming JSON payload (The fully fresh object from React)
+	var updatedQuiz Quiz
+	if err := c.ShouldBindJSON(&updatedQuiz); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"error":   "Invalid request payload: " + err.Error(),
+		})
+		return
+	}
+
+	// 3. Execute the Transaction in the Service
+	if err := h.service.ReplaceQuizContent(uint(quizID), &updatedQuiz); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"error":   "Failed to update quiz content: " + err.Error(),
+		})
+		return
+	}
+
+	// 4. Return Success
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"message": "Quiz updated successfully",
+		"quiz_id": quizID,
 	})
 }

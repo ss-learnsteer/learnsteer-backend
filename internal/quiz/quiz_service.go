@@ -102,3 +102,50 @@ func (s *Service) GetQuestionsByQuizID(quizID uint) ([]Question, error) {
 
 	return questions, nil
 }
+
+// ReplaceQuizContent updates the quiz metadata and completely replaces all questions/options
+func (s *Service) ReplaceQuizContent(quizID uint, updatedQuiz *Quiz) error {
+	// Start a Database Transaction
+	return s.db.Transaction(func(tx *gorm.DB) error {
+
+		// 1. Update the parent Quiz metadata (Title, Description, etc.)
+		// We only update specific columns to avoid overwriting the ID or CreatedAt
+		if err := tx.Model(&Quiz{}).Where("id = ?", quizID).Updates(Quiz{
+			Title:       updatedQuiz.Title,
+			Description: updatedQuiz.Description,
+			// Add any other top-level quiz fields here
+		}).Error; err != nil {
+			return err
+		}
+
+		// 2. Wipe the old Options and Questions cleanly
+		// First, delete options tied to this quiz's questions to prevent foreign key errors
+		if err := tx.Exec(`
+			DELETE FROM options 
+			WHERE question_id IN (SELECT id FROM questions WHERE quiz_id = ?)
+		`, quizID).Error; err != nil {
+			return err
+		}
+
+		// Next, delete the questions themselves
+		if err := tx.Where("quiz_id = ?", quizID).Delete(&Question{}).Error; err != nil {
+			return err
+		}
+
+		// 3. Insert the fully fresh Questions and Options
+		// We must explicitly link the new questions to the existing quizID
+		for i := range updatedQuiz.Questions {
+			updatedQuiz.Questions[i].QuizID = quizID
+		}
+
+		if len(updatedQuiz.Questions) > 0 {
+			// GORM will automatically insert the questions and their nested options here
+			if err := tx.Create(&updatedQuiz.Questions).Error; err != nil {
+				return err
+			}
+		}
+
+		// If we reach here, returning nil tells GORM to COMMIT the transaction safely.
+		return nil
+	})
+}
