@@ -109,6 +109,19 @@ func (h *Handler) ListQuizzes(c *gin.Context) {
 		return
 	}
 
+	// 2. CHECK FOR EMPTY RESULTS
+	if len(quizzes) == 0 {
+		c.JSON(http.StatusNotFound, gin.H{
+			"success": false,
+			"error":   "Take a breather! 🧘‍♂️ There are no mock exams live for your medium right now. Relax, review your notes, and check back soon!",
+			// You can optionally return the meta so the frontend knows what was searched
+			"meta": gin.H{ 
+				"medium": filterMedium,
+			},
+		})
+		return
+	}
+
 	// 3. Return Standard Pagination Response
 	c.JSON(http.StatusOK, gin.H{
 		"data": quizzes,
