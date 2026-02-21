@@ -15,7 +15,7 @@ type Quiz struct {
 
 	Title       string `json:"title"`
 	Description string `json:"description"`
-	Medium      string     `json:"medium"` // e.g., "Sinhala", "English", "Tamil"
+	Medium      string `json:"medium" gorm:"default:'Sinhala';not null"` // e.g., "Sinhala", "English", "Tamil"
 	DurationMin int    `json:"duration_min"` // 0 = unlimited
 
 	// HasMany relationship: A quiz has many questions
