@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/sasnaka-learnsteer/ss-quiz-platform-backend/internal/middleware"
 	"gorm.io/gorm"
 )
 
@@ -39,6 +40,14 @@ type UserProfileResponse struct {
 	Role           string `json:"role"`
 }
 
+type CreateTicketRequest struct {
+	NIC string `json:"nic" binding:"required"`
+}
+
+type ExchangeTicketRequest struct {
+	Ticket string `json:"ticket" binding:"required"`
+}
+
 // NewHandler initializes the auth handler
 func NewHandler(service *Service) *Handler {
 	return &Handler{service: service}
@@ -54,6 +63,17 @@ func (h *Handler) RegisterRoutes(r *gin.RouterGroup) {
 		authGroup.POST("/check-nic", h.CheckNIC)
 		authGroup.POST("/verify-password", h.VerifyPassword)
 		authGroup.GET("/profile/:nic", h.GetProfile)
+		// The React app calls this to trade the ticket for a JWT
+		authGroup.POST("/exchange", h.ExchangeSSOTicket)
+	}
+
+	// The B2B Server-to-Server Group
+	b2bGroup := r.Group("/b2b")
+	// Protect this entire group with the API Key middleware
+	b2bGroup.Use(middleware.RequireAPIKey())
+	{
+		// The Node.js server calls this
+		b2bGroup.POST("/tickets", h.CreateB2BTicket)
 	}
 }
 
@@ -257,5 +277,63 @@ func (h *Handler) GetProfile(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"data":    safeProfile,
+	})
+}
+
+// CreateB2BTicket is called by the external Node.js server
+func (h *Handler) CreateB2BTicket(c *gin.Context) {
+	var req CreateTicketRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "NIC is required"})
+		return
+	}
+
+	// In a real B2B system, you might also verify the NIC exists here first
+	ticket, err := h.service.GenerateSSOTicket(req.NIC)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate ticket"})
+		return
+	}
+
+	c.JSON(http.StatusCreated, gin.H{
+		"success": true,
+		"ticket":  ticket,
+		"expires": 60, // Tell the client they have 60 seconds to use it
+	})
+}
+
+// ExchangeSSOTicket is called by your React frontend
+func (h *Handler) ExchangeSSOTicket(c *gin.Context) {
+	var req ExchangeTicketRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Ticket is required"})
+		return
+	}
+
+	// 1. Consume the ticket
+	user, err := h.service.ConsumeSSOTicket(req.Ticket)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"success": false,
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	// 2. Generate the real Go JWT using your existing method!
+	token, err := h.service.generateJWT(*user)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate session"})
+		return
+	}
+
+	// 3. Return the token and safe user data to React
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"token":   token,
+		"user": gin.H{
+			"nic":  user.NIC,
+			"role": user.Role,
+		},
 	})
 }

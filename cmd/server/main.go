@@ -32,14 +32,19 @@ func main() {
 	}
 
 	// 2. Migrations
-	// This will now create the updated User table with district/stream fields
 	db.AutoMigrate(
 		&auth.User{},
 		&quiz.Quiz{},
 		&quiz.Question{},
 		&submission.Submission{},
 		&submission.Answer{},
+		&quiz.Option{},
+		&auth.SSOTicket{},
 	)
+
+	if err != nil {
+		log.Fatalf("Failed to migrate database: %v", err)
+	}
 
 	// 3. Initialize Services & Handlers (Dependency Injection)
 	// Auth Module

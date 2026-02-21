@@ -30,3 +30,12 @@ type User struct {
 	ALAttempt string    `json:"al_attempt"` // 1, 2, or 3
 	Medium   string `json:"medium"`     // Sinhala, Tamil, English
 }
+
+// SSOTicket represents a short-lived token for cross-service authentication
+type SSOTicket struct {
+	ID        uint      `gorm:"primaryKey"`
+	Ticket    string    `gorm:"uniqueIndex;not null"` // The random string (e.g., abc-123)
+	NIC       string    `gorm:"not null"`             // Which user this ticket belongs to
+	ExpiresAt time.Time `gorm:"not null"`             // Strict 60-second expiration
+	CreatedAt time.Time
+}

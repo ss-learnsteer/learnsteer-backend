@@ -115,7 +115,7 @@ func (h *Handler) StartQuiz(c *gin.Context) {
 	// 2. Fetch the "Mega Object" (Quiz + Questions + Options)
 	quiz, err := h.service.GetStartQuiz(uint(id))
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Quiz not found"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "Quiz not found. DB Error: " + err.Error()})
 		return
 	}
 

@@ -4,10 +4,14 @@ import (
 	"errors"
 	"time"
 
+	"crypto/rand"
+	"encoding/hex"
+	"os"
+
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
-	"os"
+	"gorm.io/gorm/clause"
 )
 
 // Service struct remains the same
@@ -63,21 +67,21 @@ func (s *Service) Register(req RegisterDTO) error {
 }
 
 func (s *Service) Login(email, password string) (string, error) {
-    var user User
+	var user User
 
-    // 1. Check if the user exists
+	// 1. Check if the user exists
 	err := s.db.Where("email = ?", email).First(&user).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			// Security Best Practice: Return a generic error so attackers 
+			// Security Best Practice: Return a generic error so attackers
 			// don't know if the email exists or the password was just wrong.
 			return "", errors.New("invalid email or password")
 		}
 		return "", err
 	}
 
-    // 2. Verify the Password
-	// For students synced via the webhook, this compares the plain text NIC they 
+	// 2. Verify the Password
+	// For students synced via the webhook, this compares the plain text NIC they
 	// typed into the login form against the bcrypt hash in the database.
 	err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(password))
 	if err != nil {
@@ -97,8 +101,8 @@ func (s *Service) Login(email, password string) (string, error) {
 func (s *Service) generateJWT(user User) (string, error) {
 	// Define the claims (the data embedded inside the token)
 	claims := jwt.MapClaims{
-		"sub":  user.ID,         // Subject (User ID)
-		"role": user.Role,       // Important for Role-Based Access Control (student vs ss_member)
+		"sub":  user.ID,                               // Subject (User ID)
+		"role": user.Role,                             // Important for Role-Based Access Control (student vs ss_member)
 		"exp":  time.Now().Add(time.Hour * 24).Unix(), // Token expires in 24 hours
 		"iat":  time.Now().Unix(),                     // Issued at
 	}
@@ -136,7 +140,8 @@ func (s *Service) ProcessWebhookRegistration(data WebhookPayload) error {
 		assignedRole = "student"
 	}
 
-	if result.Error == nil {
+	switch result.Error {
+	case nil:
 		// --- UPDATE EXISTING USER ---
 		// We update everything EXCEPT the password (in case they changed it manually)
 		user.FirstName = data.FirstName
@@ -150,11 +155,13 @@ func (s *Service) ProcessWebhookRegistration(data WebhookPayload) error {
 		user.ALBatch = data.ALBatch
 		user.ALAttempt = data.ALAttempt
 		user.Role = assignedRole
-		
+
 		return s.db.Save(&user).Error
 
-	} else if result.Error == gorm.ErrRecordNotFound {
+	case gorm.ErrRecordNotFound:
 		// --- CREATE NEW USER ---
+		// Use OnConflict so that if the NIC already exists (e.g. a duplicate
+		// submission from the sheet), we update instead of crashing.
 		newUser := User{
 			Email:          data.Email,
 			PasswordHash:   string(hashedPassword), // Default Password = NIC
@@ -170,7 +177,14 @@ func (s *Service) ProcessWebhookRegistration(data WebhookPayload) error {
 			ALBatch:        data.ALBatch,
 			ALAttempt:      data.ALAttempt,
 		}
-		return s.db.Create(&newUser).Error
+		return s.db.Clauses(clause.OnConflict{
+			Columns: []clause.Column{{Name: "nic"}},
+			DoUpdates: clause.AssignmentColumns([]string{
+				"email", "first_name", "last_name", "whatsapp_number",
+				"school", "district", "stream", "medium",
+				"al_batch", "al_attempt", "role", "updated_at",
+			}),
+		}).Create(&newUser).Error
 	}
 
 	return result.Error
@@ -179,13 +193,13 @@ func (s *Service) ProcessWebhookRegistration(data WebhookPayload) error {
 // CheckNICExists queries the database to see if the NIC is already registered
 func (s *Service) CheckNICExists(nic string) (bool, error) {
 	var count int64
-	
+
 	// Query the User table where the nic matches
 	err := s.db.Model(&User{}).Where("nic = ?", nic).Count(&count).Error
 	if err != nil {
 		return false, err
 	}
-	
+
 	// If count is greater than 0, the NIC exists
 	return count > 0, nil
 }
@@ -209,7 +223,7 @@ func (s *Service) VerifyPasswordByNIC(nic, password string) (bool, error) {
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			// User doesn't exist, so the password is automatically invalid
-			return false, nil 
+			return false, nil
 		}
 		// An actual database connection error occurred
 		return false, err
@@ -224,4 +238,65 @@ func (s *Service) VerifyPasswordByNIC(nic, password string) (bool, error) {
 
 	// Password matches perfectly
 	return true, nil
+}
+
+// GenerateSSOTicket creates a 60-second secure ticket for a user
+func (s *Service) GenerateSSOTicket(nic string) (string, error) {
+	// 1. Generate a 32-byte secure random string
+	bytes := make([]byte, 32)
+	if _, err := rand.Read(bytes); err != nil {
+		return "", err
+	}
+	ticketStr := hex.EncodeToString(bytes)
+
+	// 2. Save it to the database with a 60-second lifespan
+	ticket := SSOTicket{
+		Ticket:    ticketStr,
+		NIC:       nic,
+		ExpiresAt: time.Now().Add(60 * time.Second), // Very short window!
+	}
+
+	if err := s.db.Create(&ticket).Error; err != nil {
+		return "", err
+	}
+
+	return ticketStr, nil
+}
+
+// ConsumeSSOTicket verifies the ticket, deletes it, and returns the User
+func (s *Service) ConsumeSSOTicket(ticketStr string) (*User, error) {
+	var ticket SSOTicket
+	var user User
+
+	// 1. We use a Database Transaction to ensure this ticket is only used EXACTLY once
+	err := s.db.Transaction(func(tx *gorm.DB) error {
+		// Find the ticket
+		if err := tx.Where("ticket = ?", ticketStr).First(&ticket).Error; err != nil {
+			return errors.New("invalid or expired ticket")
+		}
+
+		// Check expiration
+		if time.Now().After(ticket.ExpiresAt) {
+			tx.Delete(&ticket) // Clean up the expired ticket
+			return errors.New("ticket has expired")
+		}
+
+		// Fetch the actual user associated with this NIC
+		if err := tx.Where("nic = ?", ticket.NIC).First(&user).Error; err != nil {
+			return errors.New("user not found")
+		}
+
+		// IMPORTANT: Delete the ticket immediately so it can never be reused
+		if err := tx.Delete(&ticket).Error; err != nil {
+			return err
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &user, nil
 }

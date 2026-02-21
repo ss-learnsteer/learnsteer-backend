@@ -3,9 +3,11 @@ package auth
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"sync/atomic"
 	"testing"
 
 	"github.com/gin-gonic/gin"
@@ -13,20 +15,23 @@ import (
 	"gorm.io/gorm"
 )
 
-// setupTestEnvironment initializes an in-memory DB and returns the Gin engine
+// dbCounter gives each test its own isolated in-memory SQLite database.
+var dbCounter uint64
+
+// setupTestEnvironment initializes an in-memory DB and returns the Gin engine.
+// Each call gets a brand-new database so tests never share state.
 func setupTestEnvironment() (*gin.Engine, *gorm.DB) {
-	// 1. Setup In-Memory SQLite Database
-	db, err := gorm.Open(sqlite.Open("file::memory:?cache=shared"), &gorm.Config{})
+	// Use a unique name per call so there is no shared state between test runs.
+	dbName := fmt.Sprintf("file:testdb%d?mode=memory&cache=private", atomic.AddUint64(&dbCounter, 1))
+	db, err := gorm.Open(sqlite.Open(dbName), &gorm.Config{})
 	if err != nil {
 		panic("Failed to connect to in-memory database")
 	}
 	db.AutoMigrate(&User{})
 
-	// 2. Setup Service and Handler
 	service := NewService(db)
 	handler := NewHandler(service)
 
-	// 3. Setup Gin Router in Test Mode
 	gin.SetMode(gin.TestMode)
 	router := gin.Default()
 	router.POST("/webhook", handler.HandleGoogleSheetWebhook)
@@ -45,6 +50,8 @@ func TestHandleGoogleSheetWebhook(t *testing.T) {
 	// TEST CASE 1: Successful New User Registration
 	// ---------------------------------------------------------
 	t.Run("Valid Webhook Payload - Creates New User", func(t *testing.T) {
+		// Clean slate before this subtest
+		db.Exec("DELETE FROM users")
 		payload := WebhookPayload{
 			Timestamp:      "2023-10-27T10:00:00Z",
 			FirstName:      "Kasun",
@@ -87,13 +94,15 @@ func TestHandleGoogleSheetWebhook(t *testing.T) {
 	// TEST CASE 2: Successful Update (Upsert Logic)
 	// ---------------------------------------------------------
 	t.Run("Duplicate Email Payload - Updates Existing User", func(t *testing.T) {
+		// Ensure Kasun from Test Case 1 is present (but no duplicate NIC rows)
+		db.Exec("DELETE FROM users")
 		// Kasun changes his district to Gampaha
 		payload := WebhookPayload{
-			FirstName:      "Kasun",
-			LastName:       "Perera",
-			NIC:            "200112345678",
-			Email:          "kasun@example.com", 
-			District:       "Gampaha", // <--- The changed field
+			FirstName: "Kasun",
+			LastName:  "Perera",
+			NIC:       "200112345678",
+			Email:     "kasun@example.com",
+			District:  "Gampaha", // <--- The changed field
 		}
 
 		body, _ := json.Marshal(payload)
@@ -128,7 +137,7 @@ func TestHandleGoogleSheetWebhook(t *testing.T) {
 	t.Run("Unauthorized - Wrong Secret Key", func(t *testing.T) {
 		payload := WebhookPayload{Email: "hacker@example.com"}
 		body, _ := json.Marshal(payload)
-		
+
 		req, _ := http.NewRequest("POST", "/webhook", bytes.NewBuffer(body))
 		req.Header.Set("X-Webhook-Secret", "wrong-secret-123") // Incorrect secret
 		req.Header.Set("Content-Type", "application/json")
