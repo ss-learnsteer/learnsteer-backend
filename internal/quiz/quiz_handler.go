@@ -13,6 +13,10 @@ type Handler struct {
 	service *Service
 }
 
+type VisibilityPayload struct {
+	IsVisible *bool `json:"is_visible" binding:"required"`
+}
+
 // NewHandler initializes the handler
 func NewHandler(service *Service) *Handler {
 	return &Handler{service: service}
@@ -47,6 +51,9 @@ func (h *Handler) RegisterRoutes(router *gin.RouterGroup) {
 			middleware.FeatureToggle("ENABLE_QUIZ_CREATION"), 
 			h.UpdateQuiz,
 		)
+
+		// The toggle switch endpoint
+		routes.PATCH("/:id/visibility", h.ToggleVisibility)
 	}
 }
 
@@ -92,18 +99,22 @@ func (h *Handler) ListQuizzes(c *gin.Context) {
 	userMedium := c.GetString("user_medium")
 
 	var filterMedium string
+	var onlyVisible bool
 
 	// 2. Apply Role-Based Filtering Logic
 	if userRole == "student" {
 		// Force the filter to match the student's database medium
 		filterMedium = userMedium 
+		onlyVisible = true // Students NEVER see hidden quizzes
 	} else {
 		// If they are an admin/staff, let them see everything OR use the query param manually
 		filterMedium = c.Query("medium") 
+		// Admins see everything by default, but can optionally filter by visibility
+		onlyVisible = c.Query("visible_only") == "true"
 	}
 
 	// 2. Call Service with the new filter
-	quizzes, total, err := h.service.ListQuizzes(page, limit, filterMedium)
+	quizzes, total, err := h.service.ListQuizzes(page, limit, filterMedium, onlyVisible)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch quizzes"})
 		return
@@ -230,5 +241,31 @@ func (h *Handler) UpdateQuiz(c *gin.Context) {
 		"success": true,
 		"message": "Quiz updated successfully",
 		"quiz_id": quizID,
+	})
+}
+
+// ToggleVisibility allows admins to quickly hide or publish a quiz
+func (h *Handler) ToggleVisibility(c *gin.Context) {
+	idParam := c.Param("id")
+	id, err := strconv.Atoi(idParam)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid quiz ID"})
+		return
+	}
+
+	var payload VisibilityPayload
+	if err := c.ShouldBindJSON(&payload); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "is_visible boolean is required"})
+		return
+	}
+
+	if err := h.service.UpdateVisibility(uint(id), *payload.IsVisible); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update visibility"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"message": "Quiz visibility updated successfully",
 	})
 }

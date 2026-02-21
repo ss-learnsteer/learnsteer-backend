@@ -52,7 +52,7 @@ func (s *Service) GetStartQuiz(id uint) (*Quiz, error) {
 // ListQuizzes fetches a paginated list of quizzes WITHOUT questions.
 // Optimization: This saves massive bandwidth by not loading the heavy questions data
 // on the dashboard list.
-func (s *Service) ListQuizzes(page, limit int, medium string) ([]Quiz, int64, error) {
+func (s *Service) ListQuizzes(page, limit int, medium string, onlyVisible bool) ([]Quiz, int64, error) {
 	var quizzes []Quiz
 	var total int64
 
@@ -62,6 +62,11 @@ func (s *Service) ListQuizzes(page, limit int, medium string) ([]Quiz, int64, er
 	// 2. Apply the medium filter ONLY if one was provided
 	if medium != "" {
 		query = query.Where("medium = ?", medium)
+	}
+
+	// Filter out hidden quizzes if the flag is true
+	if onlyVisible {
+		query = query.Where("is_visible = ?", true)
 	}
 
 	// 3. Get the total count of rows AFTER the filter is applied
@@ -156,4 +161,26 @@ func (s *Service) ReplaceQuizContent(quizID uint, updatedQuiz *Quiz) error {
 		// If we reach here, returning nil tells GORM to COMMIT the transaction safely.
 		return nil
 	})
+}
+
+// UpdateVisibility explicitly toggles the is_visible flag for a specific quiz
+func (s *Service) UpdateVisibility(quizID uint, isVisible bool) error {
+	// We use .Update("column", value) rather than .Updates(struct).
+	// This forces GORM to update the specific column, perfectly bypassing 
+	// the zero-value issue where it ignores 'false' booleans.
+	result := s.db.Model(&Quiz{}).
+		Where("id = ?", quizID).
+		Update("is_visible", isVisible)
+
+	// Catch actual database errors (like connection drops)
+	if result.Error != nil {
+		return result.Error
+	}
+
+	// If the query succeeded but no rows were changed, the quiz doesn't exist
+	if result.RowsAffected == 0 {
+		return errors.New("quiz not found")
+	}
+
+	return nil
 }

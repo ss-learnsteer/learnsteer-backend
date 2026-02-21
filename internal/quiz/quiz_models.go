@@ -16,7 +16,9 @@ type Quiz struct {
 	Title       string `json:"title"`
 	Description string `json:"description"`
 	Medium      string `json:"medium" gorm:"default:'Sinhala';not null"` // e.g., "Sinhala", "English", "Tamil"
-	DurationMin int    `json:"duration_min"` // 0 = unlimited
+	// Use *bool so GORM correctly saves 'false' instead of ignoring it
+	IsVisible   *bool `json:"is_visible" gorm:"default:true"`
+	DurationMin int   `json:"duration_min"` // 0 = unlimited
 
 	// HasMany relationship: A quiz has many questions
 	Questions []Question `json:"questions" gorm:"foreignKey:QuizID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
