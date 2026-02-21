@@ -1,7 +1,9 @@
 package submission
 
 import (
-	"regexp"
+	"errors"
+	"strings"
+	"time"
 
 	"github.com/sasnaka-learnsteer/ss-quiz-platform-backend/internal/quiz"
 	"gorm.io/gorm"
@@ -15,62 +17,69 @@ func NewService(db *gorm.DB) *Service {
 	return &Service{db: db}
 }
 
-// Submit handles the grading and saving of a quiz submission
-func (s *Service) Submit(submission *Submission) error {
-	return s.db.Transaction(func(tx *gorm.DB) error {
-		// 1. Fetch all questions for this quiz to get the Correct Answers
-		// We need the "truth" from the database, not what the user sent.
-		var questions []quiz.Question
-		if err := tx.Where("quiz_id = ?", submission.QuizID).Find(&questions).Error; err != nil {
-			return err
-		}
+// GradeAndSubmit calculates the score and saves the student's submission
+func (s *Service) GradeAndSubmit(userID uint, req SubmitQuizPayload) (*Submission, error) {
+	var targetQuiz quiz.Quiz
 
-		// Create a map for fast lookup: QuestionID -> Question
-		qMap := make(map[uint]quiz.Question)
-		for _, q := range questions {
-			qMap[q.ID] = q
-		}
+	// 1. Fetch the quiz with all questions and options
+	if err := s.db.Preload("Questions.Options").First(&targetQuiz, req.QuizID).Error; err != nil {
+		return nil, errors.New("quiz not found")
+	}
 
-		// 2. Auto-Grade the Answers
-		totalScore := 0
-		for i := range submission.Answers {
-			ans := &submission.Answers[i]
-			question, exists := qMap[ans.QuestionID]
+	// 2. Build a memory map for instant O(1) Question lookups
+	questionsMap := make(map[uint]quiz.Question)
+	for _, q := range targetQuiz.Questions {
+		questionsMap[q.ID] = q
+	}
 
-			if !exists {
-				continue // Skip invalid question IDs
-			}
+	// 3. Grade the student's submission
+	var totalScore int
+	var submissionAnswers []Answer
 
-			// Grade based on type
-			isCorrect := false
-			if question.Type == quiz.TypeMCQ {
-				if ans.SelectedOption == question.CorrectAnswer {
-					isCorrect = true
+	for _, studentAnswer := range req.Answers {
+		isCorrect := false
+
+		// Lookup the actual question from the database
+		if q, exists := questionsMap[studentAnswer.QuestionID]; exists {
+
+			// Safety check: ensure the string isn't empty
+			if len(studentAnswer.SelectedOption) > 0 {
+				// Convert "a" -> 0, "b" -> 1, "c" -> 2
+				char := strings.ToLower(studentAnswer.SelectedOption)[0]
+				optIndex := int(char - 'a')
+
+				// Bounds check: prevent a panic if a student maliciously sends "z"
+				if optIndex >= 0 && optIndex < len(q.Options) {
+					// Check if the option at that index is the correct one
+					if q.Options[optIndex].IsCorrect {
+						isCorrect = true
+						totalScore += q.Points
+					}
 				}
-			} else if question.Type == quiz.TypeText {
-				// Simple Regex matching for text answers
-				// e.g., CorrectAnswer regex: "(?i)vector" matches "It is a Vector quantity"
-				matched, _ := regexp.MatchString(question.CorrectAnswer, ans.TextResponse)
-				if matched {
-					isCorrect = true
-				}
-			}
-
-			ans.IsCorrect = isCorrect
-			if isCorrect {
-				totalScore += question.Points
 			}
 		}
 
-		// 3. Update Submission Metadata
-		submission.Score = totalScore
+		// 4. Create the Answer record using YOUR exact struct fields
+		submissionAnswers = append(submissionAnswers, Answer{
+			QuestionID:     studentAnswer.QuestionID,
+			SelectedOption: studentAnswer.SelectedOption, // Safely save the "a" or "b"
+			IsCorrect:      isCorrect,
+		})
+	}
 
-		// 4. Save to DB
-		// GORM will insert the Submission AND all the Answers in one go
-		if err := tx.Create(submission).Error; err != nil {
-			return err
-		}
+	// 5. Create and save the final Submission record
+	now := time.Now()
+	submission := Submission{
+		UserID:      userID,
+		QuizID:      req.QuizID,
+		Score:       totalScore,
+		CompletedAt: &now, // Mark it as finished right now
+		Answers:     submissionAnswers,
+	}
 
-		return nil
-	})
+	if err := s.db.Create(&submission).Error; err != nil {
+		return nil, errors.New("failed to save submission")
+	}
+
+	return &submission, nil
 }

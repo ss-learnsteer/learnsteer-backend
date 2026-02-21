@@ -14,32 +14,28 @@ import (
 )
 
 // setupSubmissionTestEnv initializes the DB, seeds a test quiz, and mocks the auth middleware
-func setupSubmissionTestEnv() (*gin.Engine, *gorm.DB, uint, uint, uint) {
+func setupSubmissionTestEnv() (*gin.Engine, *gorm.DB, uint, uint) {
 	// 1. Setup In-Memory DB
 	db, _ := gorm.Open(sqlite.Open("file::memory:?cache=shared"), &gorm.Config{})
-	
-	// Migrate both Quiz and Submission tables
-	db.AutoMigrate(&quiz.Quiz{}, &quiz.Question{}, &Submission{}, &Answer{})
 
-	// 2. Seed Test Data (The "Truth" in the database)
+	// Migrate all necessary tables, including quiz.Option!
+	db.AutoMigrate(&quiz.Quiz{}, &quiz.Question{}, &quiz.Option{}, &Submission{}, &Answer{})
+
+	// 2. Seed Test Data (The new "Truth" in the database)
 	testQuiz := quiz.Quiz{Title: "Physics Unit 1"}
 	db.Create(&testQuiz)
 
 	q1 := quiz.Question{
-		QuizID:        testQuiz.ID,
-		Type:          quiz.TypeMCQ, // Assuming "mcq"
-		Points:        10,
-		CorrectAnswer: "b",
+		QuizID: testQuiz.ID,
+		Points: 10,
+		// Seed the options exactly how the CreateQuiz handler saves them
+		Options: []quiz.Option{
+			{Text: "10 m/s", IsCorrect: false}, // Index 0 ("a")
+			{Text: "14 m/s", IsCorrect: true},  // Index 1 ("b") - THIS IS THE CORRECT ANSWER
+			{Text: "12 m/s", IsCorrect: false}, // Index 2 ("c")
+		},
 	}
 	db.Create(&q1)
-
-	q2 := quiz.Question{
-		QuizID:        testQuiz.ID,
-		Type:          quiz.TypeText, // Assuming "text"
-		Points:        5,
-		CorrectAnswer: "(?i)vector", // Regex: case-insensitive match for "vector"
-	}
-	db.Create(&q2)
 
 	// 3. Setup Router and Handlers
 	service := NewService(db)
@@ -49,29 +45,29 @@ func setupSubmissionTestEnv() (*gin.Engine, *gorm.DB, uint, uint, uint) {
 	router := gin.Default()
 
 	// 4. Mock the Auth Middleware
-	// We inject a fake userID into the context, exactly like your AuthMiddleware does
+	// We inject a fake userID into the context, perfectly matching your AuthMiddleware
 	router.Use(func(c *gin.Context) {
-		c.Set("userID", uint(99)) // Mock Student ID
+		c.Set("user_id", uint(99)) // Mock Student ID
 		c.Next()
 	})
 
 	router.POST("/submissions", handler.SubmitQuiz)
 
-	return router, db, testQuiz.ID, q1.ID, q2.ID
+	return router, db, testQuiz.ID, q1.ID
 }
 
 func TestAutoGradingLogic(t *testing.T) {
-	router, _, quizID, q1ID, q2ID := setupSubmissionTestEnv()
+	router, _, quizID, q1ID := setupSubmissionTestEnv()
 
 	// ---------------------------------------------------------
-	// TEST CASE 1: Perfect Score (15/15 points)
+	// TEST CASE 1: Correct Answer
 	// ---------------------------------------------------------
-	t.Run("Perfect Score - All answers correct", func(t *testing.T) {
-		payload := Submission{
+	t.Run("Calculates Points for Correct Answer", func(t *testing.T) {
+		// Use the DTO struct that the handler expects
+		payload := SubmitQuizPayload{
 			QuizID: quizID,
-			Answers: []Answer{
-				{QuestionID: q1ID, SelectedOption: "b"},                            // Correct MCQ
-				{QuestionID: q2ID, TextResponse: "Velocity is a Vector quantity"}, // Correct Regex Match
+			Answers: []SubmitAnswerPayload{
+				{QuestionID: q1ID, SelectedOption: "b"}, // "b" maps to index 1 (IsCorrect: true)
 			},
 		}
 
@@ -86,25 +82,27 @@ func TestAutoGradingLogic(t *testing.T) {
 			t.Fatalf("Expected 201 Created, got %d. Body: %s", w.Code, w.Body.String())
 		}
 
-		// Parse the JSON response to check the calculated score
-		var response map[string]interface{}
+		// Parse the JSON response
+		var response struct {
+			Data struct {
+				Score int `json:"score"`
+			} `json:"data"`
+		}
 		json.Unmarshal(w.Body.Bytes(), &response)
 
-		expectedScore := float64(15) // JSON numbers parse as float64 in Go map[string]interface{}
-		if response["score"] != expectedScore {
-			t.Errorf("Expected score 15, got %v", response["score"])
+		if response.Data.Score != 10 {
+			t.Errorf("Expected score 10, got %d", response.Data.Score)
 		}
 	})
 
 	// ---------------------------------------------------------
-	// TEST CASE 2: Partial Score (10/15 points)
+	// TEST CASE 2: Incorrect Answer
 	// ---------------------------------------------------------
-	t.Run("Partial Score - One wrong, one right", func(t *testing.T) {
-		payload := Submission{
+	t.Run("Assigns Zero Points for Wrong Answer", func(t *testing.T) {
+		payload := SubmitQuizPayload{
 			QuizID: quizID,
-			Answers: []Answer{
-				{QuestionID: q1ID, SelectedOption: "b"},      // Correct (10 pts)
-				{QuestionID: q2ID, TextResponse: "scalar"},   // Wrong text (0 pts)
+			Answers: []SubmitAnswerPayload{
+				{QuestionID: q1ID, SelectedOption: "a"}, // "a" maps to index 0 (IsCorrect: false)
 			},
 		}
 
@@ -115,23 +113,27 @@ func TestAutoGradingLogic(t *testing.T) {
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
 
-		var response map[string]interface{}
+		var response struct {
+			Data struct {
+				Score int `json:"score"`
+			} `json:"data"`
+		}
 		json.Unmarshal(w.Body.Bytes(), &response)
 
-		if response["score"] != float64(10) {
-			t.Errorf("Expected score 10, got %v", response["score"])
+		if response.Data.Score != 0 {
+			t.Errorf("Expected score 0, got %d", response.Data.Score)
 		}
 	})
 
 	// ---------------------------------------------------------
-	// TEST CASE 3: Zero Score & Invalid Question ID
+	// TEST CASE 3: Out of Bounds & Security Resilience
 	// ---------------------------------------------------------
-	t.Run("Zero Score and Resilient to Fake Question IDs", func(t *testing.T) {
-		payload := Submission{
+	t.Run("Resilient to Out of Bounds and Fake IDs", func(t *testing.T) {
+		payload := SubmitQuizPayload{
 			QuizID: quizID,
-			Answers: []Answer{
-				{QuestionID: q1ID, SelectedOption: "c"}, // Wrong MCQ
-				{QuestionID: 9999, SelectedOption: "a"}, // Fake Question ID (Hacker attempt)
+			Answers: []SubmitAnswerPayload{
+				{QuestionID: q1ID, SelectedOption: "z"}, // Malicious out-of-bounds letter
+				{QuestionID: 9999, SelectedOption: "b"}, // Fake Question ID
 			},
 		}
 
@@ -142,11 +144,15 @@ func TestAutoGradingLogic(t *testing.T) {
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
 
-		var response map[string]interface{}
+		var response struct {
+			Data struct {
+				Score int `json:"score"`
+			} `json:"data"`
+		}
 		json.Unmarshal(w.Body.Bytes(), &response)
 
-		if response["score"] != float64(0) {
-			t.Errorf("Expected score 0, got %v", response["score"])
+		if response.Data.Score != 0 {
+			t.Errorf("Expected score 0 from malicious payload, got %d", response.Data.Score)
 		}
 	})
 }

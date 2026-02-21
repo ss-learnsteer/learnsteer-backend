@@ -3,6 +3,7 @@ package quiz
 import (
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/sasnaka-learnsteer/ss-quiz-platform-backend/internal/middleware"
@@ -15,6 +16,28 @@ type Handler struct {
 
 type VisibilityPayload struct {
 	IsVisible *bool `json:"is_visible" binding:"required"`
+}
+
+type OptionPayload struct {
+	Text string `json:"text" binding:"required"`
+}
+
+type QuestionPayload struct {
+	Type          string          `json:"type" binding:"required"`
+	Points        int             `json:"points"`
+	TextMarkdown  string          `json:"text_markdown" binding:"required"`
+	ImageURL      string          `json:"image_url"`
+	Options       []OptionPayload `json:"options" binding:"required,min=2"`
+	CorrectAnswer string          `json:"correct_answer" binding:"required,len=1"` // "a", "b", "c", etc.
+}
+
+type CreateQuizRequest struct {
+	Title       string            `json:"title" binding:"required"`
+	Description string            `json:"description"`
+	DurationMin int               `json:"duration_min"`
+	Medium      string            `json:"medium" binding:"required"`
+	IsVisible   *bool             `json:"is_visible"`
+	Questions   []QuestionPayload `json:"questions" binding:"required,min=1"`
 }
 
 // NewHandler initializes the handler
@@ -32,13 +55,13 @@ func (h *Handler) RegisterRoutes(router *gin.RouterGroup) {
 		routes.GET("/:id/start", h.StartQuiz)
 		routes.GET("/:id/questions", h.GetQuizQuestions)
 		routes.POST(
-			"", 
-			middleware.FeatureToggle("ENABLE_QUIZ_CREATION"), 
+			"",
+			middleware.FeatureToggle("ENABLE_QUIZ_CREATION"),
 			h.CreateQuiz,
 		)
 		routes.PUT(
-			"/:id", 
-			middleware.FeatureToggle("ENABLE_QUIZ_CREATION"), 
+			"/:id",
+			middleware.FeatureToggle("ENABLE_QUIZ_CREATION"),
 			h.UpdateQuiz,
 		)
 		routes.PATCH("/:id/visibility", h.ToggleVisibility)
@@ -48,32 +71,34 @@ func (h *Handler) RegisterRoutes(router *gin.RouterGroup) {
 
 // CreateQuiz handles creating a new quiz with markdown questions
 func (h *Handler) CreateQuiz(c *gin.Context) {
-	var quiz Quiz
+	var req CreateQuizRequest
 
-	// 1. Bind JSON to Struct
-	if err := c.ShouldBindJSON(&quiz); err != nil {
+	// 1. Bind and validate the JSON payload
+	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"error":   "Invalid request payload: " + err.Error(),
+			"success": false, 
+			"error": "Invalid request payload format",
 		})
 		return
 	}
 
-	// 2. Call Service to save to database
-	if err := h.service.Create(&quiz); err != nil {
+	// 2. Map the DTO string values to the GORM struct booleans
+	quizModel := mapPayloadToModel(req)
+
+	// 3. Save to the database
+	if err := h.service.CreateQuiz(&quizModel); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"success": false,
-			"error":   "Failed to create quiz",
+			"success": false, 
+			"error": "Failed to create quiz in the database",
 		})
 		return
 	}
 
-	// 3. Return the specific ID alongside a success message
-	// GORM automatically populates quiz.ID after a successful insert
+	// 4. Return the created model (which now includes the generated DB IDs)
 	c.JSON(http.StatusCreated, gin.H{
 		"success": true,
 		"message": "Quiz created successfully",
-		"quiz_id": quiz.ID,
+		"data":    quizModel, 
 	})
 }
 
@@ -93,11 +118,11 @@ func (h *Handler) ListQuizzes(c *gin.Context) {
 	// 2. Apply Role-Based Filtering Logic
 	if userRole == "student" {
 		// Force the filter to match the student's database medium
-		filterMedium = userMedium 
+		filterMedium = userMedium
 		onlyVisible = true // Students NEVER see hidden quizzes
 	} else {
 		// If they are an admin/staff, let them see everything OR use the query param manually
-		filterMedium = c.Query("medium") 
+		filterMedium = c.Query("medium")
 		// Admins see everything by default, but can optionally filter by visibility
 		onlyVisible = c.Query("visible_only") == "true"
 	}
@@ -115,7 +140,7 @@ func (h *Handler) ListQuizzes(c *gin.Context) {
 			"success": false,
 			"error":   "Take a breather! 🧘‍♂️ There are no mock exams live for your medium right now. Relax, review your notes, and check back soon!",
 			// You can optionally return the meta so the frontend knows what was searched
-			"meta": gin.H{ 
+			"meta": gin.H{
 				"medium": filterMedium,
 			},
 		})
@@ -126,9 +151,9 @@ func (h *Handler) ListQuizzes(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"data": quizzes,
 		"meta": gin.H{
-			"page":  page,
-			"limit": limit,
-			"total": total,
+			"page":   page,
+			"limit":  limit,
+			"total":  total,
 			"medium": filterMedium,
 		},
 	})
@@ -154,10 +179,10 @@ func (h *Handler) StartQuiz(c *gin.Context) {
 	// 🔒 SECURITY SCRUB: Remove the correct answers before sending to the student
 	for i := range quiz.Questions {
 		quiz.Questions[i].CorrectAnswer = "" // Hide the regex/text answer
-		
+
 		// If you use the IsCorrect boolean on Options, hide that too!
 		for j := range quiz.Questions[i].Options {
-			quiz.Questions[i].Options[j].IsCorrect = false 
+			quiz.Questions[i].Options[j].IsCorrect = false
 		}
 	}
 
@@ -195,41 +220,48 @@ func (h *Handler) GetQuizQuestions(c *gin.Context) {
 
 // UpdateQuiz handles the full replacement of a quiz's questions
 func (h *Handler) UpdateQuiz(c *gin.Context) {
-	// 1. Get the Quiz ID from the URL parameter
+	// 1. Extract the Quiz ID from the URL
 	idParam := c.Param("id")
 	quizID, err := strconv.Atoi(idParam)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"error":   "Invalid quiz ID",
+			"success": false, 
+			"error": "Invalid quiz ID",
 		})
 		return
 	}
 
-	// 2. Bind the incoming JSON payload (The fully fresh object from React)
-	var updatedQuiz Quiz
-	if err := c.ShouldBindJSON(&updatedQuiz); err != nil {
+	var req CreateQuizRequest 
+	
+	// 2. Bind and validate the incoming JSON replacement
+	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"error":   "Invalid request payload: " + err.Error(),
+			"success": false, 
+			"error": "Invalid request payload format",
 		})
 		return
 	}
 
-	// 3. Execute the Transaction in the Service
-	if err := h.service.ReplaceQuizContent(uint(quizID), &updatedQuiz); err != nil {
+	// 3. Map the DTO to the GORM model
+	quizModel := mapPayloadToModel(req)
+	
+	// IMPORTANT: Attach the ID from the URL so GORM knows exactly which parent record to update
+	quizModel.ID = uint(quizID)
+
+	// 4. Run the update service (which should wipe old questions/options and insert these new ones)
+	if err := h.service.UpdateQuiz(&quizModel); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"success": false,
-			"error":   "Failed to update quiz content: " + err.Error(),
+			"success": false, 
+			"error": "Failed to update quiz",
 		})
 		return
 	}
 
-	// 4. Return Success
+	// 5. Return success
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"message": "Quiz updated successfully",
-		"quiz_id": quizID,
+		"data":    quizModel,
 	})
 }
 
@@ -303,4 +335,42 @@ func (h *Handler) DeleteQuiz(c *gin.Context) {
 		"success": true,
 		"message": "Quiz deleted successfully",
 	})
+}
+
+func mapPayloadToModel(req CreateQuizRequest) Quiz {
+	quiz := Quiz{
+		Title:       req.Title,
+		Description: req.Description,
+		Medium:      req.Medium,
+		IsVisible:   req.IsVisible,
+		DurationMin: req.DurationMin,
+	}
+
+	for _, qReq := range req.Questions {
+		question := Question{
+			// Assuming your Question model has these fields based on the JSON
+			Type:         QuestionType(qReq.Type),
+			Points:       qReq.Points,
+			TextMarkdown: qReq.TextMarkdown,
+			ImageURL:     qReq.ImageURL,
+		}
+
+		// Convert the letter ("a", "b", "c"...) to lowercase, grab the first character,
+		// and subtract 'a' to get the numeric index (0, 1, 2...)
+		correctLetter := strings.ToLower(qReq.CorrectAnswer)[0]
+		correctIndex := int(correctLetter - 'a')
+
+		for i, optReq := range qReq.Options {
+			option := Option{
+				Text: optReq.Text,
+				// If the loop index matches our calculated correctIndex, set to true!
+				IsCorrect: (i == correctIndex),
+			}
+			question.Options = append(question.Options, option)
+		}
+
+		quiz.Questions = append(quiz.Questions, question)
+	}
+
+	return quiz
 }

@@ -23,8 +23,8 @@ type Answer struct {
 	QuestionID   uint `json:"question_id"`
 
 	// User's response
-	SelectedOption string `json:"selected_option"` // For MCQ (e.g., "a")
-	TextResponse   string `json:"text_response"`   // For Text questions
+	SelectedOption string `json:"selected_option"` // For MCQ: the chosen option letter (e.g. "a", "b")
+	TextResponse   string `json:"text_response"`   // For text questions: the written answer
 
 	IsCorrect bool `json:"is_correct"`
 }

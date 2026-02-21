@@ -18,13 +18,10 @@ func NewService(db *gorm.DB) *Service {
 
 // CreateQuiz handles the creation of a new quiz and its questions
 // It uses a Transaction to ensure if questions fail, the quiz isn't created.
-func (s *Service) Create(quiz *Quiz) error {
-	return s.db.Transaction(func(tx *gorm.DB) error {
-		if err := tx.Create(quiz).Error; err != nil {
-			return err
-		}
-		return nil
-	})
+func (s *Service) CreateQuiz(quiz *Quiz) error {
+	// GORM automatically handles creating the Questions and Options 
+	// because they are nested inside the quiz struct we passed in.
+	return s.db.Create(quiz).Error
 }
 
 // GetStartQuiz fetches the FULL quiz with all questions for the "Start" endpoint.
@@ -190,4 +187,37 @@ func (s *Service) UpdateVisibility(quizID uint, isVisible bool) error {
 	}
 
 	return nil
+}
+
+// UpdateQuiz completely replaces the quiz metadata, questions, and options
+func (s *Service) UpdateQuiz(quiz *Quiz) error {
+	// We use a Transaction so that if anything fails, the database rolls back
+	// and we don't end up with a quiz that has no questions!
+	return s.db.Transaction(func(tx *gorm.DB) error {
+		
+		// 1. Update the parent Quiz metadata (Title, Description, Medium, etc.)
+		// We use .Updates() to apply the new fields to the existing ID
+		if err := tx.Model(&Quiz{}).Where("id = ?", quiz.ID).Updates(quiz).Error; err != nil {
+			return err
+		}
+
+		// 2. Wipe the old Questions (and by cascade, the old Options)
+		if err := tx.Where("quiz_id = ?", quiz.ID).Delete(&Question{}).Error; err != nil {
+			return err
+		}
+
+		// 3. Ensure all the incoming new questions have the correct QuizID attached
+		for i := range quiz.Questions {
+			quiz.Questions[i].QuizID = quiz.ID
+		}
+
+		// 4. Bulk insert the brand new Questions and Options
+		if len(quiz.Questions) > 0 {
+			if err := tx.Create(&quiz.Questions).Error; err != nil {
+				return err
+			}
+		}
+
+		return nil
+	})
 }
