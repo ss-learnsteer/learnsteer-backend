@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-contrib/gzip"
@@ -20,6 +21,16 @@ import (
 )
 
 func main() {
+	// 0. Set Global Application Timezone to Sri Lanka (+05:30)
+	// This forces GORM's time.Now() to always use IST for CreatedAt/UpdatedAt
+	loc, err := time.LoadLocation("Asia/Colombo")
+	if err != nil {
+		log.Printf("⚠️  Could not load Asia/Colombo timezone, falling back to UTC: %v", err)
+	} else {
+		time.Local = loc
+		log.Println("🕒 System timezone set to Asia/Colombo (+05:30)")
+	}
+
 	// 0. Load Environment Variables
 	if err := godotenv.Load(); err != nil {
 		log.Println("⚠️  No .env file found, relying on system environment variables")
@@ -32,7 +43,7 @@ func main() {
 	}
 
 	// 2. Migrations
-	db.AutoMigrate(
+	err = db.AutoMigrate(
 		&auth.User{},
 		&quiz.Quiz{},
 		&quiz.Question{},
@@ -41,7 +52,6 @@ func main() {
 		&quiz.Option{},
 		&auth.SSOTicket{},
 	)
-
 	if err != nil {
 		log.Fatalf("Failed to migrate database: %v", err)
 	}
@@ -78,7 +88,7 @@ func main() {
 
 		// 1. Health Check
 		v1.GET("/health", func(c *gin.Context) {
-			c.JSON(http.StatusOK, gin.H{"status": "up", "database": "connected"})
+			c.JSON(http.StatusOK, gin.H{"status": "up", "database": "connected", "time": time.Now().Format(time.RFC3339)})		
 		})
 
 		// 2. Auth Routes (Register, Login)

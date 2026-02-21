@@ -83,16 +83,23 @@ func (s *Service) ListQuizzes(page, limit int, medium string, onlyVisible bool) 
 	return quizzes, total, nil
 }
 
-// DeleteQuiz removes a quiz and (optionally) its questions
-func (s *Service) Delete(id uint) error {
-	// GORM handles soft delete automatically if DeletedAt is in the model
-	result := s.db.Delete(&Quiz{}, id)
+// DeleteQuiz performs a "Soft Delete" by hiding the quiz from public view.
+// This preserves student submission history and grades!
+func (s *Service) DeleteQuiz(quizID uint) error {
+	// Instead of deleting, we force is_visible to false
+	result := s.db.Model(&Quiz{}).
+		Where("id = ?", quizID).
+		Update("is_visible", false)
+
 	if result.Error != nil {
 		return result.Error
 	}
+
+	// If no rows were affected, the ID didn't exist in the database
 	if result.RowsAffected == 0 {
 		return errors.New("quiz not found")
 	}
+
 	return nil
 }
 

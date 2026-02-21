@@ -26,34 +26,23 @@ func NewHandler(service *Service) *Handler {
 // This keeps main.go clean.
 func (h *Handler) RegisterRoutes(router *gin.RouterGroup) {
 	routes := router.Group("/quizzes")
-
-	// Apply the Auth Middleware to the entire quizzes group
 	routes.Use(middleware.RequireAuth())
 	{
-		// GET /api/v1/quizzes?page=1&limit=10
 		routes.GET("", h.ListQuizzes)
-
-		// GET /api/v1/quizzes/:id/start
 		routes.GET("/:id/start", h.StartQuiz)
-
-		// GET /api/v1/quizzes/:id/questions
 		routes.GET("/:id/questions", h.GetQuizQuestions)
-
-		// POST /api/v1/quizzes (RESTful creation)
 		routes.POST(
 			"", 
 			middleware.FeatureToggle("ENABLE_QUIZ_CREATION"), 
 			h.CreateQuiz,
 		)
-
 		routes.PUT(
 			"/:id", 
 			middleware.FeatureToggle("ENABLE_QUIZ_CREATION"), 
 			h.UpdateQuiz,
 		)
-
-		// The toggle switch endpoint
 		routes.PATCH("/:id/visibility", h.ToggleVisibility)
+		routes.DELETE("/:id", h.DeleteQuiz)
 	}
 }
 
@@ -267,5 +256,51 @@ func (h *Handler) ToggleVisibility(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"message": "Quiz visibility updated successfully",
+	})
+}
+
+// DeleteQuiz handles the DELETE /quizzes/:id endpoint
+func (h *Handler) DeleteQuiz(c *gin.Context) {
+	// 1. Extract and validate the ID
+	idParam := c.Param("id")
+	id, err := strconv.Atoi(idParam)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"error":   "Invalid quiz ID",
+		})
+		return
+	}
+
+	// 2. Optional: Check user role here if you want strictly admins to delete
+	userRole := c.GetString("user_role")
+	if userRole == "student" {
+		c.JSON(http.StatusForbidden, gin.H{
+			"success": false,
+			"error":   "Students are not allowed to delete quizzes",
+		})
+		return
+	}
+
+	// 3. Call the service
+	if err := h.service.DeleteQuiz(uint(id)); err != nil {
+		if err.Error() == "quiz not found" {
+			c.JSON(http.StatusNotFound, gin.H{
+				"success": false,
+				"error":   err.Error(),
+			})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"error":   "Failed to delete quiz",
+		})
+		return
+	}
+
+	// 4. Return success
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"message": "Quiz deleted successfully",
 	})
 }
