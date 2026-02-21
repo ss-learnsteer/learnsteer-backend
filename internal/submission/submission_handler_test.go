@@ -26,13 +26,14 @@ func setupSubmissionTestEnv() (*gin.Engine, *gorm.DB, uint, uint) {
 	db.Create(&testQuiz)
 
 	q1 := quiz.Question{
-		QuizID: testQuiz.ID,
-		Points: 10,
-		// Seed the options exactly how the CreateQuiz handler saves them
+		QuizID:        testQuiz.ID,
+		Type:          quiz.TypeMCQ,
+		Points:        10,
+		CorrectAnswer: "b", // The grading service compares selected_option against this
 		Options: []quiz.Option{
-			{Text: "10 m/s", IsCorrect: false}, // Index 0 ("a")
-			{Text: "14 m/s", IsCorrect: true},  // Index 1 ("b") - THIS IS THE CORRECT ANSWER
-			{Text: "12 m/s", IsCorrect: false}, // Index 2 ("c")
+			{Text: "10 m/s", IsCorrect: false}, // "a"
+			{Text: "14 m/s", IsCorrect: true},  // "b" - correct
+			{Text: "12 m/s", IsCorrect: false}, // "c"
 		},
 	}
 	db.Create(&q1)
@@ -47,7 +48,7 @@ func setupSubmissionTestEnv() (*gin.Engine, *gorm.DB, uint, uint) {
 	// 4. Mock the Auth Middleware
 	// We inject a fake userID into the context, perfectly matching your AuthMiddleware
 	router.Use(func(c *gin.Context) {
-		c.Set("user_id", uint(99)) // Mock Student ID
+		c.Set("userID", uint(99)) // Mock Student ID
 		c.Next()
 	})
 

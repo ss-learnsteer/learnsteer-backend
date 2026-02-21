@@ -11,7 +11,7 @@ type Handler struct {
 }
 
 type SubmitAnswerPayload struct {
-	QuestionID uint `json:"question_id" binding:"required"`
+	QuestionID     uint   `json:"question_id" binding:"required"`
 	SelectedOption string `json:"selected_option" binding:"required"`
 }
 
@@ -43,7 +43,7 @@ func (h *Handler) SubmitQuiz(c *gin.Context) {
 
 	// 2. Get the logged-in student's ID from the JWT Middleware
 	// In Gin, numbers saved in context often come out as float64 when parsed from JWTs
-	userIDRaw, exists := c.Get("user_id")
+	userIDRaw, exists := c.Get("userID")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User identity not found"})
 		return

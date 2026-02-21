@@ -2,6 +2,7 @@ package submission
 
 import (
 	"errors"
+	"strconv"
 	"strings"
 	"time"
 
@@ -39,30 +40,36 @@ func (s *Service) GradeAndSubmit(userID uint, req SubmitQuizPayload) (*Submissio
 	for _, studentAnswer := range req.Answers {
 		isCorrect := false
 
-		// Lookup the actual question from the database
 		if q, exists := questionsMap[studentAnswer.QuestionID]; exists {
+			selected := strings.TrimSpace(studentAnswer.SelectedOption)
 
-			// Safety check: ensure the string isn't empty
-			if len(studentAnswer.SelectedOption) > 0 {
-				// Convert "a" -> 0, "b" -> 1, "c" -> 2
-				char := strings.ToLower(studentAnswer.SelectedOption)[0]
-				optIndex := int(char - 'a')
+			// Build a map of optionID -> IsCorrect for this question
+			optionCorrectMap := make(map[uint]bool)
+			for _, opt := range q.Options {
+				optionCorrectMap[opt.ID] = opt.IsCorrect
+			}
 
-				// Bounds check: prevent a panic if a student maliciously sends "z"
-				if optIndex >= 0 && optIndex < len(q.Options) {
-					// Check if the option at that index is the correct one
-					if q.Options[optIndex].IsCorrect {
-						isCorrect = true
-						totalScore += q.Points
-					}
+			// Try to parse selected_option as a numeric option ID (frontend sends DB IDs)
+			if optID, err := strconv.ParseUint(selected, 10, 64); err == nil {
+				// Frontend mode: "563" → look up IsCorrect by option ID
+				if correct, found := optionCorrectMap[uint(optID)]; found && correct {
+					isCorrect = true
+					totalScore += q.Points
+				}
+			} else {
+				// Test/API mode: "b" → compare against CorrectAnswer letter
+				selectedLower := strings.ToLower(selected)
+				correctLower := strings.ToLower(strings.TrimSpace(q.CorrectAnswer))
+				if selectedLower != "" && selectedLower == correctLower {
+					isCorrect = true
+					totalScore += q.Points
 				}
 			}
 		}
 
-		// 4. Create the Answer record using YOUR exact struct fields
 		submissionAnswers = append(submissionAnswers, Answer{
 			QuestionID:     studentAnswer.QuestionID,
-			SelectedOption: studentAnswer.SelectedOption, // Safely save the "a" or "b"
+			SelectedOption: studentAnswer.SelectedOption,
 			IsCorrect:      isCorrect,
 		})
 	}

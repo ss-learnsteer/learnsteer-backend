@@ -76,8 +76,8 @@ func (h *Handler) CreateQuiz(c *gin.Context) {
 	// 1. Bind and validate the JSON payload
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false, 
-			"error": "Invalid request payload format",
+			"success": false,
+			"error":   "Invalid request payload format",
 		})
 		return
 	}
@@ -88,8 +88,8 @@ func (h *Handler) CreateQuiz(c *gin.Context) {
 	// 3. Save to the database
 	if err := h.service.CreateQuiz(&quizModel); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"success": false, 
-			"error": "Failed to create quiz in the database",
+			"success": false,
+			"error":   "Failed to create quiz in the database",
 		})
 		return
 	}
@@ -98,7 +98,7 @@ func (h *Handler) CreateQuiz(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{
 		"success": true,
 		"message": "Quiz created successfully",
-		"data":    quizModel, 
+		"data":    quizModel,
 	})
 }
 
@@ -225,34 +225,34 @@ func (h *Handler) UpdateQuiz(c *gin.Context) {
 	quizID, err := strconv.Atoi(idParam)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false, 
-			"error": "Invalid quiz ID",
+			"success": false,
+			"error":   "Invalid quiz ID",
 		})
 		return
 	}
 
-	var req CreateQuizRequest 
-	
+	var req CreateQuizRequest
+
 	// 2. Bind and validate the incoming JSON replacement
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false, 
-			"error": "Invalid request payload format",
+			"success": false,
+			"error":   "Invalid request payload format",
 		})
 		return
 	}
 
 	// 3. Map the DTO to the GORM model
 	quizModel := mapPayloadToModel(req)
-	
+
 	// IMPORTANT: Attach the ID from the URL so GORM knows exactly which parent record to update
 	quizModel.ID = uint(quizID)
 
 	// 4. Run the update service (which should wipe old questions/options and insert these new ones)
 	if err := h.service.UpdateQuiz(&quizModel); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"success": false, 
-			"error": "Failed to update quiz",
+			"success": false,
+			"error":   "Failed to update quiz",
 		})
 		return
 	}
@@ -348,11 +348,11 @@ func mapPayloadToModel(req CreateQuizRequest) Quiz {
 
 	for _, qReq := range req.Questions {
 		question := Question{
-			// Assuming your Question model has these fields based on the JSON
-			Type:         QuestionType(qReq.Type),
-			Points:       qReq.Points,
-			TextMarkdown: qReq.TextMarkdown,
-			ImageURL:     qReq.ImageURL,
+			Type:          QuestionType(qReq.Type),
+			Points:        qReq.Points,
+			TextMarkdown:  qReq.TextMarkdown,
+			ImageURL:      qReq.ImageURL,
+			CorrectAnswer: strings.ToLower(strings.TrimSpace(qReq.CorrectAnswer)), // Save "a", "b", "c"...
 		}
 
 		// Convert the letter ("a", "b", "c"...) to lowercase, grab the first character,
