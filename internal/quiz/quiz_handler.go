@@ -22,6 +22,9 @@ func NewHandler(service *Service) *Handler {
 // This keeps main.go clean.
 func (h *Handler) RegisterRoutes(router *gin.RouterGroup) {
 	routes := router.Group("/quizzes")
+
+	// Apply the Auth Middleware to the entire quizzes group
+	routes.Use(middleware.RequireAuth())
 	{
 		// GET /api/v1/quizzes?page=1&limit=10
 		routes.GET("", h.ListQuizzes)
@@ -84,8 +87,23 @@ func (h *Handler) ListQuizzes(c *gin.Context) {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "10"))
 
-	// 2. Call Service
-	quizzes, total, err := h.service.ListQuizzes(page, limit)
+	// 1. Extract the user's identity from the context (set by the Auth Middleware)
+	userRole := c.GetString("user_role")
+	userMedium := c.GetString("user_medium")
+
+	var filterMedium string
+
+	// 2. Apply Role-Based Filtering Logic
+	if userRole == "student" {
+		// Force the filter to match the student's database medium
+		filterMedium = userMedium 
+	} else {
+		// If they are an admin/staff, let them see everything OR use the query param manually
+		filterMedium = c.Query("medium") 
+	}
+
+	// 2. Call Service with the new filter
+	quizzes, total, err := h.service.ListQuizzes(page, limit, filterMedium)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch quizzes"})
 		return
@@ -98,6 +116,7 @@ func (h *Handler) ListQuizzes(c *gin.Context) {
 			"page":  page,
 			"limit": limit,
 			"total": total,
+			"medium": filterMedium,
 		},
 	})
 }

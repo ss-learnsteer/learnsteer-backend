@@ -3,10 +3,12 @@ package quiz
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"strconv"
+	"sync/atomic"
 	"testing"
 
 	"github.com/gin-gonic/gin"
@@ -15,43 +17,56 @@ import (
 	"gorm.io/gorm"
 )
 
+var testDBCounter uint64
+
+// MockAuthMiddleware injects fake JWT claims into the context for testing
+func MockAuthMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		// Read fake headers sent by our tests and set them in the Gin context
+		c.Set("user_role", c.GetHeader("X-Test-Role"))
+		c.Set("user_medium", c.GetHeader("X-Test-Medium"))
+		c.Next()
+	}
+}
+
 // setupQuizTestEnv initializes an in-memory DB, seeds a quiz, and wires up the router
 func setupQuizTestEnv() (*gin.Engine, *gorm.DB, uint) {
 	// 1. Setup In-Memory SQLite Database
-	db, _ := gorm.Open(sqlite.Open("file::memory:?cache=shared"), &gorm.Config{})
+	dbName := fmt.Sprintf("file:testdb%d?mode=memory&cache=private", atomic.AddUint64(&testDBCounter, 1))
+	db, _ := gorm.Open(sqlite.Open(dbName), &gorm.Config{})
 	db.AutoMigrate(&Quiz{}, &Question{}, &Option{})
 
-	// 2. Seed an initial "Old" Quiz
-	initialQuiz := Quiz{
-		Title:       "Old Physics Quiz",
-		Description: "Version 1.0",
-		Questions: []Question{
-			{
-				TextMarkdown: "Old Question 1",
-				Options: []Option{
-					{Text: "Old Option A"},
-					{Text: "Old Option B"},
-				},
-			},
-		},
+	// Seed multiple quizzes with different mediums
+	quizzes := []Quiz{
+		{Title: "Sinhala Mock Exam", Medium: "Sinhala"},
+		{Title: "Sinhala Term Test", Medium: "Sinhala"},
+		{Title: "English Mock Exam", Medium: "English"},
+		{Title: "Tamil Mock Exam", Medium: "Tamil"},
 	}
-	db.Create(&initialQuiz)
+	for _, q := range quizzes {
+		db.Create(&q)
+	}
 
-	// 3. Setup Service, Handler, and Router
 	service := NewService(db)
 	handler := NewHandler(service)
 
 	gin.SetMode(gin.TestMode)
 	router := gin.Default()
 
-	// 4. Register the specific PUT route with the feature flag middleware
+	// Register routes for testing
 	router.PUT(
 		"/api/v1/quizzes/:id",
 		middleware.FeatureToggle("ENABLE_QUIZ_CREATION"),
 		handler.UpdateQuiz,
 	)
 
-	return router, db, initialQuiz.ID
+	// NEW: Register the GET route with our Mock JWT Middleware
+	router.GET("/api/v1/quizzes", MockAuthMiddleware(), handler.ListQuizzes)
+
+	// Return the ID of the first quiz for the PUT tests
+	var firstQuiz Quiz
+	db.First(&firstQuiz)
+	return router, db, firstQuiz.ID
 }
 
 func TestUpdateQuiz(t *testing.T) {
@@ -140,6 +155,94 @@ func TestUpdateQuiz(t *testing.T) {
 		// Assert HTTP 503 Service Unavailable
 		if w.Code != http.StatusServiceUnavailable {
 			t.Errorf("Expected status 503, got %d", w.Code)
+		}
+	})
+}
+
+func TestListQuizzesWithMediumFilter(t *testing.T) {
+	router, _, _ := setupQuizTestEnv()
+
+	// ---------------------------------------------------------
+	// TEST CASE 1: Student is strictly locked to their medium
+	// ---------------------------------------------------------
+	t.Run("Student gets only Sinhala quizzes", func(t *testing.T) {
+		req, _ := http.NewRequest("GET", "/api/v1/quizzes", nil)
+		// Simulate a JWT belonging to a Sinhala student
+		req.Header.Set("X-Test-Role", "student")
+		req.Header.Set("X-Test-Medium", "Sinhala")
+
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		if w.Code != http.StatusOK {
+			t.Fatalf("Expected 200 OK, got %d", w.Code)
+		}
+
+		// Parse the response
+		var response struct {
+			Data []Quiz                 `json:"data"`
+			Meta map[string]interface{} `json:"meta"`
+		}
+		json.Unmarshal(w.Body.Bytes(), &response)
+
+		// We seeded exactly 2 Sinhala quizzes
+		if len(response.Data) != 2 {
+			t.Errorf("Expected 2 Sinhala quizzes, got %d", len(response.Data))
+		}
+		// Verify no other mediums sneaked in
+		for _, q := range response.Data {
+			if q.Medium != "Sinhala" {
+				t.Errorf("Security breach: Student saw a %s quiz!", q.Medium)
+			}
+		}
+	})
+
+	// ---------------------------------------------------------
+	// TEST CASE 2: Admin bypassing the lock (sees all)
+	// ---------------------------------------------------------
+	t.Run("Admin sees all quizzes when no query param is passed", func(t *testing.T) {
+		req, _ := http.NewRequest("GET", "/api/v1/quizzes", nil)
+		// Simulate a JWT belonging to an admin
+		req.Header.Set("X-Test-Role", "admin")
+		req.Header.Set("X-Test-Medium", "English") // Their personal medium shouldn't matter
+
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		var response struct {
+			Data []Quiz `json:"data"`
+		}
+		json.Unmarshal(w.Body.Bytes(), &response)
+
+		// We seeded 4 total quizzes across all mediums
+		if len(response.Data) != 4 {
+			t.Errorf("Expected 4 total quizzes for Admin, got %d", len(response.Data))
+		}
+	})
+
+	// ---------------------------------------------------------
+	// TEST CASE 3: Admin manually filtering via URL
+	// ---------------------------------------------------------
+	t.Run("Admin can manually filter by URL query", func(t *testing.T) {
+		// Admin requests only Tamil quizzes via the URL
+		req, _ := http.NewRequest("GET", "/api/v1/quizzes?medium=Tamil", nil)
+		req.Header.Set("X-Test-Role", "admin")
+		req.Header.Set("X-Test-Medium", "English")
+
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		var response struct {
+			Data []Quiz `json:"data"`
+		}
+		json.Unmarshal(w.Body.Bytes(), &response)
+
+		// We seeded exactly 1 Tamil quiz
+		if len(response.Data) != 1 {
+			t.Errorf("Expected 1 Tamil quiz for Admin filter, got %d", len(response.Data))
+		}
+		if len(response.Data) > 0 && response.Data[0].Medium != "Tamil" {
+			t.Errorf("Expected Tamil quiz, got %s", response.Data[0].Medium)
 		}
 	})
 }

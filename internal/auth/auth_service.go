@@ -101,10 +101,11 @@ func (s *Service) Login(email, password string) (string, error) {
 func (s *Service) generateJWT(user User) (string, error) {
 	// Define the claims (the data embedded inside the token)
 	claims := jwt.MapClaims{
-		"sub":  user.ID,                               // Subject (User ID)
-		"role": user.Role,                             // Important for Role-Based Access Control (student vs ss_member)
-		"exp":  time.Now().Add(time.Hour * 24).Unix(), // Token expires in 24 hours
-		"iat":  time.Now().Unix(),                     // Issued at
+		"sub":    user.ID,                               // Subject (User ID)
+		"role":   user.Role,                             // Important for Role-Based Access Control (student vs ss_member)
+		"medium": user.Medium,
+		"exp":    time.Now().Add(time.Hour * 24).Unix(), // Token expires in 24 hours
+		"iat":    time.Now().Unix(),                     // Issued at
 	}
 
 	// Create a new token object, specifying the signing method and the claims

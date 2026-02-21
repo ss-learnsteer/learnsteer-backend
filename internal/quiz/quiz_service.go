@@ -52,21 +52,26 @@ func (s *Service) GetStartQuiz(id uint) (*Quiz, error) {
 // ListQuizzes fetches a paginated list of quizzes WITHOUT questions.
 // Optimization: This saves massive bandwidth by not loading the heavy questions data
 // on the dashboard list.
-func (s *Service) ListQuizzes(page, limit int) ([]Quiz, int64, error) {
+func (s *Service) ListQuizzes(page, limit int, medium string) ([]Quiz, int64, error) {
 	var quizzes []Quiz
 	var total int64
 
-	offset := (page - 1) * limit
+	// 1. Start building the base query
+	query := s.db.Model(&Quiz{})
 
-	// 1. Get Total Count (for pagination UI)
-	if err := s.db.Model(&Quiz{}).Count(&total).Error; err != nil {
+	// 2. Apply the medium filter ONLY if one was provided
+	if medium != "" {
+		query = query.Where("medium = ?", medium)
+	}
+
+	// 3. Get the total count of rows AFTER the filter is applied
+	if err := query.Count(&total).Error; err != nil {
 		return nil, 0, err
 	}
 
-	// 2. Get the light-weight list
-	// We deliberately do NOT call Preload("Questions") here.
-	err := s.db.Limit(limit).Offset(offset).Order("created_at desc").Find(&quizzes).Error
-	if err != nil {
+	// 4. Apply pagination and fetch the data
+	offset := (page - 1) * limit
+	if err := query.Offset(offset).Limit(limit).Find(&quizzes).Error; err != nil {
 		return nil, 0, err
 	}
 
