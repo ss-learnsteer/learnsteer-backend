@@ -2,18 +2,29 @@ package quiz
 
 import (
 	"errors"
+	"fmt"
+	"time"
 
+	"github.com/patrickmn/go-cache"
 	"gorm.io/gorm"
 )
 
 // Service defines the methods our handler will use
 type Service struct {
 	db *gorm.DB
+	cache *cache.Cache
 }
 
 // NewService initializes the service with the database connection
 func NewService(db *gorm.DB) *Service {
-	return &Service{db: db}
+	// Create a cache with a default expiration time of 5 minutes, and which
+	// purges expired items every 10 minutes
+	c := cache.New(5*time.Minute, 10*time.Minute)
+	
+	return &Service{
+		db: db,
+		cache: c,
+	}
 }
 
 // CreateQuiz handles the creation of a new quiz and its questions
@@ -28,6 +39,15 @@ func (s *Service) CreateQuiz(quiz *Quiz) error {
 // Optimization: We use Preload("Questions") to fetch everything in one go.
 // Note: Since 'CorrectAnswer' has `json:"-"` in models.go, it won't be sent to frontend.
 func (s *Service) GetStartQuiz(id uint) (*Quiz, error) {
+	cacheKey := fmt.Sprintf("quiz_start_%d", id)
+
+	// Check the In-Memory Cache first
+	if cachedData, found := s.cache.Get(cacheKey); found {
+		// Cache HIT! Cast the interface back to a Quiz pointer
+		// This skips the database completely and returns in microseconds
+		return cachedData.(*Quiz), nil
+	}
+	
 	var quiz Quiz
 
 	// Query: Select Quiz WHERE id = ? AND Preload Questions
@@ -43,6 +63,8 @@ func (s *Service) GetStartQuiz(id uint) (*Quiz, error) {
 		return nil, err
 	}
 
+	s.cache.Set(cacheKey, &quiz, cache.DefaultExpiration)
+
 	return &quiz, nil
 }
 
@@ -50,6 +72,18 @@ func (s *Service) GetStartQuiz(id uint) (*Quiz, error) {
 // Optimization: This saves massive bandwidth by not loading the heavy questions data
 // on the dashboard list.
 func (s *Service) ListQuizzes(page, limit int, medium string, onlyVisible bool) ([]Quiz, int64, error) {
+	// 1. Generate a unique cache key based on the exact request
+	cacheKey := fmt.Sprintf("quizzes_list_p%d_l%d_m%s_v%t", page, limit, medium, onlyVisible)
+	
+	// 2. Check if the data is already in memory
+	if cachedData, found := s.cache.Get(cacheKey); found {
+		// Cache HIT! Return it instantly without touching Neon PostgreSQL
+		// We expect cachedData to be a map holding our quizzes and total count
+		data := cachedData.(map[string]interface{})
+		return data["quizzes"].([]Quiz), data["total"].(int64), nil
+	}
+
+	// 3. Cache MISS! Go to the database (existing logic)
 	var quizzes []Quiz
 	var total int64
 
@@ -76,6 +110,12 @@ func (s *Service) ListQuizzes(page, limit int, medium string, onlyVisible bool) 
 	if err := query.Offset(offset).Limit(limit).Find(&quizzes).Error; err != nil {
 		return nil, 0, err
 	}
+
+	// 5. Save the result into the cache for the next 5 minutes
+	s.cache.Set(cacheKey, map[string]interface{}{
+		"quizzes": quizzes,
+		"total":   total,
+	}, cache.DefaultExpiration)
 
 	return quizzes, total, nil
 }

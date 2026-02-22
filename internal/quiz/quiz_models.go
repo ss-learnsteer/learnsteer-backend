@@ -45,7 +45,7 @@ type Question struct {
 	Options []Option `json:"options" gorm:"foreignKey:QuestionID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 
 	// Correct Answer (Hidden from frontend JSON usually, handled in service layer)
-	CorrectAnswer string `json:"correct_answer"` // e.g., "a" for MCQ or regex for Text
+	CorrectAnswer string `json:"-"` // e.g., "a" for MCQ or regex for Text
 	Points        int    `json:"points"`
 }
 
