@@ -30,9 +30,12 @@ func NewService(db *gorm.DB) *Service {
 // CreateQuiz handles the creation of a new quiz and its questions
 // It uses a Transaction to ensure if questions fail, the quiz isn't created.
 func (s *Service) CreateQuiz(quiz *Quiz) error {
-	// GORM automatically handles creating the Questions and Options 
-	// because they are nested inside the quiz struct we passed in.
-	return s.db.Create(quiz).Error
+	err := s.db.Create(quiz).Error
+	if err == nil {
+		// NUKE THE CACHE: Next student request will hit the DB and get fresh data
+		s.cache.Flush() 
+	}
+	return err
 }
 
 // GetStartQuiz fetches the FULL quiz with all questions for the "Start" endpoint.
@@ -233,7 +236,7 @@ func (s *Service) UpdateVisibility(quizID uint, isVisible bool) error {
 func (s *Service) UpdateQuiz(quiz *Quiz) error {
 	// We use a Transaction so that if anything fails, the database rolls back
 	// and we don't end up with a quiz that has no questions!
-	return s.db.Transaction(func(tx *gorm.DB) error {
+	err := s.db.Transaction(func(tx *gorm.DB) error {
 		
 		// 1. Update the parent Quiz metadata (Title, Description, Medium, etc.)
 		// We use .Updates() to apply the new fields to the existing ID
@@ -260,4 +263,15 @@ func (s *Service) UpdateQuiz(quiz *Quiz) error {
 
 		return nil
 	})
+
+	// 2. THE LAUNCH-DAY MAGIC: If the database update was successful, nuke the cache!
+	if err == nil {
+		s.cache.Flush()
+	}
+
+	return err
+}
+
+func (s *Service) ClearCache() {
+	s.cache.Flush()
 }
