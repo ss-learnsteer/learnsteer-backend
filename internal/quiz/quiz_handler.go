@@ -20,6 +20,7 @@ type VisibilityPayload struct {
 
 type OptionPayload struct {
 	Text string `json:"text" binding:"required"`
+	ImageURL string `json:"image_url"`
 }
 
 type QuestionPayload struct {
@@ -363,6 +364,7 @@ func mapPayloadToModel(req CreateQuizRequest) Quiz {
 		for i, optReq := range qReq.Options {
 			option := Option{
 				Text: optReq.Text,
+				ImageURL:  optReq.ImageURL,
 				// If the loop index matches our calculated correctIndex, set to true!
 				IsCorrect: (i == correctIndex),
 			}

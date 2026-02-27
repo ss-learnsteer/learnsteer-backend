@@ -53,5 +53,6 @@ type Option struct {
 	ID         uint   `gorm:"primaryKey" json:"id"`
 	QuestionID uint   `json:"question_id"`
 	Text       string `json:"text"`
+	ImageURL   string `json:"image_url,omitempty"`
 	IsCorrect  bool   `json:"-"` // Hidden from JSON so students can't cheat via the API!
 }
