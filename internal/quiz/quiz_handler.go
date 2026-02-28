@@ -376,3 +376,19 @@ func mapPayloadToModel(req CreateQuizRequest) Quiz {
 
 	return quiz
 }
+
+// WakeUp handles GET /api/v1/wakeup
+// Used purely to pre-warm the Heroku dyno and Neon database from a cold start.
+func (h *Handler) WakeUp(c *gin.Context) {
+	var result int
+	
+	// Execute the absolute lightest query possible to wake up Neon Postgres
+	// If it fails (e.g., DB is still booting), we don't care, we just want to trigger the boot.
+	_ = h.service.db.Raw("SELECT 1").Scan(&result).Error
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"status":  "awake",
+		"message": "Heroku and Neon are warmed up and ready for battle.",
+	})
+}

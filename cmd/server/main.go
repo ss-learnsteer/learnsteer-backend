@@ -91,7 +91,11 @@ func main() {
 			c.JSON(http.StatusOK, gin.H{"status": "up", "database": "connected", "time": time.Now().Format(time.RFC3339)})		
 		})
 
-		// 2. Auth Routes (Register, Login)
+		// 2. Pre-Warm / Wakeup Endpoint (Public)
+        // Triggers the DB to wake up from scale-to-zero
+        v1.GET("/wakeup", quizHandler.WakeUp)
+
+		// 3. Auth Routes (Register, Login)
 		authHandler.RegisterRoutes(v1)
 
 		// ----------------------------
