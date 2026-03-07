@@ -16,7 +16,7 @@ type Quiz struct {
 	Title       string `json:"title"`
 	Description string `json:"description"`
 	Medium      string `json:"medium" gorm:"default:'Sinhala';not null"` // e.g., "Sinhala", "English", "Tamil"
-	IsVisible   *bool `json:"is_visible" gorm:"default:true"`
+	IsVisible   *bool `json:"is_visible" gorm:"default:false"`
 	DurationMin int   `json:"duration_min"` // 0 = unlimited
 
 	ReleaseDate      *time.Time `json:"release_date"`       // When it opens
