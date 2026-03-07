@@ -17,6 +17,8 @@ type Quiz struct {
 	Description string `json:"description"`
 	Medium      string `json:"medium" gorm:"default:'Sinhala';not null"` // e.g., "Sinhala", "English", "Tamil"
 	IsVisible   *bool `json:"is_visible" gorm:"default:false"`
+	// The custom explicit soft-delete flag
+	IsDeleted bool `json:"is_deleted" gorm:"default:false"`
 	DurationMin int   `json:"duration_min"` // 0 = unlimited
 
 	ReleaseDate      *time.Time `json:"release_date"`       // When it opens

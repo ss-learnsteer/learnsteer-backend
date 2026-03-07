@@ -91,6 +91,9 @@ func (s *Service) ListQuizzes(page, limit int, medium string, onlyVisible bool) 
 	// 1. Start building the base query
 	query := s.db.Model(&Quiz{})
 
+	// CRITICAL ADDITION: Never return quizzes marked as deleted to ANYONE
+	query = query.Where("is_deleted = ?", false)
+
 	// 2. Apply the medium filter ONLY if one was provided
 	if medium != "" {
 		query = query.Where("medium = ?", medium)
@@ -125,12 +128,10 @@ func (s *Service) ListQuizzes(page, limit int, medium string, onlyVisible bool) 
 	return quizzes, total, nil
 }
 
-// DeleteQuiz performs a "Soft Delete" by setting the deleted_at timestamp.
-// This preserves student submission history and grades!
+// DeleteQuiz safely soft-deletes a quiz and flushes the cache
 func (s *Service) DeleteQuiz(quizID uint) error {
 	// Let GORM handle the soft delete (it populates deleted_at)
-	result := s.db.Delete(&Quiz{}, quizID)
-
+	result := s.db.Model(&Quiz{}).Where("id = ?", quizID).Update("is_deleted", true)
 	if result.Error != nil {
 		return result.Error
 	}
