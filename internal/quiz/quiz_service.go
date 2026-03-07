@@ -71,22 +71,20 @@ func (s *Service) GetStartQuiz(id uint) (*Quiz, error) {
 	return &quiz, nil
 }
 
-// ListQuizzes fetches a paginated list of quizzes WITHOUT questions.
-// Optimization: This saves massive bandwidth by not loading the heavy questions data
-// on the dashboard list.
+// ListQuizzes fetches quizzes with pagination, medium filtering, and visibility isolation
 func (s *Service) ListQuizzes(page, limit int, medium string, onlyVisible bool) ([]Quiz, int64, error) {
-	// 1. Generate a unique cache key based on the exact request
+	// 1. THE ISOLATED CACHE KEY
+	// By appending '%t' (the boolean for onlyVisible), we physically create two separate 
+	// memory blocks: one for students (v:true) and one for ss_members (v:false)
 	cacheKey := fmt.Sprintf("quizzes_list_p%d_l%d_m%s_v%t", page, limit, medium, onlyVisible)
 	
-	// 2. Check if the data is already in memory
+	// 2. Check the In-Memory Cache first
 	if cachedData, found := s.cache.Get(cacheKey); found {
-		// Cache HIT! Return it instantly without touching Neon PostgreSQL
-		// We expect cachedData to be a map holding our quizzes and total count
-		data := cachedData.(map[string]interface{})
-		return data["quizzes"].([]Quiz), data["total"].(int64), nil
+		// Because we return two variables (quizzes and total), we type-assert the cached map
+		response := cachedData.(map[string]interface{})
+		return response["quizzes"].([]Quiz), response["total"].(int64), nil
 	}
 
-	// 3. Cache MISS! Go to the database (existing logic)
 	var quizzes []Quiz
 	var total int64
 
@@ -108,17 +106,21 @@ func (s *Service) ListQuizzes(page, limit int, medium string, onlyVisible bool) 
 		return nil, 0, err
 	}
 
-	// 4. Apply pagination and fetch the data
+	// 5. Get the Paginated Data
 	offset := (page - 1) * limit
-	if err := query.Offset(offset).Limit(limit).Find(&quizzes).Error; err != nil {
+	if err := query.Order("created_at desc").Offset(offset).Limit(limit).Find(&quizzes).Error; err != nil {
 		return nil, 0, err
 	}
 
-	// 5. Save the result into the cache for the next 5 minutes
-	s.cache.Set(cacheKey, map[string]interface{}{
+	// 6. Save to Cache
+	// We store both the results and the total count in a map so they can be cached together
+	cachePayload := map[string]interface{}{
 		"quizzes": quizzes,
 		"total":   total,
-	}, cache.DefaultExpiration)
+	}
+
+	// Cache it (e.g., for 5 minutes). Standard go-cache syntax.
+	s.cache.Set(cacheKey, cachePayload, 5*time.Minute)
 
 	return quizzes, total, nil
 }
@@ -274,4 +276,38 @@ func (s *Service) UpdateQuiz(quiz *Quiz) error {
 
 func (s *Service) ClearCache() {
 	s.cache.Flush()
+}
+
+// GetUserAttempts fetches the count of submissions per quiz for a specific user
+func (s *Service) GetUserAttempts(userID uint, quizIDs []uint) (map[uint]int, error) {
+	attemptsMap := make(map[uint]int)
+	
+	// If there are no quizzes, return the empty map early
+	if len(quizIDs) == 0 {
+		return attemptsMap, nil
+	}
+
+	type Result struct {
+		QuizID uint
+		Count  int
+	}
+	var results []Result
+
+	// Runs a highly optimized GROUP BY query: 
+	// SELECT quiz_id, count(id) FROM submissions WHERE user_id = X AND quiz_id IN (Y, Z) GROUP BY quiz_id
+	err := s.db.Table("submissions").
+		Select("quiz_id, count(id) as count").
+		Where("user_id = ? AND quiz_id IN ?", userID, quizIDs).
+		Group("quiz_id").
+		Scan(&results).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	for _, r := range results {
+		attemptsMap[r.QuizID] = r.Count
+	}
+
+	return attemptsMap, nil
 }

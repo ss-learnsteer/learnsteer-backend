@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/sasnaka-learnsteer/ss-quiz-platform-backend/internal/middleware"
@@ -30,6 +31,21 @@ type QuestionPayload struct {
 	ImageURL      string          `json:"image_url"`
 	Options       []OptionPayload `json:"options" binding:"required,min=2"`
 	CorrectAnswer string          `json:"correct_answer" binding:"required,len=1"` // "a", "b", "c", etc.
+}
+
+// QuizResponseDTO shapes the final JSON sent to the React frontend
+type QuizResponseDTO struct {
+	ID               uint       `json:"id"`
+	CreatedAt        time.Time  `json:"created_at"`
+	Title            string     `json:"title"`
+	Description      string     `json:"description"`
+	Medium           string     `json:"medium"`
+	IsVisible        *bool      `json:"is_visible"`
+	DurationMin      int        `json:"duration_min"`
+	ReleaseDate      *time.Time `json:"release_date"`
+	EndDate          *time.Time `json:"end_date"`
+	MarkingSchemeURL string     `json:"marking_scheme_url"`
+	Attempts         int        `json:"attempts"` // User-specific data injected safely
 }
 
 type CreateQuizRequest struct {
@@ -117,15 +133,22 @@ func (h *Handler) ListQuizzes(c *gin.Context) {
 	var onlyVisible bool
 
 	// 2. Apply Role-Based Filtering Logic
-	if userRole == "student" {
+	switch userRole {
+	case "student":
 		// Force the filter to match the student's database medium
 		filterMedium = userMedium
 		onlyVisible = true // Students NEVER see hidden quizzes
-	} else {
-		// If they are an admin/staff, let them see everything OR use the query param manually
+	case "ss_member", "admin":
+		// ss_members can see ALL mediums (or filter via query param)
 		filterMedium = c.Query("medium")
-		// Admins see everything by default, but can optionally filter by visibility
+
+		// ss_members see everything (visible and hidden) by default,
+		// unless they explicitly pass ?visible_only=true in the URL
 		onlyVisible = c.Query("visible_only") == "true"
+	default:
+		// Fallback security: If the token has a weird/missing role, lock it down
+		filterMedium = userMedium
+		onlyVisible = true
 	}
 
 	// 2. Call Service with the new filter

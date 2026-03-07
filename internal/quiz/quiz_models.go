@@ -16,9 +16,12 @@ type Quiz struct {
 	Title       string `json:"title"`
 	Description string `json:"description"`
 	Medium      string `json:"medium" gorm:"default:'Sinhala';not null"` // e.g., "Sinhala", "English", "Tamil"
-	// Use *bool so GORM correctly saves 'false' instead of ignoring it
 	IsVisible   *bool `json:"is_visible" gorm:"default:true"`
 	DurationMin int   `json:"duration_min"` // 0 = unlimited
+
+	ReleaseDate      *time.Time `json:"release_date"`       // When it opens
+	EndDate          *time.Time `json:"end_date"`           // When it closes
+	MarkingSchemeURL string     `json:"marking_scheme_url"` // Cloudinary PDF link (Wiwarana)
 
 	// HasMany relationship: A quiz has many questions
 	Questions []Question `json:"questions" gorm:"foreignKey:QuizID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
