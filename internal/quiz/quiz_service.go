@@ -125,13 +125,11 @@ func (s *Service) ListQuizzes(page, limit int, medium string, onlyVisible bool) 
 	return quizzes, total, nil
 }
 
-// DeleteQuiz performs a "Soft Delete" by hiding the quiz from public view.
+// DeleteQuiz performs a "Soft Delete" by setting the deleted_at timestamp.
 // This preserves student submission history and grades!
 func (s *Service) DeleteQuiz(quizID uint) error {
-	// Instead of deleting, we force is_visible to false
-	result := s.db.Model(&Quiz{}).
-		Where("id = ?", quizID).
-		Update("is_visible", false)
+	// Let GORM handle the soft delete (it populates deleted_at)
+	result := s.db.Delete(&Quiz{}, quizID)
 
 	if result.Error != nil {
 		return result.Error
