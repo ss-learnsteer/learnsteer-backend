@@ -11,7 +11,7 @@ import (
 
 // Service defines the methods our handler will use
 type Service struct {
-	db *gorm.DB
+	db    *gorm.DB
 	cache *cache.Cache
 }
 
@@ -20,9 +20,9 @@ func NewService(db *gorm.DB) *Service {
 	// Create a cache with a default expiration time of 5 minutes, and which
 	// purges expired items every 10 minutes
 	c := cache.New(5*time.Minute, 10*time.Minute)
-	
+
 	return &Service{
-		db: db,
+		db:    db,
 		cache: c,
 	}
 }
@@ -33,7 +33,7 @@ func (s *Service) CreateQuiz(quiz *Quiz) error {
 	err := s.db.Create(quiz).Error
 	if err == nil {
 		// NUKE THE CACHE: Next student request will hit the DB and get fresh data
-		s.cache.Flush() 
+		s.cache.Flush()
 	}
 	return err
 }
@@ -50,7 +50,7 @@ func (s *Service) GetStartQuiz(id uint) (*Quiz, error) {
 		// This skips the database completely and returns in microseconds
 		return cachedData.(*Quiz), nil
 	}
-	
+
 	var quiz Quiz
 
 	// Query: Select Quiz WHERE id = ? AND Preload Questions
@@ -74,10 +74,10 @@ func (s *Service) GetStartQuiz(id uint) (*Quiz, error) {
 // ListQuizzes fetches quizzes with pagination, medium filtering, and visibility isolation
 func (s *Service) ListQuizzes(page, limit int, medium string, onlyVisible bool) ([]Quiz, int64, error) {
 	// 1. THE ISOLATED CACHE KEY
-	// By appending '%t' (the boolean for onlyVisible), we physically create two separate 
+	// By appending '%t' (the boolean for onlyVisible), we physically create two separate
 	// memory blocks: one for students (v:true) and one for ss_members (v:false)
 	cacheKey := fmt.Sprintf("quizzes_list_p%d_l%d_m%s_v%t", page, limit, medium, onlyVisible)
-	
+
 	// 2. Check the In-Memory Cache first
 	if cachedData, found := s.cache.Get(cacheKey); found {
 		// Because we return two variables (quizzes and total), we type-assert the cached map
@@ -142,20 +142,23 @@ func (s *Service) DeleteQuiz(quizID uint) error {
 		return errors.New("quiz not found")
 	}
 
+	// NUKE THE CACHE: Next student/admin request will get fresh data
+	s.cache.Flush()
+
 	return nil
 }
 
 // GetQuestionsByQuizID fetches all questions for a given quiz.
-// It uses Preload to automatically fetch the associated multiple-choice options 
+// It uses Preload to automatically fetch the associated multiple-choice options
 // so the frontend has everything it needs to render the test.
 func (s *Service) GetQuestionsByQuizID(quizID uint) ([]Question, error) {
 	var questions []Question
 
 	// We query the questions table where the foreign key matches the quizID.
-	// Preload("Options") tells GORM to execute a second highly-optimized query 
+	// Preload("Options") tells GORM to execute a second highly-optimized query
 	// to fetch all related options and attach them to the correct questions in memory.
 	err := s.db.Where("quiz_id = ?", quizID).
-		Preload("Options"). 
+		Preload("Options").
 		Find(&questions).Error
 
 	if err != nil {
@@ -215,7 +218,7 @@ func (s *Service) ReplaceQuizContent(quizID uint, updatedQuiz *Quiz) error {
 // UpdateVisibility explicitly toggles the is_visible flag for a specific quiz
 func (s *Service) UpdateVisibility(quizID uint, isVisible bool) error {
 	// We use .Update("column", value) rather than .Updates(struct).
-	// This forces GORM to update the specific column, perfectly bypassing 
+	// This forces GORM to update the specific column, perfectly bypassing
 	// the zero-value issue where it ignores 'false' booleans.
 	result := s.db.Model(&Quiz{}).
 		Where("id = ?", quizID).
@@ -231,6 +234,9 @@ func (s *Service) UpdateVisibility(quizID uint, isVisible bool) error {
 		return errors.New("quiz not found")
 	}
 
+	// NUKE THE CACHE: Visibility changes must be reflected immediately
+	s.cache.Flush()
+
 	return nil
 }
 
@@ -239,7 +245,7 @@ func (s *Service) UpdateQuiz(quiz *Quiz) error {
 	// We use a Transaction so that if anything fails, the database rolls back
 	// and we don't end up with a quiz that has no questions!
 	err := s.db.Transaction(func(tx *gorm.DB) error {
-		
+
 		// 1. Update the parent Quiz metadata (Title, Description, Medium, etc.)
 		// We use .Updates() to apply the new fields to the existing ID
 		if err := tx.Model(&Quiz{}).Where("id = ?", quiz.ID).Updates(quiz).Error; err != nil {
@@ -281,7 +287,7 @@ func (s *Service) ClearCache() {
 // GetUserAttempts fetches the count of submissions per quiz for a specific user
 func (s *Service) GetUserAttempts(userID uint, quizIDs []uint) (map[uint]int, error) {
 	attemptsMap := make(map[uint]int)
-	
+
 	// If there are no quizzes, return the empty map early
 	if len(quizIDs) == 0 {
 		return attemptsMap, nil
@@ -293,7 +299,7 @@ func (s *Service) GetUserAttempts(userID uint, quizIDs []uint) (map[uint]int, er
 	}
 	var results []Result
 
-	// Runs a highly optimized GROUP BY query: 
+	// Runs a highly optimized GROUP BY query:
 	// SELECT quiz_id, count(id) FROM submissions WHERE user_id = X AND quiz_id IN (Y, Z) GROUP BY quiz_id
 	err := s.db.Table("submissions").
 		Select("quiz_id, count(id) as count").
