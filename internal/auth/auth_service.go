@@ -104,6 +104,7 @@ func (s *Service) generateJWT(user User) (string, error) {
 		"sub":    user.ID,                               // Subject (User ID)
 		"role":   user.Role,                             // Important for Role-Based Access Control (student vs ss_member)
 		"medium": user.Medium,
+		"stream": user.Stream,
 		"exp":    time.Now().Add(time.Hour * 24).Unix(), // Token expires in 24 hours
 		"iat":    time.Now().Unix(),                     // Issued at
 	}

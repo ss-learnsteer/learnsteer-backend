@@ -53,6 +53,7 @@ type CreateQuizRequest struct {
 	Description string            `json:"description"`
 	DurationMin int               `json:"duration_min"`
 	Medium      string            `json:"medium" binding:"required"`
+	Stream      string            `json:"stream" binding:"required"`
 	IsVisible   *bool             `json:"is_visible"`
 	Questions   []QuestionPayload `json:"questions" binding:"required,min=1"`
 }
@@ -128,8 +129,10 @@ func (h *Handler) ListQuizzes(c *gin.Context) {
 	// 1. Extract the user's identity from the context (set by the Auth Middleware)
 	userRole := c.GetString("user_role")
 	userMedium := c.GetString("user_medium")
+	userStream := c.GetString("user_stream")
 
 	var filterMedium string
+	var filterStream string
 	var onlyVisible bool
 
 	// 2. Apply Role-Based Filtering Logic
@@ -137,10 +140,12 @@ func (h *Handler) ListQuizzes(c *gin.Context) {
 	case "student":
 		// Force the filter to match the student's database medium
 		filterMedium = userMedium
+		filterStream = userStream
 		onlyVisible = true // Students NEVER see hidden quizzes
 	case "ss_member", "admin":
 		// ss_members can see ALL mediums (or filter via query param)
 		filterMedium = c.Query("medium")
+		filterStream = c.Query("stream")
 
 		// ss_members see everything (visible and hidden) by default,
 		// unless they explicitly pass ?visible_only=true in the URL
@@ -148,11 +153,12 @@ func (h *Handler) ListQuizzes(c *gin.Context) {
 	default:
 		// Fallback security: If the token has a weird/missing role, lock it down
 		filterMedium = userMedium
+		filterStream = userStream
 		onlyVisible = true
 	}
 
 	// 2. Call Service with the new filter
-	quizzes, total, err := h.service.ListQuizzes(page, limit, filterMedium, onlyVisible)
+	quizzes, total, err := h.service.ListQuizzes(page, limit, filterMedium, filterStream, onlyVisible)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch quizzes"})
 		return
@@ -200,15 +206,13 @@ func (h *Handler) StartQuiz(c *gin.Context) {
 		return
 	}
 
-	// 🔒 SECURITY SCRUB: Remove the correct answers before sending to the student
-	for i := range quiz.Questions {
-		quiz.Questions[i].CorrectAnswer = "" // Hide the regex/text answer
-
-		// If you use the IsCorrect boolean on Options, hide that too!
-		for j := range quiz.Questions[i].Options {
-			quiz.Questions[i].Options[j].IsCorrect = false
+	for i := 0; i < len(quiz.Questions); i++ {
+			quiz.Questions[i].CorrectAnswer = "" // Safe memory modification
+			
+			for j := 0; j < len(quiz.Questions[i].Options); j++ {
+				quiz.Questions[i].Options[j].IsCorrect = false // Safe memory modification
+			}
 		}
-	}
 
 	c.JSON(http.StatusOK, quiz)
 }
@@ -366,6 +370,7 @@ func mapPayloadToModel(req CreateQuizRequest) Quiz {
 		Title:       req.Title,
 		Description: req.Description,
 		Medium:      req.Medium,
+		Stream:      req.Stream,
 		IsVisible:   req.IsVisible,
 		DurationMin: req.DurationMin,
 	}
@@ -402,12 +407,8 @@ func mapPayloadToModel(req CreateQuizRequest) Quiz {
 
 // WakeUp handles GET /api/v1/wakeup
 // Used purely to pre-warm the Heroku dyno and Neon database from a cold start.
-func (h *Handler) WakeUp(c *gin.Context) {
-	var result int
-	
-	// Execute the absolute lightest query possible to wake up Neon Postgres
-	// If it fails (e.g., DB is still booting), we don't care, we just want to trigger the boot.
-	_ = h.service.db.Raw("SELECT 1").Scan(&result).Error
+func (h *Handler) WakeUp(c *gin.Context) {	
+	_ = h.service.PingDB()
 
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,

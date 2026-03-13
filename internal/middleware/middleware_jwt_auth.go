@@ -42,6 +42,12 @@ func RequireAuth() gin.HandlerFunc {
 			} else {
 				c.Set("user_medium", "")
 			}
+			//Safely extract the stream (fallback to empty string if missing)
+			if stream, ok := claims["stream"].(string); ok {
+				c.Set("user_stream", stream)
+			} else {
+				c.Set("user_stream", "")
+			}
 		}
 
 		c.Next()

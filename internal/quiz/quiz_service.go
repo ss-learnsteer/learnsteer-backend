@@ -72,11 +72,11 @@ func (s *Service) GetStartQuiz(id uint) (*Quiz, error) {
 }
 
 // ListQuizzes fetches quizzes with pagination, medium filtering, and visibility isolation
-func (s *Service) ListQuizzes(page, limit int, medium string, onlyVisible bool) ([]Quiz, int64, error) {
+func (s *Service) ListQuizzes(page, limit int, medium string, stream string, onlyVisible bool) ([]Quiz, int64, error) {
 	// 1. THE ISOLATED CACHE KEY
 	// By appending '%t' (the boolean for onlyVisible), we physically create two separate
 	// memory blocks: one for students (v:true) and one for ss_members (v:false)
-	cacheKey := fmt.Sprintf("quizzes_list_p%d_l%d_m%s_v%t", page, limit, medium, onlyVisible)
+	cacheKey := fmt.Sprintf("quizzes_list_p%d_l%d_m%s_s%s_v%t", page, limit, medium, stream, onlyVisible)
 
 	// 2. Check the In-Memory Cache first
 	if cachedData, found := s.cache.Get(cacheKey); found {
@@ -97,6 +97,10 @@ func (s *Service) ListQuizzes(page, limit int, medium string, onlyVisible bool) 
 	// 2. Apply the medium filter ONLY if one was provided
 	if medium != "" {
 		query = query.Where("medium = ?", medium)
+	}
+
+	if stream != "" {
+		query = query.Where("stream = ?", stream)
 	}
 
 	// Filter out hidden quizzes if the flag is true
@@ -315,4 +319,9 @@ func (s *Service) GetUserAttempts(userID uint, quizIDs []uint) (map[uint]int, er
 	}
 
 	return attemptsMap, nil
+}
+
+func (s *Service) PingDB() error {
+    var result int
+    return s.db.Raw("SELECT 1").Scan(&result).Error
 }

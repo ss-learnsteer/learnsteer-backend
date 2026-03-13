@@ -16,6 +16,7 @@ type Quiz struct {
 	Title       string `json:"title"`
 	Description string `json:"description"`
 	Medium      string `json:"medium" gorm:"default:'Sinhala';not null"` // e.g., "Sinhala", "English", "Tamil"
+	Stream string `json:"stream" gorm:"not null"`
 	IsVisible   *bool `json:"is_visible" gorm:"default:false"`
 	// The custom explicit soft-delete flag
 	IsDeleted bool `json:"is_deleted" gorm:"default:false"`
