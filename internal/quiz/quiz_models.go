@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"gorm.io/gorm"
+	"github.com/lib/pq"
 )
 
 // Quiz represents a collection of questions
@@ -16,11 +17,11 @@ type Quiz struct {
 	Title       string `json:"title"`
 	Description string `json:"description"`
 	Medium      string `json:"medium" gorm:"default:'Sinhala';not null"` // e.g., "Sinhala", "English", "Tamil"
-	Stream string `json:"stream" gorm:"not null"`
-	IsVisible   *bool `json:"is_visible" gorm:"default:false"`
+    Stream pq.StringArray `json:"stream" gorm:"type:text[];default:'{\"General\"}';not null"`	
+	IsVisible   *bool  `json:"is_visible" gorm:"default:false"`
 	// The custom explicit soft-delete flag
-	IsDeleted bool `json:"is_deleted" gorm:"default:false"`
-	DurationMin int   `json:"duration_min"` // 0 = unlimited
+	IsDeleted   bool `json:"is_deleted" gorm:"default:false"`
+	DurationMin int  `json:"duration_min"` // 0 = unlimited
 
 	ReleaseDate      *time.Time `json:"release_date"`       // When it opens
 	EndDate          *time.Time `json:"end_date"`           // When it closes

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/lib/pq"
 	"github.com/patrickmn/go-cache"
 	"gorm.io/gorm"
 )
@@ -100,7 +101,8 @@ func (s *Service) ListQuizzes(page, limit int, medium string, stream string, onl
 	}
 
 	if stream != "" {
-		query = query.Where("stream = ?", stream)
+		userStreamArray := pq.StringArray([]string{stream})
+		query = query.Where("stream && ?", userStreamArray)
 	}
 
 	// Filter out hidden quizzes if the flag is true

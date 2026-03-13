@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/lib/pq"
 	"github.com/sasnaka-learnsteer/ss-quiz-platform-backend/internal/middleware"
 )
 
@@ -53,7 +54,7 @@ type CreateQuizRequest struct {
 	Description string            `json:"description"`
 	DurationMin int               `json:"duration_min"`
 	Medium      string            `json:"medium" binding:"required"`
-	Stream      string            `json:"stream" binding:"required"`
+	Stream []string `json:"stream" binding:"required,min=1"`
 	IsVisible   *bool             `json:"is_visible"`
 	Questions   []QuestionPayload `json:"questions" binding:"required,min=1"`
 }
@@ -370,7 +371,7 @@ func mapPayloadToModel(req CreateQuizRequest) Quiz {
 		Title:       req.Title,
 		Description: req.Description,
 		Medium:      req.Medium,
-		Stream:      req.Stream,
+		Stream:      pq.StringArray(req.Stream),
 		IsVisible:   req.IsVisible,
 		DurationMin: req.DurationMin,
 	}
