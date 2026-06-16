@@ -20,3 +20,6 @@ Thumbs.db
 
 # Vendor (if we decide to vendor dependencies later, usually ignored in Go modules)
 vendor/
+
+# Local frontend testing folder
+/frontend/

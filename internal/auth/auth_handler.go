@@ -59,7 +59,7 @@ func (h *Handler) RegisterRoutes(r *gin.RouterGroup) {
 	{
 		authGroup.POST("/register", h.Register)
 		authGroup.POST("/login", h.Login)
-		authGroup.POST("/webhook/google-sheets", h.HandleGoogleSheetWebhook)
+		// authGroup.POST("/webhook/google-sheets", h.HandleGoogleSheetWebhook)
 		authGroup.POST("/check-nic", h.CheckNIC)
 		authGroup.POST("/verify-password", h.VerifyPassword)
 		authGroup.GET("/profile/:nic", h.GetProfile)
@@ -86,10 +86,14 @@ type RegisterRequest struct {
 	LastName  string `json:"last_name" binding:"required"`
 
 	// New Demographic Data (Required for Impact Analytics)
-	ExamYear int    `json:"exam_year" binding:"required"` // e.g., 2025
-	Stream   string `json:"stream" binding:"required"`    // e.g., "Physical Science"
-	District string `json:"district" binding:"required"`  // e.g., "Gampaha"
-	School   string `json:"school" binding:"required"`    // e.g., "Royal College"
+	Stream         string `json:"stream" binding:"required"`          // e.g., "Physical Science"
+	District       string `json:"district" binding:"required"`        // e.g., "Gampaha"
+	School         string `json:"school" binding:"required"`          // e.g., "Royal College"
+	NIC            string `json:"nic" binding:"required"`             // National Identity Card
+	WhatsappNumber string `json:"whatsapp_number" binding:"required"` // Mobile Whatsapp No.
+	ALBatch        string `json:"al_batch" binding:"required"`        // e.g., "2025"
+	ALAttempt      string `json:"al_attempt" binding:"required"`      // "1", "2", or "3"
+	Medium         string `json:"medium" binding:"required"`          // "Sinhala", "Tamil", "English"
 }
 
 // LoginRequest defines the JSON payload for user login
@@ -111,14 +115,18 @@ func (h *Handler) Register(c *gin.Context) {
 	// 2. Map Request JSON to Service DTO
 	// This separates the API layer from the Domain layer
 	dto := RegisterDTO{
-		Email:     req.Email,
-		Password:  req.Password,
-		FirstName: req.FirstName,
-		LastName:  req.LastName,
-		ExamYear:  req.ExamYear,
-		Stream:    req.Stream,
-		District:  req.District,
-		School:    req.School,
+		Email:          req.Email,
+		Password:       req.Password,
+		FirstName:      req.FirstName,
+		LastName:       req.LastName,
+		Stream:         req.Stream,
+		District:       req.District,
+		School:         req.School,
+		NIC:            req.NIC,
+		WhatsappNumber: req.WhatsappNumber,
+		ALBatch:        req.ALBatch,
+		ALAttempt:      req.ALAttempt,
+		Medium:         req.Medium,
 	}
 
 	// 3. Call Service Logic

@@ -2,6 +2,7 @@ package auth
 
 import (
 	"errors"
+	"strings"
 	"time"
 
 	"crypto/rand"
@@ -25,22 +26,31 @@ func NewService(db *gorm.DB) *Service {
 
 // RegisterDTO holds all the data needed for registration
 type RegisterDTO struct {
-	Email     string
-	Password  string
-	FirstName string
-	LastName  string
-	ExamYear  int
-	Stream    string
-	District  string
-	School    string
+	Email          string
+	Password       string
+	FirstName      string
+	LastName       string
+	Stream         string
+	District       string
+	School         string
+	NIC            string
+	WhatsappNumber string
+	ALBatch        string
+	ALAttempt      string
+	Medium         string
 }
 
 // Register now accepts the DTO object
 func (s *Service) Register(req RegisterDTO) error {
-	// 1. Check if user exists
+	// 1. Check if user exists by email
 	var existing User
 	if err := s.db.Where("email = ?", req.Email).First(&existing).Error; err == nil {
 		return errors.New("email already registered")
+	}
+
+	// 1b. Check if user exists by NIC
+	if err := s.db.Where("nic = ?", req.NIC).First(&existing).Error; err == nil {
+		return errors.New("a user with this NIC is already registered")
 	}
 
 	// 2. Hash Password
@@ -51,19 +61,33 @@ func (s *Service) Register(req RegisterDTO) error {
 
 	// 3. Create User with ALL new fields
 	user := User{
-		Email:        req.Email,
-		PasswordHash: string(hashed),
-		FirstName:    req.FirstName,
-		LastName:     req.LastName,
-		Role:         "student",
-		// New Demographic Data
-		ExamYear: req.ExamYear,
-		Stream:   req.Stream,
-		District: req.District,
-		School:   req.School,
+		Email:          req.Email,
+		PasswordHash:   string(hashed),
+		FirstName:      req.FirstName,
+		LastName:       req.LastName,
+		Role:           "student",
+		Stream:         req.Stream,
+		District:       req.District,
+		School:         req.School,
+		NIC:            req.NIC,
+		WhatsappNumber: req.WhatsappNumber,
+		ALBatch:        req.ALBatch,
+		ALAttempt:      req.ALAttempt,
+		Medium:         req.Medium,
 	}
 
-	return s.db.Create(&user).Error
+	err = s.db.Create(&user).Error
+	if err != nil {
+		errStr := err.Error()
+		if strings.Contains(errStr, "idx_users_nic") || strings.Contains(errStr, "users_nic_key") {
+			return errors.New("a user with this NIC is already registered")
+		}
+		if strings.Contains(errStr, "idx_users_email") || strings.Contains(errStr, "users_email_key") {
+			return errors.New("email already registered")
+		}
+		return err
+	}
+	return nil
 }
 
 func (s *Service) Login(email, password string) (string, error) {

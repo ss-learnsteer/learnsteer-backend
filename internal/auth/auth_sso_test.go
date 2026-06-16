@@ -16,7 +16,10 @@ import (
 
 // setupSSOTestEnv initializes the DB, seeds a user, and wires the router
 func setupSSOTestEnv() (*gin.Engine, *gorm.DB) {
-	db, _ := gorm.Open(sqlite.Open("file::memory:?cache=shared"), &gorm.Config{})
+	db, err := gorm.Open(sqlite.Open("file:testssodb?mode=memory&cache=shared"), &gorm.Config{})
+	if err != nil {
+		panic("Failed to connect to in-memory database: " + err.Error())
+	}
 	db.AutoMigrate(&User{}, &SSOTicket{})
 
 	// Seed a dummy student
