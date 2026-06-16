@@ -19,6 +19,7 @@ type User struct {
 	LastName     string `json:"last_name"`
 	Role         string `gorm:"default:'student'" json:"role"` // 'student', 'admin'
 	// New Demographic Data
+	ExamYear int    `json:"exam_year"`
 	Stream   string `json:"stream"`
 	District string `json:"district"`
 	School   string `json:"school"`

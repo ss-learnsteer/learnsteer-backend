@@ -30,6 +30,7 @@ type RegisterDTO struct {
 	Password       string
 	FirstName      string
 	LastName       string
+	ExamYear       int
 	Stream         string
 	District       string
 	School         string
@@ -66,6 +67,7 @@ func (s *Service) Register(req RegisterDTO) error {
 		FirstName:      req.FirstName,
 		LastName:       req.LastName,
 		Role:           "student",
+		ExamYear:       req.ExamYear,
 		Stream:         req.Stream,
 		District:       req.District,
 		School:         req.School,

@@ -86,6 +86,7 @@ type RegisterRequest struct {
 	LastName  string `json:"last_name" binding:"required"`
 
 	// New Demographic Data (Required for Impact Analytics)
+	ExamYear       int    `json:"exam_year" binding:"required"`       // e.g., 2026
 	Stream         string `json:"stream" binding:"required"`          // e.g., "Physical Science"
 	District       string `json:"district" binding:"required"`        // e.g., "Gampaha"
 	School         string `json:"school" binding:"required"`          // e.g., "Royal College"
@@ -119,6 +120,7 @@ func (h *Handler) Register(c *gin.Context) {
 		Password:       req.Password,
 		FirstName:      req.FirstName,
 		LastName:       req.LastName,
+		ExamYear:       req.ExamYear,
 		Stream:         req.Stream,
 		District:       req.District,
 		School:         req.School,
