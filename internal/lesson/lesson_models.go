@@ -190,15 +190,29 @@ type LessonNoteDetailDTO struct {
 	Icon            string              `json:"icon,omitempty"` // e.g. "🔬"
 }
 
+// AnnotatedProgramDTO represents the annotated lecture slides and program notes
+type AnnotatedProgramDTO struct {
+	Title       string `json:"title"`        // e.g. "Annotated Program"
+	Description string `json:"description"`  // e.g. "The annotated lecture slides and program notes for this lesson will appear here."
+	DownloadURL string `json:"download_url"` // e.g. "/api/v1/lessons/3/annotated-program"
+}
+
 // LessonQADTO represents a Q&A thread for the lesson
 type LessonQADTO struct {
-	ID       uint   `json:"id"`
-	User     string `json:"user"`     // e.g. "Amal P."
-	Avatar   string `json:"avatar"`   // e.g. "AP"
-	Question string `json:"question"` // e.g. "What is the difference between mitosis and meiosis?"
-	Answer   string `json:"answer"`   // e.g. "Mitosis produces two identical diploid cells..."
-	Time     string `json:"time"`     // e.g. "2 days ago"
-	Likes    int    `json:"likes"`    // e.g. 12
+	ID               uint   `json:"id"`
+	User             string `json:"user"`              // e.g. "Amal P."
+	Avatar           string `json:"avatar"`            // e.g. "AP"
+	Question         string `json:"question"`          // e.g. "What is the difference between mitosis and meiosis?"
+	Answer           string `json:"answer"`            // e.g. "Mitosis produces two identical diploid cells..."
+	InstructorAnswer string `json:"instructor_answer"` // alias for clear semantic naming
+	Time             string `json:"time"`              // e.g. "2 days ago"
+	Likes            int    `json:"likes"`             // e.g. 12
+	HelpfulText      string `json:"helpful_text"`      // e.g. "12 Helpful"
+}
+
+// PostQuestionRequestDTO represents the body to post a new question
+type PostQuestionRequestDTO struct {
+	Question string `json:"question" binding:"required"`
 }
 
 // LessonResourceDetailDTO represents a downloadable attachment
@@ -231,23 +245,25 @@ type LessonUnitProgressDTO struct {
 
 // LessonDetailDTO shapes the full /lessonview player page
 type LessonDetailDTO struct {
-	ID           uint                      `json:"id"`
-	LessonNumber int                       `json:"lesson_number"`
-	Title        string                    `json:"title"`
-	UnitName     string                    `json:"unit_name"`
-	SubjectName  string                    `json:"subject_name"`
-	Instructor   string                    `json:"instructor"`
-	VideoURL     string                    `json:"video_url"`
-	DurationMin  int                       `json:"duration_min"`
-	LessonType   string                    `json:"lesson_type"`
-	IsCompleted  bool                      `json:"is_completed"`
-	ProgressPct  int                       `json:"progress_pct"`
-	Tabs         []LessonTabDTO            `json:"tabs"`
-	Notes        []LessonNoteDetailDTO     `json:"notes"`
-	QA           []LessonQADTO             `json:"qa"`
-	Resources    []LessonResourceDetailDTO `json:"resources"`
-	NextUp       NextUpWidgetDTO           `json:"next_up"`
-	UnitProgress LessonUnitProgressDTO     `json:"unit_progress"`
+	ID                uint                      `json:"id"`
+	LessonNumber      int                       `json:"lesson_number"`
+	Title             string                    `json:"title"`
+	UnitName          string                    `json:"unit_name"`
+	SubjectName       string                    `json:"subject_name"`
+	Instructor        string                    `json:"instructor"`
+	VideoURL          string                    `json:"video_url"`
+	DurationMin       int                       `json:"duration_min"`
+	LessonType        string                    `json:"lesson_type"`
+	IsCompleted       bool                      `json:"is_completed"`
+	ProgressPct       int                       `json:"progress_pct"`
+	CurrentUserAvatar string                    `json:"current_user_avatar"` // e.g. "YP"
+	Tabs              []LessonTabDTO            `json:"tabs"`
+	Notes             []LessonNoteDetailDTO     `json:"notes"`
+	AnnotatedProgram  AnnotatedProgramDTO       `json:"annotated_program"`
+	QA                []LessonQADTO             `json:"qa"`
+	Resources         []LessonResourceDetailDTO `json:"resources"`
+	NextUp            NextUpWidgetDTO           `json:"next_up"`
+	UnitProgress      LessonUnitProgressDTO     `json:"unit_progress"`
 }
 
 // LessonListPageDTO represents the full payload for /lessonlist

@@ -1,6 +1,7 @@
 package lesson
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -32,6 +33,8 @@ func (h *Handler) RegisterRoutes(r *gin.RouterGroup) {
 	r.POST("/lessons", h.CreateLesson)
 	r.POST("/lessons/:id/toggle-complete", h.ToggleLessonComplete)
 	r.POST("/lessons/:id/progress", h.SaveLessonProgress)
+	r.POST("/lessons/:id/questions", h.PostLessonQuestion)
+	r.POST("/lessons/:id/questions/:questionId/helpful", h.LikeLessonQuestion)
 
 	// Revision Modules
 	r.GET("/subjects/:id/revision", h.GetRevisionModules)
@@ -451,4 +454,58 @@ func (h *Handler) CreatePastPaper(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusCreated, gin.H{"success": true, "data": req})
+}
+
+// PostLessonQuestion handles posting a new student question in the lesson Q&A thread
+func (h *Handler) PostLessonQuestion(c *gin.Context) {
+	idParam := c.Param("id")
+	lessonID, err := strconv.Atoi(idParam)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"success": false, "error": "Invalid lesson ID"})
+		return
+	}
+
+	userID := extractUserID(c)
+	var req PostQuestionRequestDTO
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"success": false, "error": "Question text is required"})
+		return
+	}
+
+	qa, err := h.service.PostLessonQuestion(uint(lessonID), userID, req.Question)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "error": "Failed to post question: " + err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusCreated, gin.H{"success": true, "data": qa})
+}
+
+// LikeLessonQuestion handles upvoting / marking a Q&A question as helpful
+func (h *Handler) LikeLessonQuestion(c *gin.Context) {
+	idParam := c.Param("id")
+	lessonID, err := strconv.Atoi(idParam)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"success": false, "error": "Invalid lesson ID"})
+		return
+	}
+
+	qParam := c.Param("questionId")
+	questionID, err := strconv.Atoi(qParam)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"success": false, "error": "Invalid question ID"})
+		return
+	}
+
+	helpfulCount, err := h.service.LikeLessonQuestion(uint(lessonID), uint(questionID))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "error": "Failed to update helpful count: " + err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"success":       true,
+		"helpful_count": helpfulCount,
+		"helpful_text":  fmt.Sprintf("%d Helpful", helpfulCount),
+	})
 }

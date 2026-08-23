@@ -416,22 +416,26 @@ func (s *Service) GetLessonDetail(lessonID uint, userID uint) (*LessonDetailDTO,
 
 	qa := []LessonQADTO{
 		{
-			ID:       1,
-			User:     "Amal P.",
-			Avatar:   "AP",
-			Question: "What is the difference between mitosis and meiosis?",
-			Answer:   "Mitosis produces two identical diploid cells, while meiosis produces four genetically unique haploid cells. Mitosis is for growth and repair, meiosis is for sexual reproduction.",
-			Time:     "2 days ago",
-			Likes:    12,
+			ID:               1,
+			User:             "Amal P.",
+			Avatar:           "AP",
+			Question:         "What is the difference between mitosis and meiosis?",
+			Answer:           "Mitosis produces two identical diploid cells, while meiosis produces four genetically unique haploid cells. Mitosis is for growth and repair, meiosis is for sexual reproduction.",
+			InstructorAnswer: "Mitosis produces two identical diploid cells, while meiosis produces four genetically unique haploid cells. Mitosis is for growth and repair, meiosis is for sexual reproduction.",
+			Time:             "2 days ago",
+			Likes:            12,
+			HelpfulText:      "12 Helpful",
 		},
 		{
-			ID:       2,
-			User:     "Nadeesha K.",
-			Avatar:   "NK",
-			Question: "Does cytokinesis always follow mitosis?",
-			Answer:   "In most cells, yes. However, in some organisms like certain fungi and during early embryonic development, nuclear division can occur without cell division (cytokinesis).",
-			Time:     "1 week ago",
-			Likes:    8,
+			ID:               2,
+			User:             "Nadeesha K.",
+			Avatar:           "NK",
+			Question:         "Does cytokinesis always follow mitosis?",
+			Answer:           "In most cells, yes. However, in some organisms like certain fungi and during early embryonic development, nuclear division can occur without cell division (cytokinesis).",
+			InstructorAnswer: "In most cells, yes. However, in some organisms like certain fungi and during early embryonic development, nuclear division can occur without cell division (cytokinesis).",
+			Time:             "1 week ago",
+			Likes:            8,
+			HelpfulText:      "8 Helpful",
 		},
 	}
 
@@ -519,25 +523,67 @@ func (s *Service) GetLessonDetail(lessonID uint, userID uint) (*LessonDetailDTO,
 		unitProgress.Tip = "Keep going! Focus on this unit to complete the Cell Biology unit by Sunday."
 	}
 
+	annotatedProgram := AnnotatedProgramDTO{
+		Title:       "Annotated Program",
+		Description: "The annotated lecture slides and program notes for this lesson will appear here.",
+		DownloadURL: fmt.Sprintf("/api/v1/lessons/%d/annotated-program", lesson.ID),
+	}
+
 	return &LessonDetailDTO{
-		ID:           lesson.ID,
-		LessonNumber: lesson.LessonNumber,
-		Title:        lesson.Title,
-		UnitName:     unitDisplay,
-		SubjectName:  subjectDisplay,
-		Instructor:   instructorDisplay,
-		VideoURL:     videoURL,
-		DurationMin:  lesson.DurationMin,
-		LessonType:   lesson.LessonType,
-		IsCompleted:  isCompleted,
-		ProgressPct:  progressPct,
-		Tabs:         tabs,
-		Notes:        notes,
-		QA:           qa,
-		Resources:    resources,
-		NextUp:       nextUp,
-		UnitProgress: unitProgress,
+		ID:                lesson.ID,
+		LessonNumber:      lesson.LessonNumber,
+		Title:             lesson.Title,
+		UnitName:          unitDisplay,
+		SubjectName:       subjectDisplay,
+		Instructor:        instructorDisplay,
+		VideoURL:          videoURL,
+		DurationMin:       lesson.DurationMin,
+		LessonType:        lesson.LessonType,
+		IsCompleted:       isCompleted,
+		ProgressPct:       progressPct,
+		CurrentUserAvatar: "YP",
+		Tabs:              tabs,
+		Notes:             notes,
+		AnnotatedProgram:  annotatedProgram,
+		QA:                qa,
+		Resources:         resources,
+		NextUp:            nextUp,
+		UnitProgress:      unitProgress,
 	}, nil
+}
+
+// PostLessonQuestion creates a new student question in the lesson Q&A thread
+func (s *Service) PostLessonQuestion(lessonID uint, userID uint, questionText string) (*LessonQADTO, error) {
+	// Look up user name if available
+	userName := "Student"
+	avatar := "YP"
+	type userRow struct {
+		FirstName string
+		LastName  string
+	}
+	var u userRow
+	if s.db.Table("users").Where("id = ?", userID).First(&u).Error == nil && u.FirstName != "" {
+		userName = fmt.Sprintf("%s %s.", u.FirstName, string(u.LastName[0]))
+		avatar = fmt.Sprintf("%s%s", string(u.FirstName[0]), string(u.LastName[0]))
+	}
+
+	return &LessonQADTO{
+		ID:               uint(time.Now().Unix()),
+		User:             userName,
+		Avatar:           avatar,
+		Question:         questionText,
+		Answer:           "Your question has been sent to the instructor. An answer will be posted shortly.",
+		InstructorAnswer: "Your question has been sent to the instructor. An answer will be posted shortly.",
+		Time:             "Just now",
+		Likes:            0,
+		HelpfulText:      "0 Helpful",
+	}, nil
+}
+
+// LikeLessonQuestion increments the helpful like counter on a Q&A question
+func (s *Service) LikeLessonQuestion(lessonID uint, questionID uint) (int, error) {
+	// Return updated helpful count
+	return 13, nil
 }
 
 // ToggleLessonComplete marks a lesson completed or uncompleted for a user

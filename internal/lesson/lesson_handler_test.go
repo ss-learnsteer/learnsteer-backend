@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"strconv"
+	"strings"
 	"sync/atomic"
 	"testing"
 
@@ -419,4 +420,62 @@ func TestGetLessonListOverview(t *testing.T) {
 		}
 	})
 }
+
+func TestLessonQAEndpoints(t *testing.T) {
+	router, _, _, _, lesID := setupLessonTestEnv()
+	lesIDStr := strconv.Itoa(int(lesID))
+
+	t.Run("Student posts a new question in lesson Q&A", func(t *testing.T) {
+		body := `{"question": "How long does the G1 phase typically take?"}`
+		req, _ := http.NewRequest("POST", "/api/v1/lessons/"+lesIDStr+"/questions", strings.NewReader(body))
+		req.Header.Set("Content-Type", "application/json")
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		if w.Code != http.StatusCreated {
+			t.Fatalf("Expected 201 Created, got %d. Body: %s", w.Code, w.Body.String())
+		}
+
+		var resp struct {
+			Success bool        `json:"success"`
+			Data    LessonQADTO `json:"data"`
+		}
+		json.Unmarshal(w.Body.Bytes(), &resp)
+
+		if !resp.Success {
+			t.Errorf("Expected success to be true")
+		}
+		if resp.Data.Question != "How long does the G1 phase typically take?" {
+			t.Errorf("Expected question text to match, got %s", resp.Data.Question)
+		}
+		if resp.Data.InstructorAnswer == "" {
+			t.Errorf("Expected instructor answer placeholder")
+		}
+	})
+
+	t.Run("Student marks a Q&A question as helpful", func(t *testing.T) {
+		req, _ := http.NewRequest("POST", "/api/v1/lessons/"+lesIDStr+"/questions/1/helpful", nil)
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		if w.Code != http.StatusOK {
+			t.Fatalf("Expected 200 OK, got %d", w.Code)
+		}
+
+		var resp struct {
+			Success      bool   `json:"success"`
+			HelpfulCount int    `json:"helpful_count"`
+			HelpfulText  string `json:"helpful_text"`
+		}
+		json.Unmarshal(w.Body.Bytes(), &resp)
+
+		if !resp.Success {
+			t.Errorf("Expected success to be true")
+		}
+		if resp.HelpfulCount <= 0 {
+			t.Errorf("Expected positive helpful count")
+		}
+	})
+}
+
 
