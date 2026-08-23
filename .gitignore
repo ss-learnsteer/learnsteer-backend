@@ -1,6 +1,8 @@
 # Binaries
 /bin
 /dist
+cmd/server/server
+server
 *.exe
 *.exe~
 *.dll
@@ -9,6 +11,8 @@
 
 # Environment Variables (NEVER commit these)
 .env
+README.md
+README*
 
 # IDE Specifics
 .vscode/
