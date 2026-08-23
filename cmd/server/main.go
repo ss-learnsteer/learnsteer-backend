@@ -14,6 +14,7 @@ import (
 
 	// Internal Modules
 	"github.com/sasnaka-learnsteer/ss-quiz-platform-backend/internal/auth"
+	"github.com/sasnaka-learnsteer/ss-quiz-platform-backend/internal/lesson"
 	"github.com/sasnaka-learnsteer/ss-quiz-platform-backend/internal/platform/database"
 	"github.com/sasnaka-learnsteer/ss-quiz-platform-backend/internal/platform/middleware" // Added Middleware
 	"github.com/sasnaka-learnsteer/ss-quiz-platform-backend/internal/quiz"
@@ -51,6 +52,14 @@ func main() {
 		&submission.Answer{},
 		&quiz.Option{},
 		&auth.SSOTicket{},
+		&lesson.Subject{},
+		&lesson.Unit{},
+		&lesson.Lesson{},
+		&lesson.LessonNote{},
+		&lesson.LessonResource{},
+		&lesson.UserLessonProgress{},
+		&lesson.RevisionModule{},
+		&lesson.PastPaper{},
 	)
 	if err != nil {
 		log.Fatalf("Failed to migrate database: %v", err)
@@ -68,6 +77,10 @@ func main() {
 	// Submission Module
 	submissionService := submission.NewService(db)
 	submissionHandler := submission.NewHandler(submissionService)
+
+	// Lesson Module
+	lessonService := lesson.NewService(db)
+	lessonHandler := lesson.NewHandler(lessonService)
 
 	// 4. Setup Router
 	r := gin.Default()
@@ -105,10 +118,11 @@ func main() {
 		protected := v1.Group("/")
 		protected.Use(middleware.AuthMiddleware())
 		{
-			// 3. Quiz Routes
-			// Now all quiz endpoints require a valid 'Authorization: Bearer <token>' header
+			// Quiz, Submission, and Lesson Routes
+			// Require a valid 'Authorization: Bearer <token>' header
 			quizHandler.RegisterRoutes(protected)
 			submissionHandler.RegisterRoutes(protected)
+			lessonHandler.RegisterRoutes(protected)
 		}
 	}
 
