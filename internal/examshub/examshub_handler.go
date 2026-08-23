@@ -19,6 +19,7 @@ func NewHandler(service *Service) *Handler {
 // RegisterRoutes registers the exams hub endpoints
 func (h *Handler) RegisterRoutes(r *gin.RouterGroup) {
 	r.GET("/exams/hub", h.GetExamsHub)
+	r.GET("/exams/mocks", h.GetMockExams)
 }
 
 func extractUserID(c *gin.Context) uint {
@@ -66,3 +67,39 @@ func (h *Handler) GetExamsHub(c *gin.Context) {
 		"data":    data,
 	})
 }
+
+// GetMockExams returns the full Mock Exams page payload
+func (h *Handler) GetMockExams(c *gin.Context) {
+	userID := extractUserID(c)
+	if userID == 0 {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"success": false,
+			"error":   "Authentication required to view mock exams",
+		})
+		return
+	}
+
+	userStream := c.GetString("user_stream")
+	userMedium := c.GetString("user_medium")
+	if userStream == "" {
+		userStream = "Bio Science"
+	}
+	if userMedium == "" {
+		userMedium = "Sinhala"
+	}
+
+	data, err := h.service.GetMockExams(userID, userStream, userMedium)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"error":   "Failed to load mock exams: " + err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"data":    data,
+	})
+}
+

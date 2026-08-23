@@ -153,3 +153,57 @@ func TestGetExamsHub(t *testing.T) {
 		}
 	})
 }
+
+func TestGetMockExams(t *testing.T) {
+	router, _, _ := setupExamsHubTestEnv()
+
+	t.Run("Returns complete mock exams page payload for authenticated student", func(t *testing.T) {
+		req, _ := http.NewRequest("GET", "/api/v1/exams/mocks", nil)
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		if w.Code != http.StatusOK {
+			t.Fatalf("Expected 200 OK, got %d. Body: %s", w.Code, w.Body.String())
+		}
+
+		var resp struct {
+			Success bool             `json:"success"`
+			Data    MockExamsPageDTO `json:"data"`
+		}
+		json.Unmarshal(w.Body.Bytes(), &resp)
+
+		if !resp.Success {
+			t.Errorf("Expected success to be true")
+		}
+
+		// 1. Last Result
+		if resp.Data.LastResult.Label == "" {
+			t.Errorf("Expected last result label to be present")
+		}
+		if resp.Data.LastResult.Percentage <= 0 {
+			t.Errorf("Expected last result percentage > 0, got %d", resp.Data.LastResult.Percentage)
+		}
+
+		// 2. Upcoming Schedule
+		if len(resp.Data.UpcomingSchedule) == 0 {
+			t.Errorf("Expected upcoming mock schedule items to be present")
+		}
+		if resp.Data.UpcomingSchedule[0].Month == "" || resp.Data.UpcomingSchedule[0].Subject == "" {
+			t.Errorf("Expected upcoming mock month and subject to be populated")
+		}
+
+		// 3. Eligibility
+		if len(resp.Data.Eligibility) == 0 {
+			t.Errorf("Expected eligibility items to be present")
+		}
+
+		// 4. Strategy
+		if resp.Data.Strategy.Message == "" {
+			t.Errorf("Expected strategy message to be present")
+		}
+		if resp.Data.Strategy.StudentsRegistered <= 0 {
+			t.Errorf("Expected registered students count > 0, got %d", resp.Data.Strategy.StudentsRegistered)
+		}
+	})
+}
+

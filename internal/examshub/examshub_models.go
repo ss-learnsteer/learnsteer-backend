@@ -74,3 +74,58 @@ type AssessmentHistoryDTO struct {
 	CurrentWeekLabel string `json:"current_week_label"` // "Current Week"
 	Trend          string `json:"trend"`            // "up", "down", "stable"
 }
+
+// ===== Mock Exams Page DTOs =====
+
+// MockExamsPageDTO is the full payload for the Mock Exams page
+type MockExamsPageDTO struct {
+	LastResult          LastResultDTO           `json:"last_result"`
+	UpcomingSchedule    []UpcomingMockDTO       `json:"upcoming_schedule"`
+	Eligibility         []EligibilityDTO        `json:"eligibility"`
+	Strategy            StrategyDTO             `json:"strategy"`
+}
+
+// LastResultDTO shows the student's most recent mock exam result summary
+type LastResultDTO struct {
+	MockNumber   int    `json:"mock_number"`    // e.g. 3
+	Label        string `json:"label"`          // e.g. "Mock #3: 72%"
+	Percentage   int    `json:"percentage"`     // e.g. 72
+	ExamTitle    string `json:"exam_title"`     // e.g. "Biology Mock #3"
+	ExamID       uint   `json:"exam_id"`
+}
+
+// UpcomingMockDTO represents a scheduled mock exam in the calendar
+type UpcomingMockDTO struct {
+	ID            uint       `json:"id"`
+	Month         string     `json:"month"`          // e.g. "MAY"
+	Day           int        `json:"day"`            // e.g. 20
+	Subject       string     `json:"subject"`        // e.g. "BIOLOGY"
+	SubjectColor  string     `json:"subject_color"`  // e.g. "emerald", "violet", "orange"
+	SessionLabel  string     `json:"session_label"`  // e.g. "Session #4"
+	Title         string     `json:"title"`          // e.g. "Bio Mock #4 - May 20, 2025"
+	TimeSlot      string     `json:"time_slot"`      // e.g. "08:30 AM - 11:30 AM"
+	ExamType      string     `json:"exam_type"`      // e.g. "MCQ & Essay", "Full Syllabus"
+	Action        string     `json:"action"`         // e.g. "Book a Seat", "Register Now", "Locked"
+	IsLocked      bool       `json:"is_locked"`
+	LockReason    string     `json:"lock_reason,omitempty"` // e.g. "Unlocks at 80% Progress"
+	Date          time.Time  `json:"date"`
+}
+
+// EligibilityDTO shows subject revision progress for mock exam eligibility
+type EligibilityDTO struct {
+	Subject      string `json:"subject"`        // e.g. "BIOLOGY REVISION"
+	Percentage   int    `json:"percentage"`     // e.g. 75
+	IsUnlocked   bool   `json:"is_unlocked"`
+	Message      string `json:"message"`        // e.g. "Unlocked for Mock #4" or "Need 70% for Mock #3"
+	ActionURL    string `json:"action_url,omitempty"` // e.g. "/revision"
+	BarColor     string `json:"bar_color"`      // e.g. "bg-emerald-500"
+}
+
+// StrategyDTO shows motivational stats for the mock exams page
+type StrategyDTO struct {
+	Message              string `json:"message"`                // "Mocks are the best way to identify weak points before the real deal."
+	StudentsRegistered   int    `json:"students_registered"`    // e.g. 1240
+	RegisteredLabel      string `json:"registered_label"`       // e.g. "+1,240 students registered this week"
+	AvatarInitials       []string `json:"avatar_initials"`      // e.g. ["KP", "RN", "SS"]
+}
+
