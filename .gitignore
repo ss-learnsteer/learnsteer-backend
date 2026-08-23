@@ -1,8 +1,8 @@
 # Binaries
 /bin
 /dist
+/server
 cmd/server/server
-server
 *.exe
 *.exe~
 *.dll

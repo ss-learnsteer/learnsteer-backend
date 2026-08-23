@@ -133,7 +133,42 @@ func main() {
 		// 3. Auth Routes (Register, Login)
 		authHandler.RegisterRoutes(v1)
 
-		// 4. Public Platform Configurations (Server-Driven Landing, About, Contact)
+		// 4. Interactive Swagger UI & OpenAPI Specification
+		v1.GET("/swagger.json", func(c *gin.Context) {
+			c.File("swagger.json")
+		})
+		v1.GET("/docs", func(c *gin.Context) {
+			html := `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LearnSteer API — Swagger Documentation</title>
+  <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5/swagger-ui.css" />
+  <link rel="icon" type="image/png" href="https://unpkg.com/swagger-ui-dist@5/favicon-32x32.png" />
+  <style>body { margin: 0; background: #fafafa; }</style>
+</head>
+<body>
+  <div id="swagger-ui"></div>
+  <script src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-bundle.js"></script>
+  <script>
+    window.onload = () => {
+      SwaggerUIBundle({
+        url: '/api/v1/swagger.json',
+        dom_id: '#swagger-ui',
+        deepLinking: true,
+        presets: [SwaggerUIBundle.presets.apis],
+        layout: 'BaseLayout'
+      });
+    };
+  </script>
+</body>
+</html>`
+			c.Header("Content-Type", "text/html; charset=utf-8")
+			c.String(http.StatusOK, html)
+		})
+
+		// 5. Public Platform Configurations (Server-Driven Landing, About, Contact)
 		v1.GET("/public/config", func(c *gin.Context) {
 			c.JSON(http.StatusOK, gin.H{
 				"success": true,
