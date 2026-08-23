@@ -131,6 +131,51 @@ func main() {
 		// 3. Auth Routes (Register, Login)
 		authHandler.RegisterRoutes(v1)
 
+		// 4. Public Platform Configurations (Server-Driven Landing, About, Contact)
+		v1.GET("/public/config", func(c *gin.Context) {
+			c.JSON(http.StatusOK, gin.H{
+				"success": true,
+				"data": gin.H{
+					"platform_name": "LearnSteer by Sasnaka Sansada",
+					"tagline":       "Free A/L Students Sri Lanka - Learn Smarter. Score Higher.",
+					"description":   "The all-in-one free self-learning portal for Sri Lankan A/L students - videos, past papers, revision notes & mock exams.",
+					"badge":         "Official Platform For Sri Lankan Students",
+					"stats": gin.H{
+						"students_enrolled": "+50,000",
+						"video_lessons":     "+1,200",
+						"past_papers":       "+500",
+						"island_rank_coverage": "99.8%",
+					},
+				},
+			})
+		})
+
+		v1.GET("/public/about", func(c *gin.Context) {
+			c.JSON(http.StatusOK, gin.H{
+				"success": true,
+				"data": gin.H{
+					"title": "About Sasnaka Sansada LearnSteer",
+					"mission": "Empowering every Sri Lankan Advanced Level student with world-class, free educational resources.",
+					"vision": "Bridging the educational inequality gap across all 25 districts through technology and peer mentorship.",
+					"story": "Sasnaka Sansada is a non-profit youth organization committed to uplifting educational standards across Sri Lanka.",
+					"pillars": []string{"High Quality Video Lessons", "Structured Revision Notes", "Island-wide Mock Exams", "Real-Time Ranking & Z-Score Diagnostics"},
+				},
+			})
+		})
+
+		v1.GET("/public/contact", func(c *gin.Context) {
+			c.JSON(http.StatusOK, gin.H{
+				"success": true,
+				"data": gin.H{
+					"email": "support@learnsteer.lk",
+					"phone": "+94 11 234 5678",
+					"hotline": "+94 77 123 4567",
+					"office_address": "Sasnaka Sansada Headquarters, Colombo, Sri Lanka",
+					"working_hours": "Monday - Saturday: 8:30 AM - 5:30 PM",
+				},
+			})
+		})
+
 		// ----------------------------
 		// B. Protected Routes (Login Required)
 		// ----------------------------
