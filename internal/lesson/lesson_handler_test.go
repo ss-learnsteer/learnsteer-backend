@@ -350,3 +350,64 @@ func TestGetRevisionAndPastPapers(t *testing.T) {
 		}
 	})
 }
+
+func TestGetLessonListOverview(t *testing.T) {
+	router, _, subID, _, _ := setupLessonTestEnv()
+	subIDStr := strconv.Itoa(int(subID))
+
+	t.Run("Fetches full lesson list overview for subject", func(t *testing.T) {
+		req, _ := http.NewRequest("GET", "/api/v1/subjects/"+subIDStr+"/lessonlist", nil)
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		if w.Code != http.StatusOK {
+			t.Fatalf("Expected 200 OK, got %d", w.Code)
+		}
+
+		var resp struct {
+			Success bool              `json:"success"`
+			Data    LessonListPageDTO `json:"data"`
+		}
+		json.Unmarshal(w.Body.Bytes(), &resp)
+
+		if !resp.Success {
+			t.Errorf("Expected success to be true")
+		}
+		if resp.Data.SubjectTitle == "" {
+			t.Errorf("Expected subject title to be present")
+		}
+		if len(resp.Data.Units) == 0 {
+			t.Errorf("Expected units list to be present")
+		}
+		if resp.Data.SubjectProgress.TotalLessons <= 0 {
+			t.Errorf("Expected total lessons > 0, got %d", resp.Data.SubjectProgress.TotalLessons)
+		}
+		if resp.Data.UpcomingMock.Name == "" {
+			t.Errorf("Expected upcoming mock name to be present")
+		}
+	})
+
+	t.Run("Fetches default lesson list overview via /lessonlist", func(t *testing.T) {
+		req, _ := http.NewRequest("GET", "/api/v1/lessonlist", nil)
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		if w.Code != http.StatusOK {
+			t.Fatalf("Expected 200 OK, got %d", w.Code)
+		}
+
+		var resp struct {
+			Success bool              `json:"success"`
+			Data    LessonListPageDTO `json:"data"`
+		}
+		json.Unmarshal(w.Body.Bytes(), &resp)
+
+		if !resp.Success {
+			t.Errorf("Expected success to be true")
+		}
+		if len(resp.Data.Units) == 0 {
+			t.Errorf("Expected units list to be present")
+		}
+	})
+}
+

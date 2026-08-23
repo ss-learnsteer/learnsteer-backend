@@ -22,6 +22,8 @@ func (h *Handler) RegisterRoutes(r *gin.RouterGroup) {
 	// Subjects & Units
 	r.GET("/subjects", h.ListSubjects)
 	r.GET("/subjects/:id/units", h.GetSubjectUnits)
+	r.GET("/subjects/:id/lessonlist", h.GetLessonListOverview)
+	r.GET("/lessonlist", h.GetDefaultLessonListOverview)
 	r.POST("/subjects", h.CreateSubject)
 	r.POST("/units", h.CreateUnit)
 
@@ -131,6 +133,76 @@ func (h *Handler) GetSubjectUnits(c *gin.Context) {
 		"success":    true,
 		"subject_id": subjectID,
 		"data":       units,
+	})
+}
+
+// GetLessonListOverview returns full syllabus units, lessons, and sidebar widgets for /lessonlist
+func (h *Handler) GetLessonListOverview(c *gin.Context) {
+	idParam := c.Param("id")
+	subjectID, err := strconv.Atoi(idParam)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"error":   "Invalid subject ID",
+		})
+		return
+	}
+
+	userID := extractUserID(c)
+	userStream := c.GetString("user_stream")
+	userMedium := c.GetString("user_medium")
+	if userStream == "" {
+		userStream = "Bio Science"
+	}
+	if userMedium == "" {
+		userMedium = "Sinhala"
+	}
+
+	data, err := h.service.GetLessonListOverview(uint(subjectID), userID, userStream, userMedium)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"error":   "Failed to fetch lesson list: " + err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"data":    data,
+	})
+}
+
+// GetDefaultLessonListOverview returns the lesson list overview for the student's primary stream subject
+func (h *Handler) GetDefaultLessonListOverview(c *gin.Context) {
+	userID := extractUserID(c)
+	userStream := c.GetString("user_stream")
+	userMedium := c.GetString("user_medium")
+	if userStream == "" {
+		userStream = "Bio Science"
+	}
+	if userMedium == "" {
+		userMedium = "Sinhala"
+	}
+
+	// Optional subject query parameter
+	subjectID := 0
+	if subParam := c.Query("subject_id"); subParam != "" {
+		subjectID, _ = strconv.Atoi(subParam)
+	}
+
+	data, err := h.service.GetLessonListOverview(uint(subjectID), userID, userStream, userMedium)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"error":   "Failed to fetch lesson list: " + err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"data":    data,
 	})
 }
 

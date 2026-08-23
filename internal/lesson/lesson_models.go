@@ -183,3 +183,35 @@ type LessonDetailDTO struct {
 	Notes        []LessonNote     `json:"notes"`
 	Resources    []LessonResource `json:"resources"`
 }
+
+// LessonListPageDTO represents the full payload for /lessonlist
+type LessonListPageDTO struct {
+	SubjectTitle    string                  `json:"subject_title"`
+	SubjectDetails  string                  `json:"subject_details"`
+	Units           []UnitSummaryDTO        `json:"units"`
+	SubjectProgress LessonListProgressDTO   `json:"subject_progress"`
+	IslandRankGoal  IslandRankGoalDTO       `json:"island_rank_goal"`
+	UpcomingMock    UpcomingMockWidgetDTO   `json:"upcoming_mock"`
+}
+
+// LessonListProgressDTO represents the progress widget on /lessonlist
+type LessonListProgressDTO struct {
+	Percentage       int    `json:"percentage"`
+	TotalLessons     int    `json:"total_lessons"`
+	CompletedLessons int    `json:"completed_lessons"`
+	StudyTime        string `json:"study_time"` // e.g. "148 hrs"
+}
+
+// IslandRankGoalDTO represents the rank goal widget
+type IslandRankGoalDTO struct {
+	Title       string `json:"title"`
+	Description string `json:"description"`
+}
+
+// UpcomingMockWidgetDTO represents the upcoming mock widget on /lessonlist
+type UpcomingMockWidgetDTO struct {
+	Name    string `json:"name"`    // e.g. "Bio-Unit 01 Assesment"
+	Details string `json:"details"` // e.g. "Starts in 2 days * 15.00PM"
+	Extra   string `json:"extra"`   // e.g. "Master the expaned Unit 01 Lessons to unlock the practice simulation made early"
+}
+
