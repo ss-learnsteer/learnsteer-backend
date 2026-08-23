@@ -15,6 +15,7 @@ import (
 	// Internal Modules
 	"github.com/sasnaka-learnsteer/ss-quiz-platform-backend/internal/auth"
 	"github.com/sasnaka-learnsteer/ss-quiz-platform-backend/internal/dashboard"
+	"github.com/sasnaka-learnsteer/ss-quiz-platform-backend/internal/examshub"
 	"github.com/sasnaka-learnsteer/ss-quiz-platform-backend/internal/lesson"
 	"github.com/sasnaka-learnsteer/ss-quiz-platform-backend/internal/platform/database"
 	"github.com/sasnaka-learnsteer/ss-quiz-platform-backend/internal/platform/middleware" // Added Middleware
@@ -91,6 +92,10 @@ func main() {
 	dashboardService := dashboard.NewService(db)
 	dashboardHandler := dashboard.NewHandler(dashboardService)
 
+	// Exams Hub Module
+	examsHubService := examshub.NewService(db)
+	examsHubHandler := examshub.NewHandler(examsHubService)
+
 	// 4. Setup Router
 	r := gin.Default()
 	r.Use(gzip.Gzip(gzip.DefaultCompression))
@@ -133,6 +138,7 @@ func main() {
 			submissionHandler.RegisterRoutes(protected)
 			lessonHandler.RegisterRoutes(protected)
 			dashboardHandler.RegisterRoutes(protected)
+			examsHubHandler.RegisterRoutes(protected)
 		}
 	}
 
