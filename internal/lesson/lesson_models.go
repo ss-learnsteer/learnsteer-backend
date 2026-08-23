@@ -167,21 +167,87 @@ type LessonSummaryDTO struct {
 	IsLocked     bool   `json:"is_locked"`
 }
 
+// LessonTabDTO represents a tab header on /lessonview
+type LessonTabDTO struct {
+	ID    string `json:"id"`              // "notes", "annotated", "qa", "resources"
+	Label string `json:"label"`           // "Lesson Notes", "Annotated Program", "Q&A", "Resources"
+	Count int    `json:"count,omitempty"` // e.g. 24 for Q&A, 3 for Resources
+}
+
+// LessonSubPointDTO represents sub-bullet points inside a phase section
+type LessonSubPointDTO struct {
+	Label string `json:"label"` // e.g. "G1 Phase:"
+	Desc  string `json:"desc"`  // e.g. "Period before the synthesis of DNA."
+}
+
+// LessonNoteDetailDTO represents a structured note section
+type LessonNoteDetailDTO struct {
+	ID              uint                `json:"id"`
+	Title           string              `json:"title"`
+	ContentMarkdown string              `json:"content_markdown"`
+	SectionType     string              `json:"section_type"` // "text", "phase", "tip"
+	SubPoints       []LessonSubPointDTO `json:"sub_points,omitempty"`
+	Icon            string              `json:"icon,omitempty"` // e.g. "🔬"
+}
+
+// LessonQADTO represents a Q&A thread for the lesson
+type LessonQADTO struct {
+	ID       uint   `json:"id"`
+	User     string `json:"user"`     // e.g. "Amal P."
+	Avatar   string `json:"avatar"`   // e.g. "AP"
+	Question string `json:"question"` // e.g. "What is the difference between mitosis and meiosis?"
+	Answer   string `json:"answer"`   // e.g. "Mitosis produces two identical diploid cells..."
+	Time     string `json:"time"`     // e.g. "2 days ago"
+	Likes    int    `json:"likes"`    // e.g. 12
+}
+
+// LessonResourceDetailDTO represents a downloadable attachment
+type LessonResourceDetailDTO struct {
+	ID       uint   `json:"id"`
+	Title    string `json:"title"` // e.g. "Mitosis Diagram Pack"
+	FileSize string `json:"file_size"`
+	FileType string `json:"file_type"` // "PDF", "DOCX"
+	Color    string `json:"color"`     // "from-red-500 to-rose-600"
+	FileURL  string `json:"file_url"`
+}
+
+// NextUpWidgetDTO represents the Next Up lesson widget in the sidebar
+type NextUpWidgetDTO struct {
+	LessonID       uint   `json:"lesson_id"`
+	Unit           string `json:"unit"`            // e.g. "LESSON 4"
+	Title          string `json:"title"`           // e.g. "Cytoplasmic Organelles & Functions"
+	Duration       string `json:"duration"`        // e.g. "45 min"
+	ResourcesCount int    `json:"resources_count"` // e.g. 8
+	Icon           string `json:"icon"`            // e.g. "🧬"
+}
+
+// LessonUnitProgressDTO represents the unit progress box in the sidebar
+type LessonUnitProgressDTO struct {
+	Percentage       int    `json:"percentage"`        // e.g. 45
+	CompletedLessons int    `json:"completed_lessons"` // e.g. 3
+	TotalLessons     int    `json:"total_lessons"`     // e.g. 7
+	Tip              string `json:"tip"`               // e.g. "Keep going! Focus on this unit to complete the Cell Biology unit by Sunday."
+}
+
 // LessonDetailDTO shapes the full /lessonview player page
 type LessonDetailDTO struct {
-	ID           uint             `json:"id"`
-	LessonNumber int              `json:"lesson_number"`
-	Title        string           `json:"title"`
-	UnitName     string           `json:"unit_name"`
-	SubjectName  string           `json:"subject_name"`
-	Instructor   string           `json:"instructor"`
-	VideoURL     string           `json:"video_url"`
-	DurationMin  int              `json:"duration_min"`
-	LessonType   string           `json:"lesson_type"`
-	IsCompleted  bool             `json:"is_completed"`
-	ProgressPct  int              `json:"progress_pct"`
-	Notes        []LessonNote     `json:"notes"`
-	Resources    []LessonResource `json:"resources"`
+	ID           uint                      `json:"id"`
+	LessonNumber int                       `json:"lesson_number"`
+	Title        string                    `json:"title"`
+	UnitName     string                    `json:"unit_name"`
+	SubjectName  string                    `json:"subject_name"`
+	Instructor   string                    `json:"instructor"`
+	VideoURL     string                    `json:"video_url"`
+	DurationMin  int                       `json:"duration_min"`
+	LessonType   string                    `json:"lesson_type"`
+	IsCompleted  bool                      `json:"is_completed"`
+	ProgressPct  int                       `json:"progress_pct"`
+	Tabs         []LessonTabDTO            `json:"tabs"`
+	Notes        []LessonNoteDetailDTO     `json:"notes"`
+	QA           []LessonQADTO             `json:"qa"`
+	Resources    []LessonResourceDetailDTO `json:"resources"`
+	NextUp       NextUpWidgetDTO           `json:"next_up"`
+	UnitProgress LessonUnitProgressDTO     `json:"unit_progress"`
 }
 
 // LessonListPageDTO represents the full payload for /lessonlist

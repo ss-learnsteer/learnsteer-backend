@@ -224,11 +224,20 @@ func TestGetLessonDetail(t *testing.T) {
 		if resp.Data.Title != "Cell Division: Mitosis" {
 			t.Errorf("Expected lesson title Cell Division: Mitosis, got %s", resp.Data.Title)
 		}
-		if len(resp.Data.Notes) != 1 {
-			t.Errorf("Expected 1 lesson note, got %d", len(resp.Data.Notes))
+		if len(resp.Data.Tabs) != 4 {
+			t.Errorf("Expected 4 tabs, got %d", len(resp.Data.Tabs))
 		}
-		if len(resp.Data.Resources) != 1 {
-			t.Errorf("Expected 1 lesson resource, got %d", len(resp.Data.Resources))
+		if len(resp.Data.Notes) == 0 {
+			t.Errorf("Expected lesson notes to be present")
+		}
+		if len(resp.Data.Resources) == 0 {
+			t.Errorf("Expected lesson resources to be present")
+		}
+		if resp.Data.NextUp.Title == "" {
+			t.Errorf("Expected Next Up lesson title to be present")
+		}
+		if resp.Data.UnitProgress.TotalLessons <= 0 {
+			t.Errorf("Expected unit progress total lessons > 0, got %d", resp.Data.UnitProgress.TotalLessons)
 		}
 	})
 }

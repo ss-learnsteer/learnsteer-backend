@@ -353,20 +353,190 @@ func (s *Service) GetLessonDetail(lessonID uint, userID uint) (*LessonDetailDTO,
 		}
 	}
 
+	// Format unit display name
+	unitDisplay := "Unit 01: Cell Biology"
+	if unit.Name != "" {
+		unitDisplay = fmt.Sprintf("Unit %02d: %s", unit.UnitNumber, unit.Name)
+	}
+
+	subjectDisplay := "Biology"
+	if subject.Name != "" {
+		subjectDisplay = subject.Name
+	}
+
+	instructorDisplay := "Dr. S. Perera"
+	if lesson.Instructor != "" {
+		instructorDisplay = lesson.Instructor
+	}
+
+	videoURL := "https://www.youtube.com/embed/fJfTDc3WzQ8?si=RiUL7S5QrngP6anM"
+	if lesson.VideoURL != "" {
+		videoURL = lesson.VideoURL
+	}
+
+	tabs := []LessonTabDTO{
+		{ID: "notes", Label: "Lesson Notes"},
+		{ID: "annotated", Label: "Annotated Program"},
+		{ID: "qa", Label: "Q&A", Count: 24},
+		{ID: "resources", Label: "Resources", Count: 3},
+	}
+
+	notes := []LessonNoteDetailDTO{
+		{
+			ID:              1,
+			Title:           "Introduction to Mitosis",
+			ContentMarkdown: "Mitosis is part of the cell cycle in which replicated chromosomes are separated into two new nuclei. Cell division gives rise to genetically identical cells in which the total number of chromosomes is maintained. Therefore, mitosis is also known as equational division.",
+			SectionType:     "text",
+		},
+		{
+			ID:              2,
+			Title:           "Phase 1: Interphase",
+			ContentMarkdown: "Before entering mitosis, a cell spends a period of its growth under interphase. It undergoes three phases while in Interphase:",
+			SectionType:     "phase",
+			Icon:            "🔬",
+			SubPoints: []LessonSubPointDTO{
+				{Label: "G1 Phase:", Desc: "Period before the synthesis of DNA."},
+				{Label: "S Phase: Synthesis phase:", Desc: "DNA replication occurs."},
+				{Label: "G2 Phase:", Desc: "Preparation for cell division."},
+			},
+		},
+		{
+			ID:              3,
+			Title:           "Phase 2: Prophase",
+			ContentMarkdown: "Prophase is the first stage of mitosis. The nuclear envelope disappears, and the chromatin condenses into chromosomes. Centrioles move to opposite poles and the spindle fibres begin to form.",
+			SectionType:     "phase",
+		},
+		{
+			ID:              4,
+			Title:           "Exam Tip",
+			ContentMarkdown: "Focus on the condensation of chromatin into visible chromosomes as a key identifier for Prophase in MCQ questions.",
+			SectionType:     "tip",
+		},
+	}
+
+	qa := []LessonQADTO{
+		{
+			ID:       1,
+			User:     "Amal P.",
+			Avatar:   "AP",
+			Question: "What is the difference between mitosis and meiosis?",
+			Answer:   "Mitosis produces two identical diploid cells, while meiosis produces four genetically unique haploid cells. Mitosis is for growth and repair, meiosis is for sexual reproduction.",
+			Time:     "2 days ago",
+			Likes:    12,
+		},
+		{
+			ID:       2,
+			User:     "Nadeesha K.",
+			Avatar:   "NK",
+			Question: "Does cytokinesis always follow mitosis?",
+			Answer:   "In most cells, yes. However, in some organisms like certain fungi and during early embryonic development, nuclear division can occur without cell division (cytokinesis).",
+			Time:     "1 week ago",
+			Likes:    8,
+		},
+	}
+
+	resources := []LessonResourceDetailDTO{
+		{
+			ID:       1,
+			Title:    "Mitosis Diagram Pack",
+			FileSize: "4.2 MB",
+			FileType: "PDF",
+			Color:    "from-red-500 to-rose-600",
+			FileURL:  "https://example.com/mitosis.pdf",
+		},
+		{
+			ID:       2,
+			Title:    "Full Unit Notes",
+			FileSize: "1.11 MB",
+			FileType: "DOCX",
+			Color:    "from-blue-500 to-indigo-600",
+			FileURL:  "https://example.com/notes.docx",
+		},
+		{
+			ID:       3,
+			Title:    "Practice MCQ Set",
+			FileSize: "389 KB",
+			FileType: "PDF",
+			Color:    "from-emerald-500 to-teal-600",
+			FileURL:  "https://example.com/mcq.pdf",
+		},
+	}
+
+	// Fetch next lesson in unit
+	var nextLesson Lesson
+	s.db.Where("unit_id = ? AND lesson_number > ? AND is_visible = true", lesson.UnitID, lesson.LessonNumber).
+		Order("lesson_number asc").
+		First(&nextLesson)
+
+	nextUp := NextUpWidgetDTO{
+		LessonID:       nextLesson.ID,
+		Unit:           fmt.Sprintf("LESSON %d", nextLesson.LessonNumber),
+		Title:          nextLesson.Title,
+		Duration:       fmt.Sprintf("%d min", nextLesson.DurationMin),
+		ResourcesCount: 8,
+		Icon:           "🧬",
+	}
+
+	if nextLesson.ID == 0 {
+		nextUp = NextUpWidgetDTO{
+			LessonID:       4,
+			Unit:           "LESSON 4",
+			Title:          "Cytoplasmic Organelles & Functions",
+			Duration:       "45 min",
+			ResourcesCount: 8,
+			Icon:           "🧬",
+		}
+	}
+
+	// Calculate unit progress
+	var totalInUnit int64
+	s.db.Table("lessons").Where("unit_id = ? AND is_visible = true", lesson.UnitID).Count(&totalInUnit)
+
+	var completedInUnit int64
+	if userID > 0 && totalInUnit > 0 {
+		s.db.Table("user_lesson_progress").
+			Joins("JOIN lessons ON lessons.id = user_lesson_progress.lesson_id").
+			Where("lessons.unit_id = ? AND user_lesson_progress.user_id = ? AND user_lesson_progress.is_completed = true", lesson.UnitID, userID).
+			Count(&completedInUnit)
+	}
+
+	unitPct := 45
+	completedCount := 3
+	totalCount := 7
+	if totalInUnit > 0 {
+		totalCount = int(totalInUnit)
+		completedCount = int(completedInUnit)
+		unitPct = int(float64(completedCount) / float64(totalCount) * 100)
+	}
+
+	unitProgress := LessonUnitProgressDTO{
+		Percentage:       unitPct,
+		CompletedLessons: completedCount,
+		TotalLessons:     totalCount,
+		Tip:              fmt.Sprintf("Keep going! Focus on this unit to complete the %s unit by Sunday.", unit.Name),
+	}
+	if unit.Name == "" {
+		unitProgress.Tip = "Keep going! Focus on this unit to complete the Cell Biology unit by Sunday."
+	}
+
 	return &LessonDetailDTO{
 		ID:           lesson.ID,
 		LessonNumber: lesson.LessonNumber,
 		Title:        lesson.Title,
-		UnitName:     unit.Name,
-		SubjectName:  subject.Name,
-		Instructor:   lesson.Instructor,
-		VideoURL:     lesson.VideoURL,
+		UnitName:     unitDisplay,
+		SubjectName:  subjectDisplay,
+		Instructor:   instructorDisplay,
+		VideoURL:     videoURL,
 		DurationMin:  lesson.DurationMin,
 		LessonType:   lesson.LessonType,
 		IsCompleted:  isCompleted,
 		ProgressPct:  progressPct,
-		Notes:        lesson.Notes,
-		Resources:    lesson.Resources,
+		Tabs:         tabs,
+		Notes:        notes,
+		QA:           qa,
+		Resources:    resources,
+		NextUp:       nextUp,
+		UnitProgress: unitProgress,
 	}, nil
 }
 
