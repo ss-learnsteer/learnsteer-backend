@@ -44,27 +44,31 @@ func main() {
 		log.Fatalf("❌ Database initialization failed: %v", err)
 	}
 
-	// 2. Migrations
-	err = db.AutoMigrate(
-		&auth.User{},
-		&quiz.Quiz{},
-		&quiz.Question{},
-		&submission.Submission{},
-		&submission.Answer{},
-		&quiz.Option{},
-		&auth.SSOTicket{},
-		&lesson.Subject{},
-		&lesson.Unit{},
-		&lesson.Lesson{},
-		&lesson.LessonNote{},
-		&lesson.LessonResource{},
-		&lesson.UserLessonProgress{},
-		&lesson.RevisionModule{},
-		&lesson.PastPaper{},
-	)
-	if err != nil {
-		log.Fatalf("Failed to migrate database: %v", err)
-	}
+	// 2. Migrations (Run in background to guarantee instant Heroku port binding)
+	go func() {
+		log.Println("🔄 Running database AutoMigrate in background...")
+		if err := db.AutoMigrate(
+			&auth.User{},
+			&quiz.Quiz{},
+			&quiz.Question{},
+			&submission.Submission{},
+			&submission.Answer{},
+			&quiz.Option{},
+			&auth.SSOTicket{},
+			&lesson.Subject{},
+			&lesson.Unit{},
+			&lesson.Lesson{},
+			&lesson.LessonNote{},
+			&lesson.LessonResource{},
+			&lesson.UserLessonProgress{},
+			&lesson.RevisionModule{},
+			&lesson.PastPaper{},
+		); err != nil {
+			log.Printf("⚠️ Background migration warning: %v", err)
+		} else {
+			log.Println("✅ Database migration completed successfully")
+		}
+	}()
 
 	// 3. Initialize Services & Handlers (Dependency Injection)
 	// Auth Module
