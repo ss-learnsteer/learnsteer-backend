@@ -78,6 +78,7 @@ func main() {
 	config := cors.DefaultConfig()
 	config.AllowAllOrigins = true
 	config.AllowHeaders = []string{"Origin", "Content-Length", "Content-Type", "Authorization"}
+	config.AllowMethods = []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"}
 	r.Use(cors.New(config))
 
 	v1 := r.Group("/api/v1")

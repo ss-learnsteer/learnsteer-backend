@@ -36,12 +36,14 @@ func setupQuizTestEnv() (*gin.Engine, *gorm.DB, uint) {
 	db, _ := gorm.Open(sqlite.Open(dbName), &gorm.Config{})
 	db.AutoMigrate(&Quiz{}, &Question{}, &Option{})
 
-	// Seed multiple quizzes with different mediums
+	// Seed multiple quizzes with different mediums.
+	// IsVisible must be true so the student role filter (onlyVisible=true) can find them.
+	visible := true
 	quizzes := []Quiz{
-		{Title: "Sinhala Mock Exam", Medium: "Sinhala"},
-		{Title: "Sinhala Term Test", Medium: "Sinhala"},
-		{Title: "English Mock Exam", Medium: "English"},
-		{Title: "Tamil Mock Exam", Medium: "Tamil"},
+		{Title: "Sinhala Mock Exam", Medium: "Sinhala", IsVisible: &visible},
+		{Title: "Sinhala Term Test", Medium: "Sinhala", IsVisible: &visible},
+		{Title: "English Mock Exam", Medium: "English", IsVisible: &visible},
+		{Title: "Tamil Mock Exam", Medium: "Tamil", IsVisible: &visible},
 	}
 	for _, q := range quizzes {
 		db.Create(&q)
@@ -81,19 +83,22 @@ func TestUpdateQuiz(t *testing.T) {
 		os.Setenv("ENABLE_QUIZ_CREATION", "true")
 		defer os.Unsetenv("ENABLE_QUIZ_CREATION")
 
-		// This payload simulates what the React frontend will send
-		// Notice it has NO question or option IDs, just pure fresh data
+		// This payload simulates what the React frontend will send.
+		// Field names must match the CreateQuizRequest binding tags exactly.
 		payload := map[string]interface{}{
 			"title":       "New Physics Quiz (Updated)",
 			"description": "Version 2.0",
+			"medium":      "Sinhala",                     // required
+			"stream":      []string{"Physical Science"}, // required, min=1
 			"questions": []map[string]interface{}{
 				{
-					"text": "Brand New Question 1",
-					"type": "mcq",
+					"text_markdown":  "Brand New Question 1", // must be text_markdown
+					"type":           "mcq",
+					"correct_answer": "a", // must be correct_answer, len=1
 					"options": []map[string]interface{}{
-						{"text": "New Option X", "is_correct": true},
-						{"text": "New Option Y", "is_correct": false},
-						{"text": "New Option Z", "is_correct": false},
+						{"text": "New Option X"},
+						{"text": "New Option Y"},
+						{"text": "New Option Z"},
 					},
 				},
 			},
