@@ -140,22 +140,32 @@ func TestListSubjects(t *testing.T) {
 		}
 
 		var resp struct {
-			Success bool                `json:"success"`
-			Data    []SubjectSummaryDTO `json:"data"`
+			Success bool `json:"success"`
+			Data    struct {
+				Stream     string              `json:"stream"`
+				IslandRank int                 `json:"island_rank"`
+				Subjects   []SubjectSummaryDTO `json:"subjects"`
+			} `json:"data"`
 		}
 		json.Unmarshal(w.Body.Bytes(), &resp)
 
 		if !resp.Success {
 			t.Errorf("Expected success to be true")
 		}
-		if len(resp.Data) != 1 {
-			t.Fatalf("Expected 1 subject, got %d", len(resp.Data))
+		if resp.Data.Stream != "Bio Science" {
+			t.Errorf("Expected stream 'Bio Science', got '%s'", resp.Data.Stream)
 		}
-		if resp.Data[0].Name != "Biology" {
-			t.Errorf("Expected subject Biology, got %s", resp.Data[0].Name)
+		if resp.Data.IslandRank <= 0 {
+			t.Errorf("Expected positive island rank, got %d", resp.Data.IslandRank)
 		}
-		if resp.Data[0].TotalLessons != 1 {
-			t.Errorf("Expected 1 total lesson, got %d", resp.Data[0].TotalLessons)
+		if len(resp.Data.Subjects) != 1 {
+			t.Fatalf("Expected 1 subject, got %d", len(resp.Data.Subjects))
+		}
+		if resp.Data.Subjects[0].Name != "Biology" {
+			t.Errorf("Expected subject Biology, got %s", resp.Data.Subjects[0].Name)
+		}
+		if resp.Data.Subjects[0].TotalLessons != 1 {
+			t.Errorf("Expected 1 total lesson, got %d", resp.Data.Subjects[0].TotalLessons)
 		}
 	})
 }

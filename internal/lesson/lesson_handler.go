@@ -60,7 +60,8 @@ func extractUserID(c *gin.Context) uint {
 	return 0
 }
 
-// ListSubjects returns all subjects available for student's stream and medium
+// ListSubjects returns all subjects available for student's stream and medium,
+// wrapped with stream context and island rank for the Subjects page
 func (h *Handler) ListSubjects(c *gin.Context) {
 	userRole := c.GetString("user_role")
 	userMedium := c.GetString("user_medium")
@@ -91,9 +92,16 @@ func (h *Handler) ListSubjects(c *gin.Context) {
 		return
 	}
 
+	// Calculate Island Rank for the student's stream
+	islandRank := h.service.GetStreamIslandRank(userID)
+
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
-		"data":    subjects,
+		"data": gin.H{
+			"stream":      stream,
+			"island_rank": islandRank,
+			"subjects":    subjects,
+		},
 	})
 }
 

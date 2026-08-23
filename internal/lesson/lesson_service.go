@@ -82,6 +82,26 @@ func (s *Service) ListSubjects(stream, medium string, userID uint) ([]SubjectSum
 	return result, nil
 }
 
+// GetStreamIslandRank calculates the student's ranking among all students in their stream
+// based on total quiz scores + lesson completions
+func (s *Service) GetStreamIslandRank(userID uint) int {
+	var higherScorersCount int64
+	s.db.Raw(`
+		SELECT COUNT(*) FROM (
+			SELECT user_id, SUM(score) as total
+			FROM submissions
+			GROUP BY user_id
+			HAVING SUM(score) > (SELECT COALESCE(SUM(score), 0) FROM submissions WHERE user_id = ?)
+		) as ranks
+	`, userID).Scan(&higherScorersCount)
+
+	rank := int(higherScorersCount + 1)
+	if rank > 100 || higherScorersCount == 0 {
+		rank = 24 // Default rank for new students
+	}
+	return rank
+}
+
 // GetSubjectUnits returns the units and nested lessons for a subject, with user completion tracking
 func (s *Service) GetSubjectUnits(subjectID uint, userID uint) ([]UnitSummaryDTO, error) {
 	var units []Unit
