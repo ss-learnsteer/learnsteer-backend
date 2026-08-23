@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"sync/atomic"
 	"testing"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/sasnaka-learnsteer/ss-quiz-platform-backend/internal/middleware" // Adjust to your module path
@@ -29,11 +30,29 @@ func MockAuthMiddleware() gin.HandlerFunc {
 	}
 }
 
+type TestUser struct {
+	ID        uint   `gorm:"primaryKey"`
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
+	School    string `json:"school"`
+	District  string `json:"district"`
+}
+
+type TestSubmission struct {
+	ID          uint       `gorm:"primaryKey"`
+	UserID      uint       `json:"user_id"`
+	QuizID      uint       `json:"quiz_id"`
+	Score       int        `json:"score"`
+	CompletedAt *time.Time `json:"completed_at"`
+}
+
 // setupQuizTestEnv initializes an in-memory DB, seeds a quiz, and wires up the router
 func setupQuizTestEnv() (*gin.Engine, *gorm.DB, uint) {
 	// 1. Setup In-Memory SQLite Database
 	dbName := fmt.Sprintf("file:testdb%d?mode=memory&cache=private", atomic.AddUint64(&testDBCounter, 1))
 	db, _ := gorm.Open(sqlite.Open(dbName), &gorm.Config{})
+	db.Table("users").AutoMigrate(&TestUser{})
+	db.Table("submissions").AutoMigrate(&TestSubmission{})
 	db.AutoMigrate(&Quiz{}, &Question{}, &Option{})
 
 	// Seed multiple quizzes with different mediums.
@@ -64,6 +83,7 @@ func setupQuizTestEnv() (*gin.Engine, *gorm.DB, uint) {
 
 	// NEW: Register the GET route with our Mock JWT Middleware
 	router.GET("/api/v1/quizzes", MockAuthMiddleware(), handler.ListQuizzes)
+	router.GET("/api/v1/quizzes/:id/leaderboard", MockAuthMiddleware(), handler.GetLeaderboard)
 
 	// Return the ID of the first quiz for the PUT tests
 	var firstQuiz Quiz
@@ -248,6 +268,38 @@ func TestListQuizzesWithMediumFilter(t *testing.T) {
 		}
 		if len(response.Data) > 0 && response.Data[0].Medium != "Tamil" {
 			t.Errorf("Expected Tamil quiz, got %s", response.Data[0].Medium)
+		}
+	})
+}
+
+func TestGetLeaderboard(t *testing.T) {
+	router, _, quizID := setupQuizTestEnv()
+	quizIDStr := strconv.Itoa(int(quizID))
+
+	t.Run("Returns empty leaderboard when no submissions exist", func(t *testing.T) {
+		req, _ := http.NewRequest("GET", "/api/v1/quizzes/"+quizIDStr+"/leaderboard", nil)
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		if w.Code != http.StatusOK {
+			t.Fatalf("Expected 200 OK, got %d. Body: %s", w.Code, w.Body.String())
+		}
+
+		var response struct {
+			Success bool               `json:"success"`
+			QuizID  int                `json:"quiz_id"`
+			Data    []LeaderboardEntry `json:"data"`
+		}
+		json.Unmarshal(w.Body.Bytes(), &response)
+
+		if !response.Success {
+			t.Errorf("Expected success to be true")
+		}
+		if response.QuizID != int(quizID) {
+			t.Errorf("Expected quiz_id %d, got %d", quizID, response.QuizID)
+		}
+		if len(response.Data) != 0 {
+			t.Errorf("Expected 0 leaderboard entries, got %d", len(response.Data))
 		}
 	})
 }

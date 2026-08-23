@@ -142,17 +142,27 @@ func (h *Handler) Login(c *gin.Context) {
 	}
 
 	// 2. Call Service to get Token
-	token, err := h.service.Login(req.Email, req.Password)
+	token, user, err := h.service.Login(req.Email, req.Password)
 	if err != nil {
 		// We return 401 Unauthorized for login failures
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid email or password"})
 		return
 	}
 
-	// 3. Return Token
+	// 3. Return Token and safe user info
 	c.JSON(http.StatusOK, gin.H{
 		"token": token,
 		"type":  "Bearer",
+		"user": gin.H{
+			"id":         user.ID,
+			"first_name": user.FirstName,
+			"last_name":  user.LastName,
+			"email":      user.Email,
+			"nic":        user.NIC,
+			"role":       user.Role,
+			"medium":     user.Medium,
+			"stream":     user.Stream,
+		},
 	})
 }
 

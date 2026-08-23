@@ -63,3 +63,15 @@ type Option struct {
 	ImageURL   string `json:"image_url,omitempty"`
 	IsCorrect  bool   `json:"-"` // Hidden from JSON so students can't cheat via the API!
 }
+
+// LeaderboardEntry represents a ranked student score in a quiz leaderboard
+type LeaderboardEntry struct {
+	Rank        int        `json:"rank"`
+	UserID      uint       `json:"user_id"`
+	FirstName   string     `json:"first_name"`
+	LastName    string     `json:"last_name"`
+	School      string     `json:"school"`
+	District    string     `json:"district"`
+	Score       int        `json:"score"`
+	CompletedAt *time.Time `json:"completed_at"`
+}

@@ -66,7 +66,7 @@ func (s *Service) Register(req RegisterDTO) error {
 	return s.db.Create(&user).Error
 }
 
-func (s *Service) Login(email, password string) (string, error) {
+func (s *Service) Login(email, password string) (string, *User, error) {
 	var user User
 
 	// 1. Check if the user exists
@@ -75,9 +75,9 @@ func (s *Service) Login(email, password string) (string, error) {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			// Security Best Practice: Return a generic error so attackers
 			// don't know if the email exists or the password was just wrong.
-			return "", errors.New("invalid email or password")
+			return "", nil, errors.New("invalid email or password")
 		}
-		return "", err
+		return "", nil, err
 	}
 
 	// 2. Verify the Password
@@ -85,16 +85,16 @@ func (s *Service) Login(email, password string) (string, error) {
 	// typed into the login form against the bcrypt hash in the database.
 	err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(password))
 	if err != nil {
-		return "", errors.New("invalid email or password")
+		return "", nil, errors.New("invalid email or password")
 	}
 
 	// 3. Generate the JWT Token
 	token, err := s.generateJWT(user)
 	if err != nil {
-		return "", errors.New("failed to generate authentication token")
+		return "", nil, errors.New("failed to generate authentication token")
 	}
 
-	return token, nil
+	return token, &user, nil
 }
 
 // generateJWT is a private helper to create the token payload (claims)

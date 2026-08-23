@@ -323,6 +323,54 @@ func (s *Service) GetUserAttempts(userID uint, quizIDs []uint) (map[uint]int, er
 	return attemptsMap, nil
 }
 
+// GetLeaderboard fetches the top ranked students for a given quiz
+func (s *Service) GetLeaderboard(quizID uint, limit int) ([]LeaderboardEntry, error) {
+	if limit <= 0 || limit > 100 {
+		limit = 50
+	}
+
+	type QueryResult struct {
+		UserID      uint       `gorm:"column:user_id"`
+		FirstName   string     `gorm:"column:first_name"`
+		LastName    string     `gorm:"column:last_name"`
+		School      string     `gorm:"column:school"`
+		District    string     `gorm:"column:district"`
+		Score       int        `gorm:"column:score"`
+		CompletedAt *time.Time `gorm:"column:completed_at"`
+	}
+
+	var rawResults []QueryResult
+
+	err := s.db.Table("submissions").
+		Select("users.id as user_id, users.first_name, users.last_name, users.school, users.district, MAX(submissions.score) as score, MAX(submissions.completed_at) as completed_at").
+		Joins("JOIN users ON users.id = submissions.user_id").
+		Where("submissions.quiz_id = ?", quizID).
+		Group("users.id, users.first_name, users.last_name, users.school, users.district").
+		Order("score DESC, completed_at ASC").
+		Limit(limit).
+		Scan(&rawResults).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	leaderboard := make([]LeaderboardEntry, len(rawResults))
+	for i, r := range rawResults {
+		leaderboard[i] = LeaderboardEntry{
+			Rank:        i + 1,
+			UserID:      r.UserID,
+			FirstName:   r.FirstName,
+			LastName:    r.LastName,
+			School:      r.School,
+			District:    r.District,
+			Score:       r.Score,
+			CompletedAt: r.CompletedAt,
+		}
+	}
+
+	return leaderboard, nil
+}
+
 func (s *Service) PingDB() error {
     var result int
     return s.db.Raw("SELECT 1").Scan(&result).Error
