@@ -14,6 +14,7 @@ import (
 
 	// Internal Modules
 	"github.com/sasnaka-learnsteer/ss-quiz-platform-backend/internal/auth"
+	"github.com/sasnaka-learnsteer/ss-quiz-platform-backend/internal/dashboard"
 	"github.com/sasnaka-learnsteer/ss-quiz-platform-backend/internal/lesson"
 	"github.com/sasnaka-learnsteer/ss-quiz-platform-backend/internal/platform/database"
 	"github.com/sasnaka-learnsteer/ss-quiz-platform-backend/internal/platform/middleware" // Added Middleware
@@ -82,6 +83,10 @@ func main() {
 	lessonService := lesson.NewService(db)
 	lessonHandler := lesson.NewHandler(lessonService)
 
+	// Dashboard Module
+	dashboardService := dashboard.NewService(db)
+	dashboardHandler := dashboard.NewHandler(dashboardService)
+
 	// 4. Setup Router
 	r := gin.Default()
 	r.Use(gzip.Gzip(gzip.DefaultCompression))
@@ -118,11 +123,12 @@ func main() {
 		protected := v1.Group("/")
 		protected.Use(middleware.AuthMiddleware())
 		{
-			// Quiz, Submission, and Lesson Routes
+			// Quiz, Submission, Lesson, and Dashboard Routes
 			// Require a valid 'Authorization: Bearer <token>' header
 			quizHandler.RegisterRoutes(protected)
 			submissionHandler.RegisterRoutes(protected)
 			lessonHandler.RegisterRoutes(protected)
+			dashboardHandler.RegisterRoutes(protected)
 		}
 	}
 
