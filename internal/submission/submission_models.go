@@ -11,7 +11,7 @@ type Submission struct {
 	CreatedAt   time.Time  `json:"created_at"`
 	UserID      uint       `gorm:"index" json:"user_id"`
 	QuizID      uint       `gorm:"index" json:"quiz_id"`
-	Quiz        *quiz.Quiz `gorm:"foreignKey:QuizID" json:"quiz,omitempty"`
+	Quiz        *quiz.Quiz `gorm:"foreignKey:QuizID;constraint:-;" json:"quiz,omitempty"`
 	StartedAt   time.Time  `json:"started_at"`
 	CompletedAt *time.Time `json:"completed_at"`
 	Score       int        `json:"score"`
