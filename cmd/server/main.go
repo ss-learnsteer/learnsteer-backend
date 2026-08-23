@@ -65,6 +65,8 @@ func main() {
 			&lesson.UserLessonProgress{},
 			&lesson.RevisionModule{},
 			&lesson.PastPaper{},
+			&lesson.LessonQA{},
+			&lesson.AppConfig{},
 		); err != nil {
 			log.Printf("⚠️ Background migration warning: %v", err)
 		} else {

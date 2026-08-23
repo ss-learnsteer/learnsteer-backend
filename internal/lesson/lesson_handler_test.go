@@ -31,6 +31,8 @@ func setupLessonTestEnv() (*gin.Engine, *gorm.DB, uint, uint, uint) {
 		&UserLessonProgress{},
 		&RevisionModule{},
 		&PastPaper{},
+		&LessonQA{},
+		&AppConfig{},
 	)
 
 	// Seed Subject

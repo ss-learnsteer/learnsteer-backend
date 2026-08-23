@@ -77,8 +77,8 @@ type LessonResource struct {
 // UserLessonProgress records a student's completion and watch progress for a lesson
 type UserLessonProgress struct {
 	ID              uint       `gorm:"primaryKey" json:"id"`
-	UserID          uint       `gorm:"index;not null" json:"user_id"`
-	LessonID        uint       `gorm:"index;not null" json:"lesson_id"`
+	UserID          uint       `gorm:"uniqueIndex:idx_user_lesson;not null" json:"user_id"`
+	LessonID        uint       `gorm:"uniqueIndex:idx_user_lesson;not null" json:"lesson_id"`
 	IsCompleted     bool       `gorm:"default:false" json:"is_completed"`
 	ProgressPercent int        `gorm:"default:0" json:"progress_percent"`
 	CompletedAt     *time.Time `json:"completed_at"`
@@ -87,6 +87,40 @@ type UserLessonProgress struct {
 
 func (UserLessonProgress) TableName() string {
 	return "user_lesson_progress"
+}
+
+// LessonQA represents a persistent Q&A thread question/answer for CMS & students
+type LessonQA struct {
+	ID             uint      `gorm:"primaryKey" json:"id"`
+	CreatedAt      time.Time `json:"created_at"`
+	UpdatedAt      time.Time `json:"updated_at"`
+	LessonID       uint      `gorm:"index;not null" json:"lesson_id"`
+	UserID         uint      `gorm:"index;not null" json:"user_id"`
+	UserName       string    `json:"user_name"`
+	UserAvatar     string    `json:"user_avatar"`
+	Question       string    `gorm:"type:text;not null" json:"question"`
+	Answer         string    `gorm:"type:text" json:"answer,omitempty"`
+	InstructorName string    `json:"instructor_name,omitempty"`
+	IsAnswered     bool      `gorm:"default:false;index" json:"is_answered"`
+	Likes          int       `gorm:"default:0" json:"likes"`
+	IsVisible      bool      `gorm:"default:true;index" json:"is_visible"`
+}
+
+func (LessonQA) TableName() string {
+	return "lesson_qa"
+}
+
+// AppConfig represents a global dynamic key-value platform configuration item
+type AppConfig struct {
+	Key         string    `gorm:"primaryKey;not null" json:"key"`
+	Value       string    `gorm:"type:text;not null" json:"value"`
+	Category    string    `gorm:"index;default:'general'" json:"category"`
+	Description string    `json:"description,omitempty"`
+	UpdatedAt   time.Time `json:"updated_at"`
+}
+
+func (AppConfig) TableName() string {
+	return "app_configs"
 }
 
 // RevisionModule represents a unit revision package (short notes, essay guides)

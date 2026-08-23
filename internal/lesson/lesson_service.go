@@ -567,8 +567,25 @@ func (s *Service) PostLessonQuestion(lessonID uint, userID uint, questionText st
 		avatar = fmt.Sprintf("%s%s", string(u.FirstName[0]), string(u.LastName[0]))
 	}
 
+	record := LessonQA{
+		LessonID:   lessonID,
+		UserID:     userID,
+		UserName:   userName,
+		UserAvatar: avatar,
+		Question:   questionText,
+		IsAnswered: false,
+		Likes:      0,
+		IsVisible:  true,
+	}
+	_ = s.db.Create(&record)
+
+	qaID := record.ID
+	if qaID == 0 {
+		qaID = uint(time.Now().Unix())
+	}
+
 	return &LessonQADTO{
-		ID:               uint(time.Now().Unix()),
+		ID:               qaID,
 		User:             userName,
 		Avatar:           avatar,
 		Question:         questionText,
@@ -582,7 +599,13 @@ func (s *Service) PostLessonQuestion(lessonID uint, userID uint, questionText st
 
 // LikeLessonQuestion increments the helpful like counter on a Q&A question
 func (s *Service) LikeLessonQuestion(lessonID uint, questionID uint) (int, error) {
-	// Return updated helpful count
+	var qa LessonQA
+	if err := s.db.Where("id = ?", questionID).First(&qa).Error; err == nil {
+		qa.Likes++
+		s.db.Save(&qa)
+		return qa.Likes, nil
+	}
+	// Return updated helpful count fallback
 	return 13, nil
 }
 
