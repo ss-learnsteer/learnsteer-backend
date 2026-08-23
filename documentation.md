@@ -10,10 +10,11 @@
 ## 📑 Table of Contents
 1. [Platform Architecture & Tech Stack](#1-platform-architecture--tech-stack)
 2. [Complete REST API Reference](#2-complete-rest-api-reference)
-3. [Database Entity Relationship (ER) Diagram](#3-database-entity-relationship-er-diagram)
-4. [Complete Database Schema DDL (SQL Script)](#4-complete-database-schema-ddl-sql-script)
-5. [Seed Data SQL Script](#5-seed-data-sql-script)
-6. [Environment Variables & Deployment Guide](#6-environment-variables--deployment-guide)
+3. [Database Architecture & Domain Overview](#3-database-architecture--domain-overview)
+4. [Database Entity Relationship (ER) Diagram](#4-database-entity-relationship-er-diagram)
+5. [Complete Database Schema DDL (SQL Script)](#5-complete-database-schema-ddl-sql-script)
+6. [Seed Data SQL Script](#6-seed-data-sql-script)
+7. [Environment Variables & Deployment Guide](#7-environment-variables--deployment-guide)
 
 ---
 
@@ -117,7 +118,58 @@ Base URL: `https://ss-quiz-platform-backend-8f9b2c83591e.herokuapp.com/api/v1`
 
 ---
 
-## 3. Database Entity Relationship (ER) Diagram
+## 3. Database Architecture & Domain Overview
+
+The LearnSteer database is modeled around **4 primary functional domains** designed for high throughput, data integrity, and real-time student analytics:
+
+```
+┌────────────────────────────────────────────────────────────────────────┐
+│                        LEARNSTEER DATABASE DOMAINS                     │
+├──────────────────────────┬─────────────────────────────────────────────┤
+│ 1. Academic Syllabus     │ subjects ➔ units ➔ lessons                  │
+│    & Learning Content    │ ├── lesson_notes (Markdown, LaTeX, Phases)   │
+│                          │ ├── lesson_resources (PDF, DOCX attachments)│
+│                          │ ├── lesson_qa (Community Q&A & Answers)     │
+│                          │ ├── revision_modules (Short notes & guides) │
+│                          │ └── past_papers (Past papers & schemes)     │
+├──────────────────────────┼─────────────────────────────────────────────┤
+│ 2. Examination, Quizzes  │ quizzes ➔ questions ➔ options               │
+│    & Auto-Grading        │ └── submissions ➔ answers                   │
+├──────────────────────────┼─────────────────────────────────────────────┤
+│ 3. Student Identity &    │ users ➔ user_lesson_progress                │
+│    Progress Tracking     │ └── sso_tickets (60-second SSO auth tokens) │
+├──────────────────────────┼─────────────────────────────────────────────┤
+│ 4. Server-Driven UI      │ app_configs (Dynamic landing, copy, hotlines│
+│    & System Settings     │              and daily motivation quotes)   │
+└──────────────────────────┴─────────────────────────────────────────────┘
+```
+
+### Domain Breakdown:
+
+1. **Academic Syllabus & Content Domain:**
+   - **Hierarchical Curriculum Tree:** A strict 3-tier parent-child hierarchy (`subjects` ➔ `units` ➔ `lessons`) isolates subjects by stream (Bio, Physical Science, Commerce, Tech, Arts) and medium (Sinhala, Tamil, English).
+   - **Modular Lesson Enrichment:** Each lesson connects to multiple structured sub-entities:
+     - `lesson_notes`: Multi-phase notes (`Introduction`, `Phase 1: Interphase`, `Phase 2: Prophase`, `Exam Tip`) supporting Markdown and LaTeX math formulas (`$E=mc^2$`).
+     - `lesson_resources`: Downloadable PDF/DOCX attachments with file sizes and theme colors.
+     - `lesson_qa`: Moderated student question threads with instructor answers and helpful reaction votes.
+   - **Revision & Archives:** `revision_modules` and `past_papers` store downloadable past papers, model papers, and official marking schemes.
+
+2. **Examination & Auto-Grading Domain:**
+   - **Flexible Assessment Engine:** `quizzes` represents both short practice quizzes and formal island-wide Mock Exams with duration countdown timers, release dates, and closing deadlines.
+   - **Question & Options Bank:** `questions` store markdown content, diagrams, points weight, and explanations, while `options` store answer choices with hidden `is_correct` flags.
+   - **Submissions & Diagnostics:** `submissions` log student attempt start/completion timestamps and final scores. `answers` log individual option selections, enabling the system to compute MCQ/40, Essay/60, and unit accuracy breakdowns.
+
+3. **Student Profile & Progress Domain:**
+   - **Student Accounts:** `users` records student demographics including National Identity Card (NIC), A/L batch, attempt, stream, school, and district.
+   - **Lesson Progress Tracking:** `user_lesson_progress` tracks completion flags and playback percentages (0-100%) with a compound unique index `(user_id, lesson_id)` to ensure data idempotency.
+   - **B2B SSO Authentication:** `sso_tickets` provides short-lived (60s) single-use cryptographic tokens for secure partner portal integrations.
+
+4. **Dynamic Server-Driven UI (SDUI) Domain:**
+   - **Live Platform Configuration:** `app_configs` stores key-value pairs (`landing.hero_title`, `support.hotline`, `motivation.daily_quote`) allowing the CMS team to update landing page copy, banners, and support information instantly without frontend deployments.
+
+---
+
+## 4. Database Entity Relationship (ER) Diagram
 
 ```mermaid
 erDiagram
@@ -149,7 +201,7 @@ erDiagram
 
 ---
 
-## 4. Complete Database Schema DDL (SQL Script)
+## 5. Complete Database Schema DDL (SQL Script)
 
 Execute the following SQL statements in any PostgreSQL / Neon database to create the complete schema with all primary keys, foreign keys, indexes, and constraints:
 
@@ -432,7 +484,7 @@ CREATE INDEX IF NOT EXISTS idx_app_configs_category ON app_configs(category);
 
 ---
 
-## 5. Seed Data SQL Script
+## 6. Seed Data SQL Script
 
 ```sql
 -- 1. Seed Subjects
@@ -484,7 +536,7 @@ VALUES
 
 ---
 
-## 6. Environment Variables & Deployment Guide
+## 7. Environment Variables & Deployment Guide
 
 ### Required Environment Variables
 
