@@ -9,6 +9,7 @@
 
 # Environment Variables (NEVER commit these)
 .env
+*.db
 
 # IDE Specifics
 .vscode/

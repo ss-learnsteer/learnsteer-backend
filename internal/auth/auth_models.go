@@ -29,6 +29,8 @@ type User struct {
 	ALBatch  string    `json:"al_batch"`   // Exam Year
 	ALAttempt string    `json:"al_attempt"` // 1, 2, or 3
 	Medium   string `json:"medium"`     // Sinhala, Tamil, English
+	Picture  string `json:"picture,omitempty"`
+	GoogleID string `gorm:"index" json:"google_id,omitempty"`
 }
 
 // SSOTicket represents a short-lived token for cross-service authentication

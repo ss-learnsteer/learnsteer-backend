@@ -74,11 +74,15 @@ func main() {
 	r.Use(gzip.Gzip(gzip.DefaultCompression))
 
 	// Configure CORS (Important for React Frontend)
-	// In production, you might want to restrict AllowOrigins to your specific domain
 	config := cors.DefaultConfig()
-	config.AllowAllOrigins = true
+	config.AllowOrigins = []string{"http://localhost:5173", "http://localhost:3000", "http://localhost:5174"}
+	config.AllowCredentials = true
 	config.AllowHeaders = []string{"Origin", "Content-Length", "Content-Type", "Authorization"}
 	r.Use(cors.New(config))
+
+	// Register Auth routes at both /api and /api/v1 for frontend compatibility
+	apiGroup := r.Group("/api")
+	authHandler.RegisterRoutes(apiGroup)
 
 	v1 := r.Group("/api/v1")
 	{
@@ -95,7 +99,7 @@ func main() {
         // Triggers the DB to wake up from scale-to-zero
         v1.GET("/wakeup", quizHandler.WakeUp)
 
-		// 3. Auth Routes (Register, Login)
+		// 3. Auth Routes (Register, Login, Google Auth)
 		authHandler.RegisterRoutes(v1)
 
 		// ----------------------------

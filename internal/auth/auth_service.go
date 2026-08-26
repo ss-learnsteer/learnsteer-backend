@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"context"
 	"errors"
 	"time"
 
@@ -10,6 +11,7 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
+	"google.golang.org/api/idtoken"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
@@ -301,4 +303,84 @@ func (s *Service) ConsumeSSOTicket(ticketStr string) (*User, error) {
 	}
 
 	return &user, nil
+}
+
+// GoogleLogin validates a Google ID token, creates or updates the user in DB, and returns a JWT token.
+func (s *Service) GoogleLogin(ctx context.Context, idToken string) (string, *User, error) {
+	clientID := os.Getenv("GOOGLE_CLIENT_ID")
+	if clientID == "" {
+		clientID = "1024151991715-88jsidl68p1u2qbam53m0df5nhpul6k9.apps.googleusercontent.com"
+	}
+
+	payload, err := idtoken.Validate(ctx, idToken, clientID)
+	if err != nil {
+		return "", nil, errors.New("invalid Google ID token: " + err.Error())
+	}
+
+	email, _ := payload.Claims["email"].(string)
+	if email == "" {
+		return "", nil, errors.New("Google ID token missing email claim")
+	}
+
+	name, _ := payload.Claims["name"].(string)
+	givenName, _ := payload.Claims["given_name"].(string)
+	familyName, _ := payload.Claims["family_name"].(string)
+	picture, _ := payload.Claims["picture"].(string)
+	googleID := payload.Subject
+
+	firstName := givenName
+	if firstName == "" {
+		firstName = name
+	}
+	lastName := familyName
+
+	var user User
+	err = s.db.Where("email = ? OR google_id = ?", email, googleID).First(&user).Error
+
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		// Create new user
+		user = User{
+			Email:     email,
+			FirstName: firstName,
+			LastName:  lastName,
+			Role:      "student",
+			Picture:   picture,
+			GoogleID:  googleID,
+		}
+		if err := s.db.Create(&user).Error; err != nil {
+			return "", nil, errors.New("failed to create user account")
+		}
+	} else if err != nil {
+		return "", nil, err
+	} else {
+		// Update existing user's google_id / picture / name if missing
+		updated := false
+		if user.GoogleID == "" {
+			user.GoogleID = googleID
+			updated = true
+		}
+		if user.Picture == "" && picture != "" {
+			user.Picture = picture
+			updated = true
+		}
+		if user.FirstName == "" && firstName != "" {
+			user.FirstName = firstName
+			updated = true
+		}
+		if user.LastName == "" && lastName != "" {
+			user.LastName = lastName
+			updated = true
+		}
+		if updated {
+			s.db.Save(&user)
+		}
+	}
+
+	// Generate JWT session token
+	token, err := s.generateJWT(user)
+	if err != nil {
+		return "", nil, errors.New("failed to generate authentication token")
+	}
+
+	return token, &user, nil
 }

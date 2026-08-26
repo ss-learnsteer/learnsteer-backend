@@ -59,6 +59,7 @@ func (h *Handler) RegisterRoutes(r *gin.RouterGroup) {
 	{
 		authGroup.POST("/register", h.Register)
 		authGroup.POST("/login", h.Login)
+		authGroup.POST("/google", h.GoogleAuth)
 		authGroup.POST("/webhook/google-sheets", h.HandleGoogleSheetWebhook)
 		authGroup.POST("/check-nic", h.CheckNIC)
 		authGroup.POST("/verify-password", h.VerifyPassword)
@@ -153,6 +154,31 @@ func (h *Handler) Login(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"token": token,
 		"type":  "Bearer",
+	})
+}
+
+type GoogleAuthRequest struct {
+	IDToken string `json:"id_token" binding:"required"`
+}
+
+// GoogleAuth handles authentication using Google ID tokens
+func (h *Handler) GoogleAuth(c *gin.Context) {
+	var req GoogleAuthRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request: missing or invalid id_token"})
+		return
+	}
+
+	token, user, err := h.service.GoogleLogin(c.Request.Context(), req.IDToken)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"token": token,
+		"type":  "Bearer",
+		"user":  user,
 	})
 }
 

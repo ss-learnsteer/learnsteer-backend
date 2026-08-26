@@ -6,6 +6,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/glebarez/sqlite"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -13,25 +14,49 @@ import (
 
 // NewPostgresDB initializes the database connection with cost-saving pooling settings
 func NewPostgresDB() (*gorm.DB, error) {
-	// 1. Get credentials from Environment Variables (Best practice for Cloud)
+	// 1. If DB_HOST is not configured, fall back to local SQLite for development & offline testing
+	if os.Getenv("DB_HOST") == "" {
+		log.Println("⚠️ DB_HOST environment variable not set. Falling back to local SQLite database (learnsteer_dev.db)")
+		db, err := gorm.Open(sqlite.Open("learnsteer_dev.db"), &gorm.Config{
+			Logger: logger.Default.LogMode(logger.Info),
+		})
+		if err != nil {
+			return nil, fmt.Errorf("failed to connect to local sqlite database: %w", err)
+		}
+		log.Println("✅ Local SQLite database connection established for dev mode")
+		return db, nil
+	}
+
+	// 2. Get credentials from Environment Variables
+	sslMode := os.Getenv("DB_SSLMODE")
+	if sslMode == "" {
+		sslMode = "disable"
+	}
+
 	dsn := fmt.Sprintf(
-		"host=%s user=%s password=%s dbname=%s port=%s sslmode=require TimeZone=Asia/Colombo",
+		"host=%s user=%s password=%s dbname=%s port=%s sslmode=%s TimeZone=Asia/Colombo",
 		os.Getenv("DB_HOST"),
 		os.Getenv("DB_USER"),
 		os.Getenv("DB_PASSWORD"),
 		os.Getenv("DB_NAME"),
 		os.Getenv("DB_PORT"),
+		sslMode,
 	)
 
-	// 2. Open Connection
-	// We use a silent logger in prod to save log storage costs, but Info in dev
+	// 3. Open Connection
 	config := &gorm.Config{
 		Logger: logger.Default.LogMode(logger.Info),
 	}
 
 	db, err := gorm.Open(postgres.Open(dsn), config)
 	if err != nil {
-		return nil, fmt.Errorf("failed to connect to database: %w", err)
+		log.Printf("⚠️ PostgreSQL connection failed (%v). Falling back to local SQLite (learnsteer_dev.db)", err)
+		sqliteDB, sqliteErr := gorm.Open(sqlite.Open("learnsteer_dev.db"), config)
+		if sqliteErr != nil {
+			return nil, fmt.Errorf("failed to connect to postgres: %v, and sqlite fallback failed: %w", err, sqliteErr)
+		}
+		log.Println("✅ Local SQLite database connection established for dev mode")
+		return sqliteDB, nil
 	}
 
 	// 3. Configure Connection Pooling (CRITICAL for Cost/Stability)

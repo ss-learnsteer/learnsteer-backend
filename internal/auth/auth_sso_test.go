@@ -16,15 +16,15 @@ import (
 
 // setupSSOTestEnv initializes the DB, seeds a user, and wires the router
 func setupSSOTestEnv() (*gin.Engine, *gorm.DB) {
-	db, _ := gorm.Open(sqlite.Open("file::memory:?cache=shared"), &gorm.Config{})
-	db.AutoMigrate(&User{}, &SSOTicket{})
-
-	// Seed a dummy student
-	db.Create(&User{
-		NIC:          "200112345678",
-		Role:         "student",
-		PasswordHash: "dummy_hash", // Not needed for ticket exchange, but good for struct completeness
-	})
+	db, err := gorm.Open(sqlite.Open("test_sso.db"), &gorm.Config{})
+	if err == nil && db != nil {
+		db.AutoMigrate(&User{}, &SSOTicket{})
+		db.Create(&User{
+			NIC:          "200112345678",
+			Role:         "student",
+			PasswordHash: "dummy_hash",
+		})
+	}
 
 	service := NewService(db)
 	handler := NewHandler(service)
