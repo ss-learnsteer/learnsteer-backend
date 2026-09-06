@@ -1,0 +1,1516 @@
+{
+    "title": "A/L Phyics Model Paper 1 - English",
+    "description": "A/L Phyics Model Paper 1 - English",
+    "duration_min": 80,
+    "medium": "English",
+    "is_visible": true,
+    "questions": [
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "10 fm × 0.1 dm means,",
+            "image_url": "",
+            "options": [
+                {
+                    "text": "$100~am$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$10~pm$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$1~A^{0}$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$0.01~am$",
+                    "image_url": ""
+                },
+                {
+                    "text": "None of the above",
+                    "image_url": ""
+                }
+            ],
+            "correct_answer": "e"
+        },
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "A wire has a length of $8±0.08$ cm, diameter $2±0.02 cm$ and mass $0.5±0.005 g$. The percentage error
+of the density of the wire is,",
+            "image_url": "",
+            "options": [
+                {
+                    "text": "1%",
+                    "image_url": ""
+                },
+                {
+                    "text": "2%",
+                    "image_url": ""
+                },
+                {
+                    "text": "3%",
+                    "image_url": ""
+                },
+                {
+                    "text": "4%",
+                    "image_url": ""
+                },
+                {
+                    "text": "5%",
+                    "image_url": ""
+                }
+            ],
+            "correct_answer": "d"
+        },
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "An object oscillates in an amplitude of A. What is the displacement of the object when the potential
+energy and the kinetic energy of the object are equal?",
+            "image_url": "",
+            "options": [
+                {
+                    "text": "$\\frac{A}{2}$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$\\frac{A}{3}$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$\\frac{A}{\\sqrt{2}}$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$\\frac{A}{\\sqrt{3}}$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$\\frac{A}{2\\sqrt{2}}$",
+                    "image_url": ""
+                }
+            ],
+            "correct_answer": "c"
+        },
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "According to the direction of transmission of the particles, the points where the direction of motion
+is correctly represented are,",
+            "image_url": "https://res.cloudinary.com/dw6njcwih/image/upload/v1771858248/model1question4_d8e53a.png",
+            "options": [
+                {
+                    "text": "All P, Q, R, S and T",
+                    "image_url": ""
+                },
+                {
+                    "text": "Only P, Q, S and T",
+                    "image_url": ""
+                },
+                {
+                    "text": "Only Q, R, S and T",
+                    "image_url": ""
+                },
+                {
+                    "text": "Only Q, R and S",
+                    "image_url": ""
+                },
+                {
+                    "text": "Only P, Q and R",
+                    "image_url": ""
+                }
+            ],
+            "correct_answer": "d"
+        },
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "An object projected θ degrees to the horizontal reached a maximum height equal to its horizontal
+displacement. Find the value of θ of the kinetic energy at the maximum height is $25 kg m s^{-2}$.",
+            "image_url": "",
+            "options": [
+                {
+                    "text": "$\\tan^{-1}(\\frac{1}{4})$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$\\tan^{-1}(4)$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$\\tan^{-1}(\\frac{1}{\\sqrt{5}})$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$45°$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$\\sin^{-1}(\\frac{1}{4})$",
+                    "image_url": ""
+                }
+            ],
+            "correct_answer": "b"
+        },
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "An electrician has only 2 resistors. If he can get resistances of 3 Ω, 4 Ω, 12 Ω and 16Ω, what are the
+resistors does he has?",
+            "image_url": "",
+            "options": [
+                {
+                    "text": "4 Ω and 12 Ω",
+                    "image_url": ""
+                },
+                {
+                    "text": "4 Ω and 16 Ω",
+                    "image_url": ""
+                },
+                {
+                    "text": "7 Ω and 9 Ω",
+                    "image_url": ""
+                },
+                {
+                    "text": "6 Ω and 10 Ω",
+                    "image_url": ""
+                },
+                {
+                    "text": "7 Ω and 12 Ω",
+                    "image_url": ""
+                }
+            ],
+            "correct_answer": "a"
+        },
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "In which nucleus if the element has the highest nucleon bonding energy of (B/A)?",
+            "image_url": "",
+            "options": [
+                {
+                    "text": "$Mn$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$Fe$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$Co$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$Ni$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$Cu$",
+                    "image_url": ""
+                }
+            ],
+            "correct_answer": "d"
+        },
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "Three charges with a magnitude of q is placed on the vertices of an equilateral triangle with side
+length a. The static electric field intensity at the center of the triangle is, [k=(1/(4πε_0))]",
+            "image_url": "",
+            "options": [
+                {
+                    "text": "$\\frac{3kq}{a^2}$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$\\frac{3kq}{2a^2}$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$\\frac{kq}{a^2}$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$\\frac{kq}{2a^2}$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$0$",
+                    "image_url": ""
+                }
+            ],
+            "correct_answer": "e"
+        },
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "A 40 m long wire, placed horizontally in a direction perpendicular to the Earth's magnetic field, falls
+from rest 10 m above the ground. The potential difference induced between its two ends at the
+moment it hits the ground is,\n(Horizontal component of Earth’s magnetic field - $6×10^(-5) T, g=9.8 m s^{-2})$",
+            "image_url": "",
+            "options": [
+                {
+                    "text": "$1.12×10^{-3} T$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$2.24×10^{-3} T$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$2.24×10^{-5} T$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$3.36×10^{-3} T$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$3.36×10^{-5} T$",
+                    "image_url": ""
+                }
+            ],
+            "correct_answer": "d"
+        },
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "If a distance beyond a few meters is not clearly visible to a person, what is the defect and the
+suitable lens to overcome this defect?",
+            "image_url": "",
+            "options": [
+                {
+                    "text": "Short sightedness – Required a concave lens",
+                    "image_url": ""
+                },
+                {
+                    "text": "Short sightedness – Required a concave lens",
+                    "image_url": ""
+                },
+                {
+                    "text": "Long sightedness – Required a concave lens",
+                    "image_url": ""
+                },
+                {
+                    "text": "Long sightedness – Required a convex lens",
+                    "image_url": ""
+                },
+                {
+                    "text": "Cannot overcome using a single lens",
+                    "image_url": ""
+                }
+            ],
+            "correct_answer": "a"
+        },
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "A metal rod with a Young’s modulus of $4×10^10 Nm^(-2)$ undergoes a strain of 0.06%. Find the strain
+energy stored in a unit volume.",
+            "image_url": "",
+            "options": [
+                {
+                    "text": "$3600~J~m^(-3)$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$7200~J~m^(-3)$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$10800~J~m^(-3)$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$17600~J~m^(-3)$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$14400~J~m^(-3)$",
+                    "image_url": ""
+                }
+            ],
+            "correct_answer": "b"
+        },
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "A person standing on a bus falls off forward when the brake is applied is due to,",
+            "image_url": "",
+            "options": [
+                {
+                    "text": "Inertia of the person",
+                    "image_url": ""
+                },
+                {
+                    "text": "Inertia of the bus",
+                    "image_url": ""
+                },
+                {
+                    "text": "Gravitational force applied to the person by the ground",
+                    "image_url": ""
+                },
+                {
+                    "text": "Frictional force applied to the person by the ground",
+                    "image_url": ""
+                },
+                {
+                    "text": "Perpendicular reaction applied to the person by the ground",
+                    "image_url": ""
+                }
+            ],
+            "correct_answer": "a"
+        },
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "When a resistive moment of 4Nm is applied to plate rotating at an angular velocity of $30 rad s^(-1)$ the plate reduced its angular velocity to $26 rad s^(-1)$ within 30 seconds. What is the moment of inertia of the plate?",
+            "image_url": "",
+            "options": [
+                {
+                    "text": "$24~kg~m^2$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$30~kg~m^2$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$4~kg~m^2$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$16~kg~m^2$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$20~kg~m^2$",
+                    "image_url": ""
+                }
+            ],
+            "correct_answer": "b"
+        },
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "A plane moving horizontally in a uniform velocity release a bomb at a height of 2h. FInd the velocity
+of the plane if the bomb is required to land in horizontal distance of 3h from the initial position",
+            "image_url": "",
+            "options": [
+                {
+                    "text": "$\\frac{2}{3}\\sqrt{gh}$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$\\frac{9}{4}\\sqrt{gh}$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$\\sqrt{(2/3)~gh}$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$\\sqrt{(3/2)~gh}$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$\\frac{3}{2}\\sqrt{gh}$",
+                    "image_url": ""
+                }
+            ],
+            "correct_answer": "e"
+        },
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "An extensible string is kept at θ temperature is fixed to 2 stationary fixed support and cooled with
+the time given below. The correct graph representing square of speed of transverse waves (V^2) variation with time is,,",
+            "image_url": "https://res.cloudinary.com/dw6njcwih/image/upload/v1771858246/model1question15_awab8a.jpg",
+            "options": [
+                {
+                    "text": "",
+                    "image_url": "https://res.cloudinary.com/dw6njcwih/image/upload/v1771858245/model1question15.1_aidyxf.jpg"
+                },
+                {
+                    "text": "",
+                    "image_url": "https://res.cloudinary.com/dw6njcwih/image/upload/v1771858242/model1question15.2_dfh7xg.jpg"
+                },
+                {
+                    "text": "",
+                    "image_url": "https://res.cloudinary.com/dw6njcwih/image/upload/v1771858242/model1question15.3_twwhv4.jpg"
+                },
+                {
+                    "text": "",
+                    "image_url": "https://res.cloudinary.com/dw6njcwih/image/upload/v1771858242/model1question15.4_yxosgm.jpg"
+                },
+                {
+                    "text": "",
+                    "image_url": "https://res.cloudinary.com/dw6njcwih/image/upload/v1771858241/model1question15.5_muyil4.jpg"
+                }
+            ],
+            "correct_answer": "e"
+        },
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "In graph a, the variance of daughter nuclei in radioactive sample is shown. Corresponding activity
+variance for this sample is,",
+            "image_url": "https://res.cloudinary.com/dw6njcwih/image/upload/v1771858764/model1question16_g4numl.jpg",
+            "options": [
+                {
+                    "text": "",
+                    "image_url": "https://res.cloudinary.com/dw6njcwih/image/upload/v1771858762/model1question16.1_r6iksm.jpg"
+                },
+                {
+                    "text": "",
+                    "image_url": "https://res.cloudinary.com/dw6njcwih/image/upload/v1771858760/model1question16.2_eqgdgz.jpg"
+                },
+                {
+                    "text": "",
+                    "image_url": "https://res.cloudinary.com/dw6njcwih/image/upload/v1771858759/model1question16.3_b8elxf.jpg"
+                },
+                {
+                    "text": "",
+                    "image_url": "https://res.cloudinary.com/dw6njcwih/image/upload/v1771858757/model1question16.4_md8x5u.jpg"
+                },
+                {
+                    "text": "",
+                    "image_url": "https://res.cloudinary.com/dw6njcwih/image/upload/v1771858755/model1question16.5_jpa1z9.jpg"
+                }
+            ],
+            "correct_answer": "e"
+        },
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "The same sphere is suspended from a light weight thread and the following readings are
+obtained. The relative density of liquid B is 1.5. Find the relative density of liquid.",
+            "image_url": "https://res.cloudinary.com/dw6njcwih/image/upload/v1771858754/model1question17_pgdzea.jpg",
+            "options": [
+                {
+                    "text": "$2$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$2.25$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$2.5$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$2.75$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$1.25$",
+                    "image_url": ""
+                }
+            ],
+            "correct_answer": "b"
+        },
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "A charged particle moves in a circular path in a plane perpendicular to a magnetic field with a
+certain speed. If the speed is doubled, what should be the magnetic field density for the particle to
+move in the same path as before?",
+            "image_url": "",
+            "options": [
+                {
+                    "text": "Should be 4 times",
+                    "image_url": ""
+                },
+                {
+                    "text": "Should be 2 times",
+                    "image_url": ""
+                },
+                {
+                    "text": "Should be constant",
+                    "image_url": ""
+                },
+                {
+                    "text": "Should be half",
+                    "image_url": ""
+                },
+                {
+                    "text": "Should be quarter",
+                    "image_url": ""
+                }
+            ],
+            "correct_answer": "b"
+        },
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "Consider the following sources which are emitting spherical waves. Find the speeds of sources $u_1$ and $u_2$ using your knowledge. Speed of sound waves in air is $330 m s^(-1)$.",
+            "image_url": "https://res.cloudinary.com/dw6njcwih/image/upload/v1771858752/model1question19_vir4pq.png",
+            "options": [
+                {
+                    "text": "$u_1=330~m~s^(-1),u_2=330~m~s^(-1)$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$u_1=300~m~s^(-1),u_2=330~m~s^(-1)$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$u_1=330~m~s^(-1),u_2=300~m~s^(-1)$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$u_1=300~m~s^(-1),u_2=360~m~s^(-1)$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$u_1=350~m~s^(-1),u_2=360~m~s^(-1)$",
+                    "image_url": ""
+                }
+            ],
+            "correct_answer": "b"
+        },
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "A water heater is required to supply water at 30 °C from water at 25 °C at a steady rate of 1.5 kg s^(-1) Assuming no heat is lost to the surroundings, what is the minimum power of the heater?",
+            "image_url": "",
+            "options": [
+                {
+                    "text": "$3.15×10^4~W$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$3.15×10^3~W$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$4.2×10^3~W$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$4.2×10^4~W$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$1.85×10^4~W$",
+                    "image_url": ""
+                }
+            ],
+            "correct_answer": "a"
+        },
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "Which point can be the centre of gravity,",
+            "image_url": "https://res.cloudinary.com/dw6njcwih/image/upload/v1771858751/model1question21_ynh7x5.png",
+            "options": [
+                {
+                    "text": "$A$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$B$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$C$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$D$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$E$",
+                    "image_url": ""
+                }
+            ],
+            "correct_answer": "b"
+        },
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "Consider the following statements about earthquake.\n\n(A) Waves generated during volcanic explosions are the main cause of earthquakes..\n(B) The point inside the Earth where an earthquake originates is called the epicentre. The point on
+the Earth’s surface directly above it is called the focal.\n(C) Intensity of earthquake increases when the depth of focal decreases.\n(D) Among the different speeds of seismic waves, Speeds will increase as, Rayleigh Waves > Love Waves > S Waves > P Waves.\n\nThe correct statements among these,",
+            "image_url": "",
+            "options": [
+                {
+                    "text": "(A) only",
+                    "image_url": ""
+                },
+                {
+                    "text": "(C) only",
+                    "image_url": ""
+                },
+                {
+                    "text": "(A) and (C) only",
+                    "image_url": ""
+                },
+                {
+                    "text": "(A) and (B) only",
+                    "image_url": ""
+                },
+                {
+                    "text": "(C) and (D) only",
+                    "image_url": ""
+                }
+            ],
+            "correct_answer": "e"
+        },
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "Consider the following statements regarding the dew point of air containing water vapour in a
+closed container.\n(A) At the dew point, unsaturated water vapour becomes saturated water vapour.\n(B) If the temperature is reduced below the dew point, some of the water vapour
+condenses.\n(C) At the dew point, if the volume of the container is reduced, the absolute humidity of the
+air decreases.\n Which statement(s) of the above is/are true?",
+            "image_url": "",
+            "options": [
+                {
+                    "text": "(A) only",
+                    "image_url": ""
+                },
+                {
+                    "text": "(B) only",
+                    "image_url": ""
+                },
+                {
+                    "text": "(A) and (B) only",
+                    "image_url": ""
+                },
+                {
+                    "text": "(A) and (C) only",
+                    "image_url": ""
+                },
+                {
+                    "text": "A, B, C All",
+                    "image_url": ""
+                }
+            ],
+            "correct_answer": "c"
+        },
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "In the given potentiometer, the resistance of the potentiometer wire AB is 2 Ω and its total
+length is 10 cm. If the balancing length is 6 cm, what is the electromotive force (emf) of the cell E.",
+            "image_url": "https://res.cloudinary.com/dw6njcwih/image/upload/v1771858748/model1question24_xvxwlb.jpg",
+            "options": [
+                {
+                    "text": "$4~V$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$2.4~V$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$3~V$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$8.4~V$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$3.2~V$",
+                    "image_url": ""
+                }
+            ],
+            "correct_answer": "d"
+        },
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "Which property is not common for all types of waves.",
+            "image_url": "",
+            "options": [
+                {
+                    "text": "Refraction",
+                    "image_url": ""
+                },
+                {
+                    "text": "Diffusion",
+                    "image_url": ""
+                },
+                {
+                    "text": "Polarisation",
+                    "image_url": ""
+                },
+                {
+                    "text": "Interference",
+                    "image_url": ""
+                },
+                {
+                    "text": "Reflection",
+                    "image_url": ""
+                }
+            ],
+            "correct_answer": "c"
+        },
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "The radius of the Earth is R, and the acceleration due to gravity at its surface is g. A particle of
+mass m is projected from the Earth’s surface to a height R/4. What is the increase in its gravitational
+potential energy?",
+            "image_url": "",
+            "options": [
+                {
+                    "text": "$\\frac{mgR}{2}$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$\\frac{mgR}{3}$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$\\frac{mgR}{4}$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$\\frac{mgR}{5}$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$\\frac{mgR}{6}$",
+                    "image_url": ""
+                }
+            ],
+            "correct_answer": "d"
+        },
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "One-third of a container floats submerged in water as shown in the figure. If the container is
+filled with a liquid of relative density 2, what is the maximum height the liquid can be poured into
+the container without it sinking in water?",
+            "image_url": "https://res.cloudinary.com/dw6njcwih/image/upload/v1771858747/model1question27_jkmgly.jpg",
+            "options": [
+                {
+                    "text": "$h$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$\\frac{h}{3}$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$\\frac{2h}{3}$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$\\frac{3h}{5}$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$\\frac{h}{2}$",
+                    "image_url": ""
+                }
+            ],
+            "correct_answer": "b"
+        },
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "How far from a convex lens of focal length 10cm should an object be kept in order to create an
+inverted image 5 times larger than object?",
+            "image_url": "",
+            "options": [
+                {
+                    "text": "$21~cm$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$15~cm$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$12~cm$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$42~cm$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$24~cm$",
+                    "image_url": ""
+                }
+            ],
+            "correct_answer": "c"
+        },
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "Given that the voltmeter is ideal and Internal resistance of the dry cell is negligible in the diagram
+below, what is the voltmeter reading?",
+            "image_url": "https://res.cloudinary.com/dw6njcwih/image/upload/v1771858746/model1question29_axsdvo.jpg",
+            "options": [
+                {
+                    "text": "$+2~V$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$-4~V$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$-2~V$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$+4~V$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$0~V$",
+                    "image_url": ""
+                }
+            ],
+            "correct_answer": "d"
+        },
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "Consider the following beakers with equal bottom surface area and water being filled to a same
+height. Which of the following statement/s is/are true? \n\n(A) Order of the pressure at the bottom PC < PA < PB\n(B) Water released through a hole made on curved surface near the bottom will be quickest in C.\n(C) The pressure acting on the curved surface of B is vertically downward while it is vertically
+upward in C.\n",
+            "image_url": "https://res.cloudinary.com/dw6njcwih/image/upload/v1771858745/model1question30_pk3mk4.jpg",
+            "options": [
+                {
+                    "text": "(A) only",
+                    "image_url": ""
+                },
+                {
+                    "text": "(B) only",
+                    "image_url": ""
+                },
+                {
+                    "text": "(C) only",
+                    "image_url": ""
+                },
+                {
+                    "text": "(B) and (C) only",
+                    "image_url": ""
+                },
+                {
+                    "text": "(A) and (C) only",
+                    "image_url": ""
+                }
+            ],
+            "correct_answer": "c"
+        },
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "What's the time taken by a light ray to travel through a glass block of refractive index n and
+thickness t?",
+            "image_url": "",
+            "options": [
+                {
+                    "text": "$\\frac{tc}{n}$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$\\frac{tn}{c}$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$\\frac{cn}{t}$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$\\frac{t}{c}$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$\\frac{c}{n}$",
+                    "image_url": ""
+                }
+            ],
+            "correct_answer": "b"
+        },
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "The flux density of a magnetic field created by a strong electro magnet is 2T. What is the force
+acting on a 10mm long wire carrying a current of 44A perpendicular to this magnetic field?",
+            "image_url": "",
+            "options": [
+                {
+                    "text": "$0.08~N$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$0.8~N$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$2~N$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$4~N$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$8~N$",
+                    "image_url": ""
+                }
+            ],
+            "correct_answer": "a"
+        },
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "Two direct conductors P and Q of infinite length carrying a current I are placed parallel to each
+other. The correct answer is,",
+            "image_url": "https://res.cloudinary.com/dw6njcwih/image/upload/v1771859265/Screenshot_2026-02-23_203510_h0cxs7.png",
+            "options": [
+                {
+                    "text": "A force act on P towards Q",
+                    "image_url": ""
+                },
+                {
+                    "text": "A force act on P away from Q",
+                    "image_url": ""
+                },
+                {
+                    "text": "A couple of force act on P to turn it in a way such that current across them is parallel",
+                    "image_url": ""
+                },
+                {
+                    "text": "A couple of force act on P to turn it in a way such that current across them is non-parallel",
+                    "image_url": ""
+                },
+                {
+                    "text": "A force or a couple act on P",
+                    "image_url": ""
+                }
+            ],
+            "correct_answer": "e"
+        },
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "The diagram accurately showing the temperature variation from end A to B of a rod of which
+ends kept at constant temperatures θ1 > θ2, being well-insulated except at the ends and the middle
+section, so that no heat is lost to the surroundings, is",
+            "image_url": "https://res.cloudinary.com/dw6njcwih/image/upload/v1771859264/model1question34_rtmw8f.jpg",
+            "options": [
+                {
+                    "text": "",
+                    "image_url": "https://res.cloudinary.com/dw6njcwih/image/upload/v1771859441/model1question34.1_kndehu.jpg"
+                },
+                {
+                    "text": "",
+                    "image_url": "https://res.cloudinary.com/dw6njcwih/image/upload/v1771859439/model1question34.2_gxnfeb.jpg"
+                },
+                {
+                    "text": "",
+                    "image_url": "https://res.cloudinary.com/dw6njcwih/image/upload/v1771859432/model1question34.5_kofw6y.jpg"
+                },
+                {
+                    "text": "",
+                    "image_url": "https://res.cloudinary.com/dw6njcwih/image/upload/v1771859437/model1question34.3_twhxnr.jpg"
+                },
+                {
+                    "text": "",
+                    "image_url": "https://res.cloudinary.com/dw6njcwih/image/upload/v1771859435/model1question34.4_vwzvym.jpg"
+                }
+            ],
+            "correct_answer": "e"
+        },
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "A soap bubble of radius 2cm is inside another one of radius 3cm. Calculate the radius of a soap
+bubble with an equal internal presser to the small saop bubble mentioned above.",
+            "image_url": "",
+            "options": [
+                {
+                    "text": "$1~cm$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$1.2~cm$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$1.5~cm$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$2~cm$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$2.4~cm$",
+                    "image_url": ""
+                }
+            ],
+            "correct_answer": "b"
+        },
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "The work done when a positive charge moves on an equipotential surface,",
+            "image_url": "",
+            "options": [
+                {
+                    "text": "$ධන~හා~අපරිමිත~වේ$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$ඍණ~හා~අපරිමිත~වේ$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$ධන~හා~පරිමිත~වේ$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$ඍණ~හා~පරිමිත~වේ$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$ශුන්‍ය~වේ$",
+                    "image_url": ""
+                }
+            ],
+            "correct_answer": "e"
+        },
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "Two spherical conductors A and B of radius 2cm and 3cm respectively carry a charge of +20 μC
+each. The amount of charge that flows from A to B, if they are made to be in contact is,",
+            "image_url": "",
+            "options": [
+                {
+                    "text": "$-8~µC$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$-4~µC$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$0~µC$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$+4~µC$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$+8~µC$",
+                    "image_url": ""
+                }
+            ],
+            "correct_answer": "d"
+        },
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "The length of a syringe needle is 10cm and viscosity of the drug is 3×10^(-3)  Pa s. The pressure a
+nurse should apply when using a needle with 0.2 mm internal diameter instead of a one with 0.4 mm
+so that the volume flow rate remains constant is,",
+            "image_url": "",
+            "options": [
+                {
+                    "text": "2 times",
+                    "image_url": ""
+                },
+                {
+                    "text": "4 times",
+                    "image_url": ""
+                },
+                {
+                    "text": "9 times",
+                    "image_url": ""
+                },
+                {
+                    "text": "16 times",
+                    "image_url": ""
+                },
+                {
+                    "text": "25 times",
+                    "image_url": ""
+                }
+            ],
+            "correct_answer": "d"
+        },
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "In the given circuit β = 100 and IC = 2.5 mA. Find the magnitude of VCB.",
+            "image_url": "https://res.cloudinary.com/dw6njcwih/image/upload/v1771859264/model1question39_yjj1mi.jpg",
+            "options": [
+                {
+                    "text": "$8~V$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$7.5~V$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$9~V$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$10.18~V$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$12.26~V$",
+                    "image_url": ""
+                }
+            ],
+            "correct_answer": "b"
+        },
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "A particle of mass m ,tied to a string of length L , moves in a circular motion making an angle θ to
+the vertical. What is the speed of the particle?",
+            "image_url": "https://res.cloudinary.com/dw6njcwih/image/upload/v1771859283/model1question40_lkyv5o.jpg",
+            "options": [
+                {
+                    "text": "$\\frac{\\cos θ}{\\sqrt{Lg/\\sin θ}}$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$\\sqrt{Lg/\\tan θ}$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$\\frac{\\sin θ}{\\sqrt{Lg/\\cos θ}}$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$\\sqrt{Lg/\\sin θ}$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$\\sqrt{Lg/\\cos θ}$",
+                    "image_url": ""
+                }
+            ],
+            "correct_answer": "c"
+        },
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "In a carom board, a force should be applied to B along the path represented by the dash-line to
+pocket A. Radius of A is 1cm and the distance B should move in order to collide with A is 100cm.
+Considering the masses of A and B are equal and all the collisions are perfectly elastic, find the
+minimum force that should be given to B to pocket A (coefficient of friction between pieces and the
+board is 0.25)",
+            "image_url": "",
+            "options": [
+                {
+                    "text": "$\\sqrt{20}  \\,\\mathrm{m}\\,\\mathrm{s}^{-1}$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$1/2 \\sqrt{109/5}  \\,\\mathrm{m}\\,\\mathrm{s}^{-1}$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$1/8 \\sqrt{109/3}  \\,\\mathrm{m}\\,\\mathrm{s}^{-1}$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$\\sqrt{32}  \\,\\mathrm{m}\\,\\mathrm{s}^{-1}$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$3.2  \\,\\mathrm{m}\\,\\mathrm{s}^{-1}$",
+                    "image_url": ""
+                }
+            ],
+            "correct_answer": "b"
+        },
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "The volume of a metal cube increases by 0.12% when its temperature is increased by 20 °C.
+What is the linear expansion of the metal?",
+            "image_url": "",
+            "options": [
+                {
+                    "text": "1 × 10⁻⁵ ℃⁻¹",
+                    "image_url": ""
+                },
+                {
+                    "text": "2 × 10⁻⁵ ℃⁻¹",
+                    "image_url": ""
+                },
+                {
+                    "text": "4 × 10⁻⁵ ℃⁻¹",
+                    "image_url": ""
+                },
+                {
+                    "text": "6 × 10⁻⁵ ℃⁻¹",
+                    "image_url": ""
+                },
+                {
+                    "text": "8 × 10⁻⁵ ℃⁻¹",
+                    "image_url": ""
+                }
+            ],
+            "correct_answer": "b"
+        },
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "A capacitor with a capacitance 0.01 μF is charged to a potential of 500V and then connected to
+an uncharged object of capacitance 1 μF. What is the new potential difference across the object?",
+            "image_url": "",
+            "options": [
+                {
+                    "text": "$1.00~V$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$4.95~V$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$5.00~V$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$49.5~V$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$50.0~V$",
+                    "image_url": ""
+                }
+            ],
+            "correct_answer": "b"
+        },
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "What is represented by m in the following equation? $PV=\\frac{1}{3} mN(C^2)$",
+            "image_url": "",
+            "options": [
+                {
+                    "text": "Mass of the gas",
+                    "image_url": ""
+                },
+                {
+                    "text": "Mass of 1 mole of gas",
+                    "image_url": ""
+                },
+                {
+                    "text": "Mass of N number of gas particles",
+                    "image_url": ""
+                },
+                {
+                    "text": "Mass of a gas particle",
+                    "image_url": ""
+                },
+                {
+                    "text": "Mass of Avogadro number of gas particles",
+                    "image_url": ""
+                }
+            ],
+            "correct_answer": "d"
+        },
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "A particle of mass m moves with a speed v along the +x axis. Another particle of mass M moves
+with a speed V along the +y axis. These two particles collide and combine. The speed and the motion
+direction (the tangent formed by the angle it makes to the x axis) of the combined particle
+respectively are,",
+            "image_url": "",
+            "options": [
+                {
+                    "text": "$\\sqrt{(mv)^2+(MV)^2}~and~ \\frac{MV}{mv}$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$mv+MV~and~ \\frac{mv}{MV}$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$(m+M)(v+V)~and~ \\frac{mV}{MV}$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$(m+M)(v+V)~and~ \\frac{MV}{mv}$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$Mv+mV~and~ \\frac{Mv}{mV}$",
+                    "image_url": ""
+                }
+            ],
+            "correct_answer": "a"
+        },
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "If two charges kept at a distance in a vacuum are dipped in a different medium while maintaining
+their previous positions, what happens to the forces between them?",
+            "image_url": "",
+            "options": [
+                {
+                    "text": "lesser than the forces when in the vacuum",
+                    "image_url": ""
+                },
+                {
+                    "text": "greater than the forces when in the vacuum",
+                    "image_url": ""
+                },
+                {
+                    "text": "no change in the forces when in the medium",
+                    "image_url": ""
+                },
+                {
+                    "text": "becomes zero when in the medium",
+                    "image_url": ""
+                },
+                {
+                    "text": "equal to the forces when in the vacuum",
+                    "image_url": ""
+                }
+            ],
+            "correct_answer": "a"
+        },
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "In a photo-electric cell, red, yellow, and blue lights are separately projected with the same
+intensity onto a photosensitive surface. The correct graphical representation of the number of
+electrons moving towards the anode with respect to the potential difference between the
+electrodes of the photo-electric cell is, The work function of the metal is 1.42 eV and the
+wavelengths of red, yellow and blue lights are 450 nm, 580 nm and 750 nm respectively.",
+            "image_url": "",
+            "options": [
+                {
+                    "text": "",
+                    "image_url": "https://res.cloudinary.com/dw6njcwih/image/upload/v1771784718/model1question47.5_vxa5li.jpg"
+                },
+                {
+                    "text": "",
+                    "image_url": "https://res.cloudinary.com/dw6njcwih/image/upload/v1771784366/model1question47.1_u82b2x.jpg"
+                },
+                {
+                    "text": "",
+                    "image_url": "https://res.cloudinary.com/dw6njcwih/image/upload/v1771784722/model1question47.2_hpkl6b.jpg"
+                },
+                {
+                    "text": "",
+                    "image_url": "https://res.cloudinary.com/dw6njcwih/image/upload/v1771784721/model1question47.3_rdjzau.jpg"
+                },
+                {
+                    "text": "",
+                    "image_url": "https://res.cloudinary.com/dw6njcwih/image/upload/v1771784720/model1question47.4_op851m.jpg"
+                }
+            ],
+            "correct_answer": "b"
+        },
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "What is the logic gate represented by the circuit below with A and B as inputs,",
+            "image_url": "https://res.cloudinary.com/dw6njcwih/image/upload/v1771784718/model1question48_h06tfc.jpg",
+            "options": [
+                {
+                    "text": "$AND$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$OR$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$NOT$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$NOR$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$NAND$",
+                    "image_url": ""
+                }
+            ],
+            "correct_answer": "d"
+        },
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "A person moves in a simple harmonic motion between A and B points that are equidistant from
+O, while hearing sound waves emitted from a source in front of him with a frequency ƒ0 along the
+axis of motion. Which graph shows the correct variation of the apparent frequency heard by the
+person for a one complete cycle of the simple harmonic motion?",
+            "image_url": "https://res.cloudinary.com/dw6njcwih/image/upload/v1771785007/model1question49_sw3nfk.jpg",
+            "options": [
+                {
+                    "text": "",
+                    "image_url": "https://res.cloudinary.com/dw6njcwih/image/upload/v1771784716/model1question49.1_yyhcch.jpg"
+                },
+                {
+                    "text": "",
+                    "image_url": "https://res.cloudinary.com/dw6njcwih/image/upload/v1771784715/model1question49.2_bxah7e.jpg"
+                },
+                {
+                    "text": "",
+                    "image_url": "https://res.cloudinary.com/dw6njcwih/image/upload/v1771784715/model1question49.3_tbbkcd.jpg"
+                },
+                {
+                    "text": "",
+                    "image_url": "https://res.cloudinary.com/dw6njcwih/image/upload/v1771784715/model1question49.4_eqcwb8.jpg"
+                },
+                {
+                    "text": "",
+                    "image_url": "https://res.cloudinary.com/dw6njcwih/image/upload/v1771784714/model1question49.5_irx3th.jpg"
+                }
+            ],
+            "correct_answer": "e"
+        },
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "A charge q is kept at the centre of a cube of side length a. what is the electrostatic flux emitted
+by the cube?",
+            "image_url": "",
+            "options": [
+                {
+                    "text": "$\\frac{q}{ε_0}$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$\\frac{qa^2}{ε_0}$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$\\frac{6qa^2}{ε_0}$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$\\frac{q}{6a^2ε_0}$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$0$",
+                    "image_url": ""
+                }
+            ],
+            "correct_answer": "a"
+        }
+    ]
+}

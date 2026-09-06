@@ -60,6 +60,20 @@ func AuthMiddleware() gin.HandlerFunc {
 			}
 			if role, ok := claims["role"]; ok {
 				c.Set("role", role)
+				// Also set as user_role so the quiz handler's role-based filtering works
+				c.Set("user_role", role)
+			}
+			// Extract medium — required for quiz medium filtering (student vs admin)
+			if medium, ok := claims["medium"].(string); ok {
+				c.Set("user_medium", medium)
+			} else {
+				c.Set("user_medium", "")
+			}
+			// Extract stream — required for quiz stream filtering
+			if stream, ok := claims["stream"].(string); ok {
+				c.Set("user_stream", stream)
+			} else {
+				c.Set("user_stream", "")
 			}
 		} else {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token claims"})

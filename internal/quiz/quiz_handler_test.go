@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"sync/atomic"
 	"testing"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/sasnaka-learnsteer/ss-quiz-platform-backend/internal/middleware" // Adjust to your module path
@@ -29,19 +30,41 @@ func MockAuthMiddleware() gin.HandlerFunc {
 	}
 }
 
+type TestUser struct {
+	ID        uint   `gorm:"primaryKey"`
+	StudentID string `json:"student_id"`
+	Nickname  string `json:"nickname"`
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
+	School    string `json:"school"`
+	District  string `json:"district"`
+}
+
+type TestSubmission struct {
+	ID          uint       `gorm:"primaryKey"`
+	UserID      uint       `json:"user_id"`
+	QuizID      uint       `json:"quiz_id"`
+	Score       int        `json:"score"`
+	CompletedAt *time.Time `json:"completed_at"`
+}
+
 // setupQuizTestEnv initializes an in-memory DB, seeds a quiz, and wires up the router
 func setupQuizTestEnv() (*gin.Engine, *gorm.DB, uint) {
 	// 1. Setup In-Memory SQLite Database
 	dbName := fmt.Sprintf("file:testdb%d?mode=memory&cache=private", atomic.AddUint64(&testDBCounter, 1))
 	db, _ := gorm.Open(sqlite.Open(dbName), &gorm.Config{})
+	db.Table("users").AutoMigrate(&TestUser{})
+	db.Table("submissions").AutoMigrate(&TestSubmission{})
 	db.AutoMigrate(&Quiz{}, &Question{}, &Option{})
 
-	// Seed multiple quizzes with different mediums
+	// Seed multiple quizzes with different mediums.
+	// IsVisible must be true so the student role filter (onlyVisible=true) can find them.
+	visible := true
 	quizzes := []Quiz{
-		{Title: "Sinhala Mock Exam", Medium: "Sinhala"},
-		{Title: "Sinhala Term Test", Medium: "Sinhala"},
-		{Title: "English Mock Exam", Medium: "English"},
-		{Title: "Tamil Mock Exam", Medium: "Tamil"},
+		{Title: "Sinhala Mock Exam", Medium: "Sinhala", IsVisible: &visible},
+		{Title: "Sinhala Term Test", Medium: "Sinhala", IsVisible: &visible},
+		{Title: "English Mock Exam", Medium: "English", IsVisible: &visible},
+		{Title: "Tamil Mock Exam", Medium: "Tamil", IsVisible: &visible},
 	}
 	for _, q := range quizzes {
 		db.Create(&q)
@@ -62,6 +85,7 @@ func setupQuizTestEnv() (*gin.Engine, *gorm.DB, uint) {
 
 	// NEW: Register the GET route with our Mock JWT Middleware
 	router.GET("/api/v1/quizzes", MockAuthMiddleware(), handler.ListQuizzes)
+	router.GET("/api/v1/quizzes/:id/leaderboard", MockAuthMiddleware(), handler.GetLeaderboard)
 
 	// Return the ID of the first quiz for the PUT tests
 	var firstQuiz Quiz
@@ -81,19 +105,22 @@ func TestUpdateQuiz(t *testing.T) {
 		os.Setenv("ENABLE_QUIZ_CREATION", "true")
 		defer os.Unsetenv("ENABLE_QUIZ_CREATION")
 
-		// This payload simulates what the React frontend will send
-		// Notice it has NO question or option IDs, just pure fresh data
+		// This payload simulates what the React frontend will send.
+		// Field names must match the CreateQuizRequest binding tags exactly.
 		payload := map[string]interface{}{
 			"title":       "New Physics Quiz (Updated)",
 			"description": "Version 2.0",
+			"medium":      "Sinhala",                     // required
+			"stream":      []string{"Physical Science"}, // required, min=1
 			"questions": []map[string]interface{}{
 				{
-					"text": "Brand New Question 1",
-					"type": "mcq",
+					"text_markdown":  "Brand New Question 1", // must be text_markdown
+					"type":           "mcq",
+					"correct_answer": "a", // must be correct_answer, len=1
 					"options": []map[string]interface{}{
-						{"text": "New Option X", "is_correct": true},
-						{"text": "New Option Y", "is_correct": false},
-						{"text": "New Option Z", "is_correct": false},
+						{"text": "New Option X"},
+						{"text": "New Option Y"},
+						{"text": "New Option Z"},
 					},
 				},
 			},
@@ -243,6 +270,38 @@ func TestListQuizzesWithMediumFilter(t *testing.T) {
 		}
 		if len(response.Data) > 0 && response.Data[0].Medium != "Tamil" {
 			t.Errorf("Expected Tamil quiz, got %s", response.Data[0].Medium)
+		}
+	})
+}
+
+func TestGetLeaderboard(t *testing.T) {
+	router, _, quizID := setupQuizTestEnv()
+	quizIDStr := strconv.Itoa(int(quizID))
+
+	t.Run("Returns empty leaderboard when no submissions exist", func(t *testing.T) {
+		req, _ := http.NewRequest("GET", "/api/v1/quizzes/"+quizIDStr+"/leaderboard", nil)
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		if w.Code != http.StatusOK {
+			t.Fatalf("Expected 200 OK, got %d. Body: %s", w.Code, w.Body.String())
+		}
+
+		var response struct {
+			Success bool               `json:"success"`
+			QuizID  int                `json:"quiz_id"`
+			Data    []LeaderboardEntry `json:"data"`
+		}
+		json.Unmarshal(w.Body.Bytes(), &response)
+
+		if !response.Success {
+			t.Errorf("Expected success to be true")
+		}
+		if response.QuizID != int(quizID) {
+			t.Errorf("Expected quiz_id %d, got %d", quizID, response.QuizID)
+		}
+		if len(response.Data) != 0 {
+			t.Errorf("Expected 0 leaderboard entries, got %d", len(response.Data))
 		}
 	})
 }

@@ -1,0 +1,1459 @@
+{
+    "title": "A/L Phyics Model Paper 1 - Sinhala",
+    "description": "A/L Phyics Model Paper 1 - Sinhala",
+    "duration_min": 80,
+    "medium": "Sinhala",
+    "is_visible": true,
+    "questions": [
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "10 fm × 0.1 dm යනු,",
+            "image_url": "",
+            "options": [
+                {
+                    "text": "$100~am$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$10~pm$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$1~A^{0}$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$0.01~am$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$ඉහත~කිසිවක්~නොවේ$",
+                    "image_url": ""
+                }
+            ],
+            "correct_answer": "e"
+        },
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "කම්බියක දිග $8±0.08$ cm, විෂ්කම්භය $2±0.02 cm$ හා ස්කන්ධය $0.5±0.005 g$ වේ. එහි ඝනත්වයේ ප්‍රතිශත දෝෂය වන්නේ,",
+            "image_url": "",
+            "options": [
+                {
+                    "text": "1%",
+                    "image_url": ""
+                },
+                {
+                    "text": "2%",
+                    "image_url": ""
+                },
+                {
+                    "text": "3%",
+                    "image_url": ""
+                },
+                {
+                    "text": "4%",
+                    "image_url": ""
+                },
+                {
+                    "text": "5%",
+                    "image_url": ""
+                }
+            ],
+            "correct_answer": "d"
+        },
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "වස්තුවක් A විස්තාරයක් සහිතව සරල අනුවර්තීය චලිතයේ යෙදේ. එහි චාලක ශක්තිය, විභව ශක්තියට සමාන වන විට දෝලන කේන්ද්‍රයේ සිට විස්තාපනය වන්නේ,",
+            "image_url": "",
+            "options": [
+                {
+                    "text": "$\\frac{A}{2}$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$\\frac{A}{3}$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$\\frac{A}{\\sqrt{2}}$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$\\frac{A}{\\sqrt{3}}$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$\\frac{A}{2\\sqrt{2}}$",
+                    "image_url": ""
+                }
+            ],
+            "correct_answer": "c"
+        },
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "මෙම තරංගයේ ප්‍රචාරණය වන දිශාවට අනුරූපව චලිත දිශාවන් නිවැරදිව දක්වා ඇති ලක්ෂ වන්නේ,",
+            "image_url": "https://res.cloudinary.com/dw6njcwih/image/upload/v1771858248/model1question4_d8e53a.png",
+            "options": [
+                {
+                    "text": "$P,~Q,~R,~S~හා~T~සියල්ල.$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$P,~Q,~S~හා~T~පමණි.$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$Q,~R,~S~හා~T~පමණි.$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$Q,~R,~S~පමණි.$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$P,~Q,~R~පමණි.$",
+                    "image_url": ""
+                }
+            ],
+            "correct_answer": "d"
+        },
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "තිරසට θ කෝණයකින් සමතල භූමියක ප්‍රක්ෂේපණය කළ වස්තුවක් ගමන් කළ උපරිම උස, එහි තිරස් පරාසයට සමාන වේ. උපරිම උසේ දී චාලක ශක්තිය $25 kg m s^{-2}$ වේ. θ හි අගය සොයන්න.",
+            "image_url": "",
+            "options": [
+                {
+                    "text": "$\\tan^{-1}(\\frac{1}{4})$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$\\tan^{-1}(4)$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$\\tan^{-1}(\\frac{1}{\\sqrt{5}})$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$45°$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$\\sin^{-1}(\\frac{1}{4})$",
+                    "image_url": ""
+                }
+            ],
+            "correct_answer": "b"
+        },
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "විදුලි කාර්මිකයෙක් සතුව ප්‍රතිරෝධ 2ක් පමණක් ඇත. ඔහු ඒවා භාවිතයෙන් 3 Ω, 4 Ω, 12 Ω හා 16 Ω යන ප්‍රතිරෝධ ලබා ගන්නේ නම්, ඔහු සතු ප්‍රතිරෝධ විය හැක්කේ,",
+            "image_url": "",
+            "options": [
+                {
+                    "text": "$4~Ω~සහ~12~Ω$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$4~Ω~සහ~16~Ω$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$7~Ω~සහ~9~Ω$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$6~Ω~සහ~10~Ω$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$7~Ω~සහ~12~Ω$",
+                    "image_url": ""
+                }
+            ],
+            "correct_answer": "a"
+        },
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "නියුක්ලියෝනයක් සඳහා වූ බන්ධන ශක්තිය (B/A) ඉහළම අගයක් ගන්නා මූලද්‍රව්‍ය න්‍යෂ්ටිය වන්නේ,",
+            "image_url": "",
+            "options": [
+                {
+                    "text": "$Mn$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$Fe$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$Co$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$Ni$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$Cu$",
+                    "image_url": ""
+                }
+            ],
+            "correct_answer": "d"
+        },
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "විශාලත්ව q බැගින් වූ ආරෝපණ 3ක් පාදයක දිග a වූ සමපාද ත්‍රිකෝණයක ශීර්ෂ 3හි තබා ඇත. එහි කේන්ද්‍රය මත ස්ථිති විද්‍යුත් ක්ෂේත්‍ර තීව්‍රතාව වනුයේ, [k=(1/(4πε_0))]",
+            "image_url": "",
+            "options": [
+                {
+                    "text": "$\\frac{3kq}{a^2}$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$\\frac{3kq}{2a^2}$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$\\frac{kq}{a^2}$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$\\frac{kq}{2a^2}$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$0$",
+                    "image_url": ""
+                }
+            ],
+            "correct_answer": "e"
+        },
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "පොළොවට 10 m ඉහළින්, පෘථිවි චුම්බක ක්ෂේත්‍රයට ලම්බ වූ දිශාවේ තිරස්ව තබා ඇති 40 m දිගැති රැහැනක් නිශ්චලතාවේ තිබී ඇද වැටේ. එය පොළොව මත පතිත වන මොහොතේ දී එහි දෙකෙළවර අතර ප්‍රේරණය වන විභව අන්තරය වන්නේ,\n(පෘථිවි චුම්බක ක්ෂේත්‍රයේ තිරස් සං‍රචකය - $6×10^(-5) T, g=9.8 m s^{-2})$",
+            "image_url": "",
+            "options": [
+                {
+                    "text": "$1.12×10^{-3} T$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$2.24×10^{-3} T$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$2.24×10^{-5} T$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$3.36×10^{-3} T$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$3.36×10^{-5} T$",
+                    "image_url": ""
+                }
+            ],
+            "correct_answer": "d"
+        },
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "මිනිසෙකුට මීටර කීපයකට වඩා දුර පැහැදිලිව නොපෙනේ නම්, ඔහු පෙළෙනුයේ,",
+            "image_url": "",
+            "options": [
+                {
+                    "text": "$අවිදුර~දෘශ්ටිකත්වය~-~ඔහුට~අවතල~කාචයක්~අවශ්‍යයි$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$අවිදුර~දෘශ්ටිකත්වය~-~ඔහුට~උත්තල~කාචයක්~අවශ්‍යයි$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$දුර~දෘශ්ටිකත්වය~-~ඔහුට~අවතල~කාචයක්~අවශ්‍යයි$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$දුර~දෘශ්ටිකත්වය~-~ඔහුට~උත්තල~කාචයක්~අවශ්‍යයි$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$තනි~කාචයකින්~නිවැරදි~කළ~නොහැකි~අක්ෂි~දෝෂයකිනි$",
+                    "image_url": ""
+                }
+            ],
+            "correct_answer": "a"
+        },
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "$4×10^10 Nm^(-2)$ යම් මාපාංකයක් ඇති ලෝහ දණ්ඩක් 0.06% ක වික්‍රියාවකට භාජනය වේ. ඒකක පරිමාවක ගබඩාවී ඇති වික්‍රියා ශක්තිය සොයන්න.",
+            "image_url": "",
+            "options": [
+                {
+                    "text": "$3600~J~m^(-3)$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$7200~J~m^(-3)$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$10800~J~m^(-3)$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$17600~J~m^(-3)$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$14400~J~m^(-3)$",
+                    "image_url": ""
+                }
+            ],
+            "correct_answer": "b"
+        },
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "බස් රථයක සිටගෙන සිටින මගියෙක් එහි තිරිංග තද කළ විට ඉදිරියට ඇද වැටෙනුයේ,",
+            "image_url": "",
+            "options": [
+                {
+                    "text": "$මගියාගේ~අවස්ථිතිය~නිසාය$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$බස්~රථයේ~අවස්ථිතිය~නිසාය$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$මගියා~මත~පොළොවෙන්ඇ~ඇති~කරන~ගුරුත්වාකර්ෂණ~බලය~නිසාය$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$මගියා~මත~පොළොවෙන්~ඇති~කරන~ඝර්ෂණ~බලය~නිසාය$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$මගියා~මත~පොළොවෙන්~ඇතිවන~අභිලම්භ~ප්‍රතික්‍රියාව~නිසාය$",
+                    "image_url": ""
+                }
+            ],
+            "correct_answer": "a"
+        },
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "$30 rad s^(-1)$ කෝණික ප්‍රවේගයකින් භ්‍රමණය වන තැටියක් මත 4 Nm ප්‍රතිරෝධී ව්‍යාවර්තයක් ක්‍රියාත්මක වීම නිසා කෝණික ප්‍රවේගය තත්පර 30ක් තුළ $26 rad s^(-1)$ දක්වා අඩු විය. තැටියේ අවස්ථිතික ඝූර්ණය කොපමණ ද?",
+            "image_url": "",
+            "options": [
+                {
+                    "text": "$24~kg~m^2$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$30~kg~m^2$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$4~kg~m^2$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$16~kg~m^2$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$20~kg~m^2$",
+                    "image_url": ""
+                }
+            ],
+            "correct_answer": "b"
+        },
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "ඒකාකාර ප්‍රවේගයක් තිරස්ව ගමන් ගන්නා ගුවන් යානයකින් 2h උසක දී බෝම්බයක් මුදා හරී. බෝම්බය අතහරින ලක්ෂයේ සිට 3h දුරකින් පතිත වීමට අවශ්‍ය නම්, ගුවන් යානය සතු විය යුතු ප්‍රවේගය සොයන්න.",
+            "image_url": "",
+            "options": [
+                {
+                    "text": "$\\frac{2}{3}\\sqrt{gh}$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$\\frac{9}{4}\\sqrt{gh}$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$\\sqrt{(2/3)~gh}$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$\\sqrt{(3/2)~gh}$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$\\frac{3}{2}\\sqrt{gh}$",
+                    "image_url": ""
+                }
+            ],
+            "correct_answer": "e"
+        },
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "θ උෂ්නත්වයේ දී අචල ආධාරක 2 කට සවිකර ඇති ‍ප්‍රත්‍යස්ථ තන්තුවක් ප්‍රස්ථාරයේ දක්වා ඇති ආකාරයට කාලයත් සමග ක්‍රමයෙන් සිසිල් කරයි. තන්තුවේ තීර්යක් තරංගවල වේගයෙහි වර්ගය (V^2) කාලය සමඟ වෙනස් වන ආකාරය දැක්වෙන නිවැරදි ප්‍රස්ථාරය වනුයේ,",
+            "image_url": "https://res.cloudinary.com/dw6njcwih/image/upload/v1771858246/model1question15_awab8a.jpg",
+            "options": [
+                {
+                    "text": "",
+                    "image_url": "https://res.cloudinary.com/dw6njcwih/image/upload/v1771858245/model1question15.1_aidyxf.jpg"
+                },
+                {
+                    "text": "",
+                    "image_url": "https://res.cloudinary.com/dw6njcwih/image/upload/v1771858242/model1question15.2_dfh7xg.jpg"
+                },
+                {
+                    "text": "",
+                    "image_url": "https://res.cloudinary.com/dw6njcwih/image/upload/v1771858242/model1question15.3_twwhv4.jpg"
+                },
+                {
+                    "text": "",
+                    "image_url": "https://res.cloudinary.com/dw6njcwih/image/upload/v1771858242/model1question15.4_yxosgm.jpg"
+                },
+                {
+                    "text": "",
+                    "image_url": "https://res.cloudinary.com/dw6njcwih/image/upload/v1771858241/model1question15.5_muyil4.jpg"
+                }
+            ],
+            "correct_answer": "e"
+        },
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "පහත a ප්‍රස්තාරයෙන් විකරණශීලී සාම්පලයක දුහිතෘ න්‍යෂ්ටිවල විචලනය දක්වයි. මෙම විචලනයට අනුරූප සාම්පලයේ සක්‍රීයතා විචලනය වන්නේ,",
+            "image_url": "https://res.cloudinary.com/dw6njcwih/image/upload/v1771858764/model1question16_g4numl.jpg",
+            "options": [
+                {
+                    "text": "",
+                    "image_url": "https://res.cloudinary.com/dw6njcwih/image/upload/v1771858762/model1question16.1_r6iksm.jpg"
+                },
+                {
+                    "text": "",
+                    "image_url": "https://res.cloudinary.com/dw6njcwih/image/upload/v1771858760/model1question16.2_eqgdgz.jpg"
+                },
+                {
+                    "text": "",
+                    "image_url": "https://res.cloudinary.com/dw6njcwih/image/upload/v1771858759/model1question16.3_b8elxf.jpg"
+                },
+                {
+                    "text": "",
+                    "image_url": "https://res.cloudinary.com/dw6njcwih/image/upload/v1771858757/model1question16.4_md8x5u.jpg"
+                },
+                {
+                    "text": "",
+                    "image_url": "https://res.cloudinary.com/dw6njcwih/image/upload/v1771858755/model1question16.5_jpa1z9.jpg"
+                }
+            ],
+            "correct_answer": "e"
+        },
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "එකම ගෝලය සැහැල්ලු අවිතන්නේ තන්තුවකින් එල්ලා ලබාගත් පාඨාංක පහත දැක්වේ. B ද්‍රාවණයේ සාපේක්ෂ ඝනත්වය 1.5 කි. A ද්‍රාවණයේ සාපේක්ෂ ඝනත්වය සොයන්න.",
+            "image_url": "https://res.cloudinary.com/dw6njcwih/image/upload/v1771858754/model1question17_pgdzea.jpg",
+            "options": [
+                {
+                    "text": "$2$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$2.25$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$2.5$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$2.75$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$1.25$",
+                    "image_url": ""
+                }
+            ],
+            "correct_answer": "b"
+        },
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "ආරෝපිත අංශුවක් යම් වේගයකින් චුම්බක ක්ෂේත්‍රයකට ලම්බක තලයක වෘත්තාකාර පථයක චලිත වේ. වේගය දෙගුණ කළ විට පළමු අරය සහිත පථයේම චලිත වීමට නම්, චුම්බක ක්ෂේත්‍රය,",
+            "image_url": "",
+            "options": [
+                {
+                    "text": "$4~ගුණයක්~විය~යුතු~ය$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$2~ගුණයක්~විය~යුතු~ය$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$නියතව~පැවතිය~යුතු~ය$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$අඩක්~විය~යුතු~ය$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$\\frac{1}{4}~ක්~විය~යුතු~ය$",
+                    "image_url": ""
+                }
+            ],
+            "correct_answer": "b"
+        },
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "ගෝලීය තරංග පෙරමුණු නිකුත් කරන පහත ප්‍රභවයන් සලකන්න. ඉහත එක් එක් අවස්ථාවේ වේගයන් වන $u_1$  සහ $u_2$ ඔබේ දැනුම භාවිතයෙන් නිගමනය කරන්න. වාතයේ ධ්වනි ප්‍රවේගය $330 m s^(-1)$ වේ.",
+            "image_url": "https://res.cloudinary.com/dw6njcwih/image/upload/v1771858752/model1question19_vir4pq.png",
+            "options": [
+                {
+                    "text": "$u_1=330~m~s^(-1),u_2=330~m~s^(-1)$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$u_1=300~m~s^(-1),u_2=330~m~s^(-1)$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$u_1=330~m~s^(-1),u_2=300~m~s^(-1)$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$u_1=300~m~s^(-1),u_2=360~m~s^(-1)$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$u_1=350~m~s^(-1),u_2=360~m~s^(-1)$",
+                    "image_url": ""
+                }
+            ],
+            "correct_answer": "b"
+        },
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "විද්‍යුත් ජල තාපකයකට 25 °C හි ඇති ජලය 1.5 kg s^(-1) නියත සීඝ්‍රතාවකින් 30 °C හි ඇති උණුසුම් ජලය ලෙස සැපයීමට සිදු වී ඇත. පරිසරයට සිදුවන තාප හානිය නොගිනිය හැකි යැයි සැලකුවොත් තාපකයට තිබිය හැකි අවම ක්ෂමතාව වනුයේ?",
+            "image_url": "",
+            "options": [
+                {
+                    "text": "$3.15×10^4~W$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$3.15×10^3~W$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$4.2×10^3~W$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$4.2×10^4~W$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$1.85×10^4~W$",
+                    "image_url": ""
+                }
+            ],
+            "correct_answer": "a"
+        },
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "ගුරුත්ව කේන්ද්‍රය පිහිටීමට වඩාත්ම ඉඩ ඇති ලක්ෂ්‍යය වනුයේ,",
+            "image_url": "https://res.cloudinary.com/dw6njcwih/image/upload/v1771858751/model1question21_ynh7x5.png",
+            "options": [
+                {
+                    "text": "$A$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$B$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$C$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$D$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$E$",
+                    "image_url": ""
+                }
+            ],
+            "correct_answer": "b"
+        },
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "භූ කම්පන පිළිබඳ පහත සඳහන් කරුණු සලකා බලන්න.\n\n(A) ගිනිකඳු පිපිරීමේදී ඇතිවන තරංග භූ කම්පන ඇතිවීමට ප්‍රධානතම හේතුවයි.\n(B) භූ කම්පනයන් සිදුවන විට ඊට අදාළ පොළොව තුළ පිපුරුම සිදුවන ස්ථානය අපි කේන්ද්‍රය වන අතර ඊට ලම්භකව පොළොව මත පිහිටි ලක්ෂ්‍යය නාභියයි.\n(C) නාභිය පිහිටි ගැඹුර අඩු වන විට භූ කම්පන තීව්‍රතාව වැඩිවේ.\n(D) විවිධ භූ කම්පන තරංගවල වේගයන්, රේලි තරංග > ලොව් තරංග > S තරංග > P තරංග ලෙස වැඩිවේ.\n\nමේ අතරින් සත්‍ය වන්නේ,",
+            "image_url": "",
+            "options": [
+                {
+                    "text": "(A) පමණි",
+                    "image_url": ""
+                },
+                {
+                    "text": "(C) පමණි",
+                    "image_url": ""
+                },
+                {
+                    "text": "(A) හා (C) පමණි",
+                    "image_url": ""
+                },
+                {
+                    "text": "(A) හා (B) පමණි",
+                    "image_url": ""
+                },
+                {
+                    "text": "(C) හා (D) පමණි",
+                    "image_url": ""
+                }
+            ],
+            "correct_answer": "e"
+        },
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "සංවෘත භාජනයක් තුළ ඇති ජල වාෂ්ප සහිත වාතයේ තුෂාර අංකය පිළිබඳව පහත ප්‍රකාශ සලකා බලන්න.\n(A) තුෂාර අංකයේ දී අසංතෘප්ත ජල වාෂ්ප සංතෘප්ත ජල වාෂ්ප බවට පත් වේ.\n(B) උෂ්ණත්වය, තුෂාර අංකයට වඩා අඩු කළහොත් වාෂ්ප වලින් යම් ප්‍රමාණයක් ඝනීභවනය වේ.\n(C) තුෂාර අංකයේ දී භාජනයේ පරිමාව අඩු කළහොත් වාතයේ නිරපේක්ෂ ආර්ද්‍රතාව අඩු වේ.\nඉහත ප්‍රකාශ වලින් නිවැරදි වන්නේ කුමක් ද? / කුමන ඒවාද?",
+            "image_url": "",
+            "options": [
+                {
+                    "text": "(A) පමණි",
+                    "image_url": ""
+                },
+                {
+                    "text": "(B) පමණි",
+                    "image_url": ""
+                },
+                {
+                    "text": "(A) හා (B) පමණි",
+                    "image_url": ""
+                },
+                {
+                    "text": "(A) හා (C) පමණි",
+                    "image_url": ""
+                },
+                {
+                    "text": "සියල්ලම සත්‍ය වේ",
+                    "image_url": ""
+                }
+            ],
+            "correct_answer": "c"
+        },
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "දී ඇති විභවමානයේ AB විභවමාන කම්බියේ කම්බියේ ප්‍රතිරෝධය 2 Ω ද, මුළු දිග 10 cm ද වේ. සංතුලන දිග 6 cm  නම්, E කෝෂයේ විද්‍යුත් ගාමක බලය වන්නේ,",
+            "image_url": "https://res.cloudinary.com/dw6njcwih/image/upload/v1771858748/model1question24_xvxwlb.jpg",
+            "options": [
+                {
+                    "text": "$4~V$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$2.4~V$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$3~V$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$8.4~V$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$3.2~V$",
+                    "image_url": ""
+                }
+            ],
+            "correct_answer": "d"
+        },
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "ඕනෑම තරංග වර්ගයක් සඳහා පොදු වූ ගුණයක් නොවන්නේ,",
+            "image_url": "",
+            "options": [
+                {
+                    "text": "$වර්තනය$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$විවර්තනය$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$ධ්‍රැවනය$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$නිරෝධනය$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$පරාවර්තනය$",
+                    "image_url": ""
+                }
+            ],
+            "correct_answer": "c"
+        },
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "පෘථිවියේ අරය R ද, එහි පෘෂ්ඨය මත ගුරුත්වජ ත්වරණය g ද වේ. ස්කන්ධය m වූ අංශුවක් පෘථිවි පෘෂ්ඨය මත සිට R/4 උසක් දක්වා ප්‍රක්ෂේපණය කළ විට එහි විභව ශක්තිය වැඩිවීම වනුයේ,",
+            "image_url": "",
+            "options": [
+                {
+                    "text": "$\\frac{mgR}{2}$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$\\frac{mgR}{3}$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$\\frac{mgR}{4}$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$\\frac{mgR}{5}$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$\\frac{mgR}{6}$",
+                    "image_url": ""
+                }
+            ],
+            "correct_answer": "d"
+        },
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "රූපයේ දැක්වෙන පරිදි භාජනයක තුනෙන් එකක් ජලය තුළ ගිලී පාවෙමින් පවතී. භාජනය තුළට සාපේක්ෂ ඝනත්වය 2 ක් වූ ද්‍රවයක් පුරනු ලැබේ. භාජනය ජලයෙහි නොගිලෙන පරිදි ඇතුළට ද්‍රවය පිරවිය හැකි උපරිම උස කොපමණ ද?",
+            "image_url": "https://res.cloudinary.com/dw6njcwih/image/upload/v1771858747/model1question27_jkmgly.jpg",
+            "options": [
+                {
+                    "text": "$h$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$\\frac{h}{3}$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$\\frac{2h}{3}$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$\\frac{3h}{5}$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$\\frac{h}{2}$",
+                    "image_url": ""
+                }
+            ],
+            "correct_answer": "b"
+        },
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "නාභි දුර 10 cm වන උත්තල කාචයකින් වස්තුව මෙන් 5 ගුණයක් විශාල යටිකුරු ප්‍රතිබිම්බයක් ලබා ගැනීමට වස්තුව කාචයේ සිට කොපමණ දුරකින් තැබිය යුතු ද?",
+            "image_url": "",
+            "options": [
+                {
+                    "text": "$21~cm$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$15~cm$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$12~cm$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$42~cm$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$24~cm$",
+                    "image_url": ""
+                }
+            ],
+            "correct_answer": "c"
+        },
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "පහත පරිපථයේ වෝල්ට්මීටරය පරිපූර්ණ වන අතර විද්‍යුත් කෝෂයේ අභ්‍යන්තර ප්‍රතිරෝධය නොගැනිය හැකියි. වෝල්ට්මීටර පාඨාංකය වන්නේ,",
+            "image_url": "https://res.cloudinary.com/dw6njcwih/image/upload/v1771858746/model1question29_axsdvo.jpg",
+            "options": [
+                {
+                    "text": "$+2~V$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$-4~V$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$-2~V$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$+4~V$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$0~V$",
+                    "image_url": ""
+                }
+            ],
+            "correct_answer": "d"
+        },
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "පතුලේ වර්ගඵල සමාන, එකම උසකට ජලය පුරවා ඇති පහත භාජන 3 සලකන්න.\n\n(A) පතුල මත පීඩනය $P_C < P_A < P_B$ වේ.\n(B) පතුල ආසන්නයේ වක්‍ර පෘෂ්ඨය මත සිදුරක් සෑදුවහොත් වැඩිම සීඝ්‍රතාවයකින් ජලය පිටවන්නේ C ගේය.\n(C) වක්‍ර බිත්ති මත ඇතිවන තෙරපුම් බලය B බඳුනේ සිරස්ව පහළට වන අතර C හි සිරස්ව ඉහළටය.\n\nසත්‍ය වන්නේ,",
+            "image_url": "https://res.cloudinary.com/dw6njcwih/image/upload/v1771858745/model1question30_pk3mk4.jpg",
+            "options": [
+                {
+                    "text": "(A) පමණි",
+                    "image_url": ""
+                },
+                {
+                    "text": "(B) පමණි",
+                    "image_url": ""
+                },
+                {
+                    "text": "(C) පමණි",
+                    "image_url": ""
+                },
+                {
+                    "text": "(B) හා (C) පමණි",
+                    "image_url": ""
+                },
+                {
+                    "text": "(A) හා (C) පමණි",
+                    "image_url": ""
+                }
+            ],
+            "correct_answer": "c"
+        },
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "වර්තනාංකය n හා ඝනකම t  වන වීදුරු කුට්ටියක් හරහා ආලෝකයට ගමන් කිරීමට ගතවන කාලය වන්නේ,",
+            "image_url": "",
+            "options": [
+                {
+                    "text": "$\\frac{tc}{n}$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$\\frac{tn}{c}$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$\\frac{cn}{t}$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$\\frac{t}{c}$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$\\frac{c}{n}$",
+                    "image_url": ""
+                }
+            ],
+            "correct_answer": "b"
+        },
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "ප්‍රබල විද්‍යුත් චුම්භකයක් මගින් ඇති වන චුම්භක ක්ෂේත්‍රයේ ස්‍රාව ඝනත්වය 2 T වේ. මෙම ක්ෂේත්‍රයට ලම්බකව 44 A ධාරාවක් රැගෙන යන 10mm දිගැති කම්බියක් මත ක්‍රියා කරන බලය වන්නේ,",
+            "image_url": "",
+            "options": [
+                {
+                    "text": "$0.08~N$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$0.8~N$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$2~N$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$4~N$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$8~N$",
+                    "image_url": ""
+                }
+            ],
+            "correct_answer": "a"
+        },
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "I විද්‍යුත් ධාරා රැගෙන යන අපරිමිත දිගින් යුතු P හා Q සෘජු සන්නායක 2 ක් එකිනෙකට අභිලම්බව පවතී. පහත සදහන් ප්‍රකාශවලින් සත්‍ය වන්නේ,",
+            "image_url": "https://res.cloudinary.com/dw6njcwih/image/upload/v1771859265/Screenshot_2026-02-23_203510_h0cxs7.png",
+            "options": [
+                {
+                    "text": "$P~මත~Q~දෙසට~බලයක්~ඇති~වේ$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$P~මත~Q~වලින්~ඉවතට~බලයක්~ඇති~වේ$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$ධාරා~2~සමාන්තර~වන~සේ~P~හැරවීමට~එය~මත~බල~යුග්මයක්ක්‍~ක්‍රියා~කරයි$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$ධාරා~2~ප්‍රති~සමාන්තර~වන~සේ~P~හැරවීමට~බල~යුග්මයක්ක්‍~ක්‍රියා~කරයි$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$P~මත~බලයක්~හෝ~යුග්මයක්~ක්‍රියා කරයි$",
+                    "image_url": ""
+                }
+            ],
+            "correct_answer": "e"
+        },
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "θ1 > θ2 වන පරිදි දෙකෙළවර ස්ථාවර උෂ්ණත්වයන්හි තබා ඇති පහත තාප සන්නායක දණ්ඩේ දෙකෙළවර හා මධ්‍ය කොටස හැර ඉතිරි පෙදෙස් තාපය හානි නොවන සේ හොඩින් අවුරා ඇත. A කෙළවර සිට B කෙළවර දක්වා උෂ්ණත්ව විචලනය නිවැරදිව දක්වා ඇති ප්‍රස්තාරය වන්නේ,",
+            "image_url": "https://res.cloudinary.com/dw6njcwih/image/upload/v1771859264/model1question34_rtmw8f.jpg",
+            "options": [
+                {
+                    "text": "",
+                    "image_url": "https://res.cloudinary.com/dw6njcwih/image/upload/v1771859441/model1question34.1_kndehu.jpg"
+                },
+                {
+                    "text": "",
+                    "image_url": "https://res.cloudinary.com/dw6njcwih/image/upload/v1771859439/model1question34.2_gxnfeb.jpg"
+                },
+                {
+                    "text": "",
+                    "image_url": "https://res.cloudinary.com/dw6njcwih/image/upload/v1771859432/model1question34.5_kofw6y.jpg"
+                },
+                {
+                    "text": "",
+                    "image_url": "https://res.cloudinary.com/dw6njcwih/image/upload/v1771859437/model1question34.3_twhxnr.jpg"
+                },
+                {
+                    "text": "",
+                    "image_url": "https://res.cloudinary.com/dw6njcwih/image/upload/v1771859435/model1question34.4_vwzvym.jpg"
+                }
+            ],
+            "correct_answer": "e"
+        },
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "අරය 2 cm වන සබන් බුබුළක් අරය 3 cm වන තවත් සබන් බුබුළක් තුළ පුම්බා ඇත. කුඩා බුබුළ තුළ පීඩනයට සමාන පීඩනයක් ඇති සබන් බුබුළක අරය ගණනය කරන්න.",
+            "image_url": "",
+            "options": [
+                {
+                    "text": "$1~cm$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$1.2~cm$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$1.5~cm$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$2~cm$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$2.4~cm$",
+                    "image_url": ""
+                }
+            ],
+            "correct_answer": "b"
+        },
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "ධන ආරෝපණයක් සම විභව පෘෂ්ඨයක් මත චලනය කරන විට සිදු කෙරෙන කාර්යය,",
+            "image_url": "",
+            "options": [
+                {
+                    "text": "$ධන~හා~අපරිමිත~වේ$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$ඍණ~හා~අපරිමිත~වේ$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$ධන~හා~පරිමිත~වේ$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$ඍණ~හා~පරිමිත~වේ$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$ශුන්‍ය~වේ$",
+                    "image_url": ""
+                }
+            ],
+            "correct_answer": "e"
+        },
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "අරයන් පිළිවෙළින් 2 cm හා 3 cm වන A හා B ගෝලීය සන්නායක දෙකෙහි +20 µC බැගින් වූ ආරෝපණ අඩංගු වේ. ගෝල දෙක එකිනෙක ස්පර්ශ වීමට සැලැස්වූ විට A සිට B දක්වා ගලා යන ආරෝපණ ප්‍රමාණය වන්නේ,",
+            "image_url": "",
+            "options": [
+                {
+                    "text": "$-8~µC$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$-4~µC$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$0~µC$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$+4~µC$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$+8~µC$",
+                    "image_url": ""
+                }
+            ],
+            "correct_answer": "d"
+        },
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "එන්නත් කටුවක දිග 10 cm ද, ඖෂධයේ දුස්ස්‍රාවීතා සංගුණකය 3×10^(-3)  Pa s ද, වන විට පරිමා ප්‍රවාහ ශීඝ්‍රතාව නොවෙනස් වන පරිදි අභ්‍යන්තර විෂ්කම්භය 0.4 mm වන එන්නත් කටුවක් වෙනුවට අභ්‍යන්තර විෂ්කම්භය 0.2 mm වන එන්නත් කටුවක් භාවිතා කරන විට හෙදියක් යෙදිය පීඩනය,",
+            "image_url": "",
+            "options": [
+                {
+                    "text": "$2~ගුණයකි$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$4~ගුණයකි$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$9~ගුණයකි$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$16~ගුණයකි$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$25~ගුණයකි$",
+                    "image_url": ""
+                }
+            ],
+            "correct_answer": "d"
+        },
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "දී ඇති පරිපථයේ β=100 හා $I_C = 2.5$ mA වේ. $V_{CB}$ හි අගය සොයන්න.",
+            "image_url": "https://res.cloudinary.com/dw6njcwih/image/upload/v1771859264/model1question39_yjj1mi.jpg",
+            "options": [
+                {
+                    "text": "$8~V$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$7.5~V$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$9~V$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$10.18~V$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$12.26~V$",
+                    "image_url": ""
+                }
+            ],
+            "correct_answer": "b"
+        },
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "දිග L වන තන්තුවක බැඳි ස්කන්ධය m වූ අංශුවක් තිරසට θ කෝණයක් ආනතව සිරස් අක්ෂයක් වටා වෘත්ත චලිතයක නිරත වේ. අංශුවේ වේගය කොපමණ ද?",
+            "image_url": "https://res.cloudinary.com/dw6njcwih/image/upload/v1771859283/model1question40_lkyv5o.jpg",
+            "options": [
+                {
+                    "text": "$\\frac{\\cos θ}{\\sqrt{Lg/\\sin θ}}$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$\\sqrt{Lg/\\tan θ}$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$\\frac{\\sin θ}{\\sqrt{Lg/\\cos θ}}$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$\\sqrt{Lg/\\sin θ}$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$\\sqrt{Lg/\\cos θ}$",
+                    "image_url": ""
+                }
+            ],
+            "correct_answer": "c"
+        },
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "කැරම් පුවරුවක A නම් ඉත්තා වළ තුළට දැමීමට B ඉත්තාට කඩ ඉරෙන් දැක්වෙන මාර්ගය ඔස්සේ යෑමට පහරක් එල්ල කළ යුතුය. A හි අරය 1 cm කි. B, A ගේ ගැටීමට චලිත විය යුතු දුර 100 cm වේ. A හා B ස්කන්ධ සමාන වන අතර සියලු ගැටුම් පූර්ණ ප්‍රත්‍යස්ථ වේ. A වළට වැටීමට B ට ලබා දිය යුතු අවම වේගය සොයන්න. ඉත්තන් හා පුවරුව අතර ඝර්ෂණ සංගුණකය 0.25 වේ.",
+            "image_url": "",
+            "options": [
+                {
+                    "text": "$\\sqrt{20}  \\,\\mathrm{m}\\,\\mathrm{s}^{-1}$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$1/2 \\sqrt{109/5}  \\,\\mathrm{m}\\,\\mathrm{s}^{-1}$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$1/8 \\sqrt{109/3}  \\,\\mathrm{m}\\,\\mathrm{s}^{-1}$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$\\sqrt{32}  \\,\\mathrm{m}\\,\\mathrm{s}^{-1}$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$3.2  \\,\\mathrm{m}\\,\\mathrm{s}^{-1}$",
+                    "image_url": ""
+                }
+            ],
+            "correct_answer": "b"
+        },
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "ලෝහ ඝනකයක උෂ්ණත්වය 20 ℃ කින් ඉහළ නැංවීමේ දී එහි පරිමාව 0.12% කින් වැඩිවේ. ලෝහයේ රේඛීය ප්‍රසාරණතාව වන්නේ,",
+            "image_url": "",
+            "options": [
+                {
+                    "text": "1 × 10⁻⁵ ℃⁻¹",
+                    "image_url": ""
+                },
+                {
+                    "text": "2 × 10⁻⁵ ℃⁻¹",
+                    "image_url": ""
+                },
+                {
+                    "text": "4 × 10⁻⁵ ℃⁻¹",
+                    "image_url": ""
+                },
+                {
+                    "text": "6 × 10⁻⁵ ℃⁻¹",
+                    "image_url": ""
+                },
+                {
+                    "text": "8 × 10⁻⁵ ℃⁻¹",
+                    "image_url": ""
+                }
+            ],
+            "correct_answer": "b"
+        },
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "$0.01 \\mathrm{μF}$ ධාරිතාවක් ඇති ධාරිත්‍රකයක් 500 V විභවයකට ආරෝපණය කර අනතුරුව 1 μF ධාරිතාවක් ඇති ආරෝපණය කර නොමැති උපකරණයකට සම්බන්ධ කෙරේ. උපකරණය හරහා ඇති නව විභව අන්තරය වන්නේ,",
+            "image_url": "",
+            "options": [
+                {
+                    "text": "$1.00~V$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$4.95~V$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$5.00~V$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$49.5~V$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$50.0~V$",
+                    "image_url": ""
+                }
+            ],
+            "correct_answer": "b"
+        },
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "පහත සමීකරණයේ m මගින් කියවෙන්නේ, $PV=\\frac{1}{3} mN(C^2)$",
+            "image_url": "",
+            "options": [
+                {
+                    "text": "$වායුවේ~ස්කන්ධය$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$වායු~මවුලයක~ස්කන්ධය$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$වායු~අණු~N~ගණනක~ස්කන්ධය$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$වායු~අණුවක~ස්කන්ධය$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$වායු~අණු~ඇවගාඩ්රෝ~සංඛ්‍යාවක~ස්කන්ධය$",
+                    "image_url": ""
+                }
+            ],
+            "correct_answer": "d"
+        },
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "ස්කන්ධය m වන වස්තුවක් v වේගයෙන් +x අක්ෂය ඔස්සේ චලනය වේ. ස්කන්ධය M වන තවත් වස්තුවක් V වේගයෙන් +y අක්ෂය ඔස්සේ චලනය වේ. මෙම වස්තු 2 එකිනෙක ගැටී සං‍යුක්ත වේ. සං‍යුක්ත වස්තුවේ වේගය සහ චලිත දිශාව, x අක්ෂය සමග සාදන කෝණයේ ටැංජනය පිළිවෙලින් වන්නේ,",
+            "image_url": "",
+            "options": [
+                {
+                    "text": "$\\sqrt{(mv)^2+(MV)^2}~සහ~ \\frac{MV}{mv}$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$mv+MV~සහ~ \\frac{mv}{MV}$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$(m+M)(v+V)~සහ~ \\frac{mV}{MV}$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$(m+M)(v+V)~සහ~ \\frac{MV}{mv}$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$Mv+mV~සහ~ \\frac{Mv}{mV}$",
+                    "image_url": ""
+                }
+            ],
+            "correct_answer": "a"
+        },
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "රික්තකයක් තුළ යම් පරතරයකින් තබා ඇති ආරෝපණ දෙක එලෙසම තිබියදී වෙනත් මාධ්‍යක ගිල් වූයේ නම් ඒවා අතර බල වලට කුමක් සිදු වේද?",
+            "image_url": "",
+            "options": [
+                {
+                    "text": "$මාධ්‍ය~තුළ~දී~බලය~රික්තකය~තුල~බලයට~වඩා~අඩු~වේ$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$මාධ්‍ය~තුළ~දී~බලය~රික්තකය~තුල~බලයට~වඩා~වැඩි~වේ$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$මාධ්‍ය~තුළ~දී~බලය~වෙනසක්~නොවේ$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$මාධ්‍ය~තුළ~දී~බලය~ශුන්‍ය~වේ$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$මාධ්‍ය~තුල~දී~බලය~රික්තකය~තුල~බලයට~සමාන~වේ$",
+                    "image_url": ""
+                }
+            ],
+            "correct_answer": "a"
+        },
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "ප්‍රකාශ කෝෂයක, ප්‍රකාශ සංවේදී පෘෂ්ඨයට අවස්ථා 3 ක දී වෙන් වෙන්ව රතු, කහ සහ නිල් වර්ණ ආලෝකය එකම තීව්‍රතාවයෙන් යුතුව පතිත කරවයි. එවිට ප්‍රකාශ කෝෂයේ අග්‍ර අතර විභව අන්තරය ඉදිරියේ ඇනෝඩය දෙසට ගමන් කරන ඉලෙක්ට්‍රෝන සංඛ්‍යාවෙහි නිවැරදි ප්‍රස්තාරිත නිරූපණය වන්නේ, ලෝහයේ කාර්ය ශ්‍රිතය 1.42 eV සහ රතු, කහ සහ නිල් ආලෝකයන්ගේ තරංග ආයාම පිළිවෙලින් 450 nm, 580 nm සහ 750 nm වේ.",
+            "image_url": "",
+            "options": [
+                {
+                    "text": "",
+                    "image_url": "https://res.cloudinary.com/dw6njcwih/image/upload/v1771784718/model1question47.5_vxa5li.jpg"
+                },
+                {
+                    "text": "",
+                    "image_url": "https://res.cloudinary.com/dw6njcwih/image/upload/v1771784366/model1question47.1_u82b2x.jpg"
+                },
+                {
+                    "text": "",
+                    "image_url": "https://res.cloudinary.com/dw6njcwih/image/upload/v1771784722/model1question47.2_hpkl6b.jpg"
+                },
+                {
+                    "text": "",
+                    "image_url": "https://res.cloudinary.com/dw6njcwih/image/upload/v1771784721/model1question47.3_rdjzau.jpg"
+                },
+                {
+                    "text": "",
+                    "image_url": "https://res.cloudinary.com/dw6njcwih/image/upload/v1771784720/model1question47.4_op851m.jpg"
+                }
+            ],
+            "correct_answer": "b"
+        },
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "A හා B ප්‍රදානයන් ලෙස යොදා ඇති පහත පරිපථයෙන් නිරූපණය වන තාර්කික ද්වාරය වන්නේ,",
+            "image_url": "https://res.cloudinary.com/dw6njcwih/image/upload/v1771784718/model1question48_h06tfc.jpg",
+            "options": [
+                {
+                    "text": "$AND$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$OR$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$NOT$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$NOR$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$NAND$",
+                    "image_url": ""
+                }
+            ],
+            "correct_answer": "d"
+        },
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "පහත රූපයේ පරිදි O ලක්ෂයට සමදුරින් පිහිටි A හා B ලක්ෂ අතර පුද්ගලයෙක් O වටා සමමිතිකව සරල අනුවර්තී චලිතයෙහි යෙදේ. ඔහු චලිත අක්ෂය ඔස්සේ තමාට ඉදිරියේ පිහිටි ƒ0  සංඛ්‍යාතයකින් යුතු ප්‍රභවයක් නිකුත් කරන ධ්වනි තරංග ශ්‍රවණය කරයි. සරල අනුවර්තී චලිතයෙහි එක් පූර්ණ වටයක් සඳහා නිරීක්ෂයාගේ ශ්‍රව්‍ය සංඛ්‍යාතයෙහි විචලනය නිවැරදිව දැක්වෙන්නේ,",
+            "image_url": "https://res.cloudinary.com/dw6njcwih/image/upload/v1771785007/model1question49_sw3nfk.jpg",
+            "options": [
+                {
+                    "text": "",
+                    "image_url": "https://res.cloudinary.com/dw6njcwih/image/upload/v1771784716/model1question49.1_yyhcch.jpg"
+                },
+                {
+                    "text": "",
+                    "image_url": "https://res.cloudinary.com/dw6njcwih/image/upload/v1771784715/model1question49.2_bxah7e.jpg"
+                },
+                {
+                    "text": "",
+                    "image_url": "https://res.cloudinary.com/dw6njcwih/image/upload/v1771784715/model1question49.3_tbbkcd.jpg"
+                },
+                {
+                    "text": "",
+                    "image_url": "https://res.cloudinary.com/dw6njcwih/image/upload/v1771784715/model1question49.4_eqcwb8.jpg"
+                },
+                {
+                    "text": "",
+                    "image_url": "https://res.cloudinary.com/dw6njcwih/image/upload/v1771784714/model1question49.5_irx3th.jpg"
+                }
+            ],
+            "correct_answer": "e"
+        },
+        {
+            "type": "mcq",
+            "points": 1,
+            "text_markdown": "පැත්තක දිග a වූ ඝනකයක කේන්ද්‍රයේ q ආරෝපණයක් තබා ඇත. ඝනකයෙන් මුදා හැරෙන ස්ථිති විද්‍යුත් ස්‍රාවය කොපමණ ද?",
+            "image_url": "",
+            "options": [
+                {
+                    "text": "$\\frac{q}{ε_0}$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$\\frac{qa^2}{ε_0}$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$\\frac{6qa^2}{ε_0}$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$\\frac{q}{6a^2ε_0}$",
+                    "image_url": ""
+                },
+                {
+                    "text": "$0$",
+                    "image_url": ""
+                }
+            ],
+            "correct_answer": "a"
+        }
+    ]
+}

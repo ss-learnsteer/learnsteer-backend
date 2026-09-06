@@ -2,19 +2,20 @@ package submission
 
 import (
 	"time"
+
+	"github.com/sasnaka-learnsteer/ss-quiz-platform-backend/internal/quiz"
 )
 
 type Submission struct {
-	ID        uint      `gorm:"primaryKey" json:"id"`
-	UserID    uint      `gorm:"index" json:"user_id"`
-	QuizID    uint      `gorm:"index" json:"quiz_id"`
-	StartedAt time.Time `json:"started_at"`
-
-	// CompletedAt is null if they are still taking it
+	ID          uint       `gorm:"primaryKey" json:"id"`
+	CreatedAt   time.Time  `json:"created_at"`
+	UserID      uint       `gorm:"index" json:"user_id"`
+	QuizID      uint       `gorm:"index" json:"quiz_id"`
+	Quiz        *quiz.Quiz `gorm:"foreignKey:QuizID;constraint:-;" json:"quiz,omitempty"`
+	StartedAt   time.Time  `json:"started_at"`
 	CompletedAt *time.Time `json:"completed_at"`
-
-	Score   int      `json:"score"`
-	Answers []Answer `json:"answers"`
+	Score       int        `json:"score"`
+	Answers     []Answer   `json:"answers,omitempty"`
 }
 
 type Answer struct {

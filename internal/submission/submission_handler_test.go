@@ -53,6 +53,7 @@ func setupSubmissionTestEnv() (*gin.Engine, *gorm.DB, uint, uint) {
 	})
 
 	router.POST("/submissions", handler.SubmitQuiz)
+	router.GET("/submissions", handler.GetMySubmissions)
 
 	return router, db, testQuiz.ID, q1.ID
 }
@@ -154,6 +155,32 @@ func TestAutoGradingLogic(t *testing.T) {
 
 		if response.Data.Score != 0 {
 			t.Errorf("Expected score 0 from malicious payload, got %d", response.Data.Score)
+		}
+	})
+
+	// ---------------------------------------------------------
+	// TEST CASE 4: Get User Submissions History
+	// ---------------------------------------------------------
+	t.Run("Retrieves User Submission History", func(t *testing.T) {
+		req, _ := http.NewRequest("GET", "/submissions", nil)
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		if w.Code != http.StatusOK {
+			t.Fatalf("Expected 200 OK, got %d. Body: %s", w.Code, w.Body.String())
+		}
+
+		var response struct {
+			Success bool         `json:"success"`
+			Data    []Submission `json:"data"`
+		}
+		json.Unmarshal(w.Body.Bytes(), &response)
+
+		if !response.Success {
+			t.Errorf("Expected success to be true")
+		}
+		if len(response.Data) == 0 {
+			t.Errorf("Expected at least 1 submission in history, got %d", len(response.Data))
 		}
 	})
 }
