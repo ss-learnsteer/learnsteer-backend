@@ -36,17 +36,18 @@ type QuestionPayload struct {
 
 // QuizResponseDTO shapes the final JSON sent to the React frontend
 type QuizResponseDTO struct {
-	ID               uint       `json:"id"`
-	CreatedAt        time.Time  `json:"created_at"`
-	Title            string     `json:"title"`
-	Description      string     `json:"description"`
-	Medium           string     `json:"medium"`
-	IsVisible        *bool      `json:"is_visible"`
-	DurationMin      int        `json:"duration_min"`
-	ReleaseDate      *time.Time `json:"release_date"`
-	EndDate          *time.Time `json:"end_date"`
-	MarkingSchemeURL string     `json:"marking_scheme_url"`
-	Attempts         int        `json:"attempts"` // User-specific data injected safely
+	ID               uint           `json:"id"`
+	CreatedAt        time.Time      `json:"created_at"`
+	Title            string         `json:"title"`
+	Description      string         `json:"description"`
+	Medium           string         `json:"medium"`
+	Stream           pq.StringArray `json:"stream"`
+	IsVisible        *bool          `json:"is_visible"`
+	DurationMin      int            `json:"duration_min"`
+	ReleaseDate      *time.Time     `json:"release_date"`
+	EndDate          *time.Time     `json:"end_date"`
+	MarkingSchemeURL string         `json:"marking_scheme_url"`
+	Attempts         int            `json:"attempts"` // User-specific data injected safely
 }
 
 type CreateQuizRequest struct {
@@ -73,6 +74,7 @@ func (h *Handler) RegisterRoutes(router *gin.RouterGroup) {
 		routes.GET("", h.ListQuizzes)
 		routes.GET("/:id/start", h.StartQuiz)
 		routes.GET("/:id/questions", h.GetQuizQuestions)
+		routes.GET("/:id/leaderboard", h.GetLeaderboard)
 		routes.POST(
 			"",
 			middleware.FeatureToggle("ENABLE_QUIZ_CREATION"),
@@ -178,7 +180,60 @@ func (h *Handler) ListQuizzes(c *gin.Context) {
 		return
 	}
 
-	// 3. Return Standard Pagination Response
+	// 3. Inject User Attempts if user ID is available
+	var userID uint
+	if uid, exists := c.Get("userID"); exists {
+		switch v := uid.(type) {
+		case float64:
+			userID = uint(v)
+		case uint:
+			userID = v
+		}
+	}
+	if userID == 0 {
+		if uid, exists := c.Get("user_id"); exists {
+			switch v := uid.(type) {
+			case float64:
+				userID = uint(v)
+			case uint:
+				userID = v
+			}
+		}
+	}
+
+	quizIDs := make([]uint, len(quizzes))
+	for i, q := range quizzes {
+		quizIDs[i] = q.ID
+	}
+
+	var attemptsMap map[uint]int
+	if userID > 0 && len(quizIDs) > 0 {
+		attemptsMap, _ = h.service.GetUserAttempts(userID, quizIDs)
+	}
+
+	quizDTOs := make([]QuizResponseDTO, len(quizzes))
+	for i, q := range quizzes {
+		attempts := 0
+		if attemptsMap != nil {
+			attempts = attemptsMap[q.ID]
+		}
+		quizDTOs[i] = QuizResponseDTO{
+			ID:               q.ID,
+			CreatedAt:        q.CreatedAt,
+			Title:            q.Title,
+			Description:      q.Description,
+			Medium:           q.Medium,
+			Stream:           q.Stream,
+			IsVisible:        q.IsVisible,
+			DurationMin:      q.DurationMin,
+			ReleaseDate:      q.ReleaseDate,
+			EndDate:          q.EndDate,
+			MarkingSchemeURL: q.MarkingSchemeURL,
+			Attempts:         attempts,
+		}
+	}
+
+	// 4. Return Standard Pagination Response
 	c.JSON(http.StatusOK, gin.H{
 		"data": quizzes,
 		"meta": gin.H{
@@ -415,5 +470,34 @@ func (h *Handler) WakeUp(c *gin.Context) {
 		"success": true,
 		"status":  "awake",
 		"message": "Heroku and Neon are warmed up and ready for battle.",
+	})
+}
+
+// GetLeaderboard returns the ranked leaderboard for a specific quiz
+func (h *Handler) GetLeaderboard(c *gin.Context) {
+	idParam := c.Param("id")
+	id, err := strconv.Atoi(idParam)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"error":   "Invalid quiz ID",
+		})
+		return
+	}
+
+	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "50"))
+	leaderboard, err := h.service.GetLeaderboard(uint(id), limit)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"error":   "Failed to fetch leaderboard: " + err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"quiz_id": id,
+		"data":    leaderboard,
 	})
 }

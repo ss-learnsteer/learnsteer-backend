@@ -1,0 +1,1093 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "LearnSteer Platform REST API",
+    "description": "Official Backend API for the **Sasnaka Sansada LearnSteer Platform** \u2014 an educational self-learning, diagnostic examination, and syllabus streaming platform for Sri Lankan A/L students.\n",
+    "version": "1.0.0",
+    "contact": {
+      "name": "Sasnaka Sansada Tech Team",
+      "email": "support@learnsteer.lk"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://ss-quiz-platform-backend-8f9b2c83591e.herokuapp.com/api/v1",
+      "description": "Production Heroku Server"
+    },
+    {
+      "url": "http://localhost:8080/api/v1",
+      "description": "Local Development Server"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Health & System",
+      "description": "System health, warmup, and runtime diagnostics"
+    },
+    {
+      "name": "Public Config",
+      "description": "Server-Driven UI public landing, about, and contact configurations"
+    },
+    {
+      "name": "Authentication & SSO",
+      "description": "Student authentication, profile lookups, Google Sheets sync, and B2B Single Sign-On"
+    },
+    {
+      "name": "Student Dashboard",
+      "description": "Aggregated dashboard, day streak, syllabus coverage, and Smart Revision alerts"
+    },
+    {
+      "name": "Progress & Analytics",
+      "description": "Z-Score trends, Island Rank milestones, and 28-day activity heatmaps"
+    },
+    {
+      "name": "Subjects & Units",
+      "description": "Academic stream subjects, syllabus units, and lesson breakdown"
+    },
+    {
+      "name": "Lessons & Video Player",
+      "description": "Lesson details, structured notes, downloadable resources, and Q&A discussion"
+    },
+    {
+      "name": "Revision & Past Papers",
+      "description": "Revision short notes, essay guides, and historical A/L past papers"
+    },
+    {
+      "name": "Exams Hub & Mocks",
+      "description": "Exam score breakdowns, predicted Z-scores, badges, and mock schedules"
+    },
+    {
+      "name": "Quizzes & Submissions",
+      "description": "Question delivery, real-time auto-grading, and leaderboards"
+    },
+    {
+      "name": "B2B SSO Tickets",
+      "description": "Enterprise B2B ticket issuance for single sign-on"
+    }
+  ],
+  "paths": {
+    "/health": {
+      "get": {
+        "tags": [
+          "Health & System"
+        ],
+        "summary": "Server & Database Health Check",
+        "responses": {
+          "200": {
+            "description": "Service is healthy and database is connected",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": "up",
+                  "database": "connected",
+                  "time": "2026-08-24T01:00:00+05:30"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/wakeup": {
+      "get": {
+        "tags": [
+          "Health & System"
+        ],
+        "summary": "DB Serverless Pre-Warm",
+        "responses": {
+          "200": {
+            "description": "Pre-warm successful",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "Server warmed up successfully"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/public/config": {
+      "get": {
+        "tags": [
+          "Public Config"
+        ],
+        "summary": "Get Dynamic Landing Page Configuration",
+        "responses": {
+          "200": {
+            "description": "Landing page branding, headlines, and metrics",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "data": {
+                    "platform_name": "LearnSteer by Sasnaka Sansada",
+                    "tagline": "Free A/L Students Sri Lanka - Learn Smarter. Score Higher.",
+                    "badge": "Official Platform For Sri Lankan Students",
+                    "stats": {
+                      "students_enrolled": "+50,000",
+                      "video_lessons": "+1,200",
+                      "past_papers": "+500"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/public/about": {
+      "get": {
+        "tags": [
+          "Public Config"
+        ],
+        "summary": "Get Dynamic About Page Content",
+        "responses": {
+          "200": {
+            "description": "About page mission, vision, story, and core pillars"
+          }
+        }
+      }
+    },
+    "/public/contact": {
+      "get": {
+        "tags": [
+          "Public Config"
+        ],
+        "summary": "Get Dynamic Contact & Support Information",
+        "responses": {
+          "200": {
+            "description": "Support phone, hotline, email, and office address"
+          }
+        }
+      }
+    },
+    "/auth/create-student": {
+      "post": {
+        "tags": [
+          "Authentication & SSO"
+        ],
+        "summary": "Create a New Student Account (Frictionless Registration)",
+        "description": "Collects the 8 essential fields to immediately onboard the student, generating a unique Student ID (e.g. LS-a1b2c3d4) and cartoon-themed Nickname (e.g. BraveLion42).",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "first_name",
+                  "last_name",
+                  "email",
+                  "password",
+                  "nic",
+                  "whatsapp_number",
+                  "stream",
+                  "medium"
+                ],
+                "properties": {
+                  "first_name": {
+                    "type": "string",
+                    "example": "Kasun"
+                  },
+                  "last_name": {
+                    "type": "string",
+                    "example": "Perera"
+                  },
+                  "email": {
+                    "type": "string",
+                    "example": "student@example.com"
+                  },
+                  "password": {
+                    "type": "string",
+                    "example": "SecretPassword123"
+                  },
+                  "nic": {
+                    "type": "string",
+                    "example": "200512345678"
+                  },
+                  "whatsapp_number": {
+                    "type": "string",
+                    "example": "0771234567"
+                  },
+                  "stream": {
+                    "type": "string",
+                    "example": "Bio Science"
+                  },
+                  "medium": {
+                    "type": "string",
+                    "example": "Sinhala"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Student created successfully with Student ID and Nickname"
+          },
+          "400": {
+            "description": "Validation error or duplicate email/NIC/whatsapp"
+          },
+          "409": {
+            "description": "Conflict on unique field"
+          }
+        }
+      }
+    },
+    "/auth/update-student": {
+      "put": {
+        "tags": [
+          "Authentication & SSO"
+        ],
+        "summary": "Update Student Profile (Profile Enrichment)",
+        "description": "Update secondary demographics once student is registered. Requires JWT Bearer token.",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "phone": {
+                    "type": "string",
+                    "example": "0712345678"
+                  },
+                  "district": {
+                    "type": "string",
+                    "example": "Colombo"
+                  },
+                  "school": {
+                    "type": "string",
+                    "example": "Ananda College"
+                  },
+                  "city": {
+                    "type": "string",
+                    "example": "Colombo 10"
+                  },
+                  "al_year": {
+                    "type": "string",
+                    "example": "2026"
+                  },
+                  "al_attempt": {
+                    "type": "string",
+                    "example": "1"
+                  },
+                  "date_of_birth": {
+                    "type": "string",
+                    "example": "2007-05-15"
+                  },
+                  "gender": {
+                    "type": "string",
+                    "example": "Male"
+                  },
+                  "guardian_phone": {
+                    "type": "string",
+                    "example": "0777654321"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Profile updated successfully"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing JWT"
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "tags": [
+          "Authentication & SSO"
+        ],
+        "summary": "Student / Admin Login",
+        "description": "Authenticates student or admin using Nickname, Email, or NIC with password.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "identifier",
+                  "password"
+                ],
+                "properties": {
+                  "identifier": {
+                    "type": "string",
+                    "example": "BraveLion42"
+                  },
+                  "password": {
+                    "type": "string",
+                    "example": "SecretPassword123"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login successful with JWT token",
+            "content": {
+              "application/json": {
+                "example": {
+                  "token": "eyJhbGciOiJIUzI1NiIsIn...",
+                  "user": {
+                    "id": 1,
+                    "student_id": "LS-9f4a12bc",
+                    "nickname": "BraveLion42",
+                    "email": "student@example.com",
+                    "first_name": "Kasun",
+                    "last_name": "Perera",
+                    "role": "student",
+                    "stream": "Bio Science",
+                    "medium": "Sinhala"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid credentials"
+          }
+        }
+      }
+    },
+    "/auth/check-nic": {
+      "post": {
+        "tags": [
+          "Authentication & SSO"
+        ],
+        "summary": "Check If Student NIC Exists",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "nic"
+                ],
+                "properties": {
+                  "nic": {
+                    "type": "string",
+                    "example": "200512345678"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Returns exists flag and registration status"
+          }
+        }
+      }
+    },
+    "/auth/profile/{student_id}": {
+      "get": {
+        "tags": [
+          "Authentication & SSO"
+        ],
+        "summary": "Fetch Public Demographic Profile by Student ID",
+        "parameters": [
+          {
+            "name": "student_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "LS-9f4a12bc"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Demographic profile details"
+          }
+        }
+      }
+    },
+    "/auth/exchange": {
+      "post": {
+        "tags": [
+          "Authentication & SSO"
+        ],
+        "summary": "Exchange SSO Ticket for JWT Token",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "ticket"
+                ],
+                "properties": {
+                  "ticket": {
+                    "type": "string",
+                    "example": "sso-ticket-uuid"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Valid JWT token issued"
+          },
+          "401": {
+            "description": "Ticket expired or invalid"
+          }
+        }
+      }
+    },
+    "/dashboard": {
+      "get": {
+        "tags": [
+          "Student Dashboard"
+        ],
+        "summary": "Get Full Aggregated Student Dashboard",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Dashboard metrics (streak, coverage, next mock, subject progress, smart revision, deadlines)",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "data": {
+                    "user": {
+                      "first_name": "Kasun",
+                      "streak_days": 12
+                    },
+                    "syllabus_coverage": {
+                      "percentage": 68
+                    },
+                    "next_mock_exam": {
+                      "title": "Biology Mock Exam #04",
+                      "session": "Session #4"
+                    },
+                    "smart_revision": {
+                      "topic": "Cell Biology",
+                      "accuracy_pct": 42,
+                      "message": "Focus on Cell Biology today. Your last test showed 42% accuracy in Mitochondria questions."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/progress": {
+      "get": {
+        "tags": [
+          "Progress & Analytics"
+        ],
+        "summary": "Get Progress & Achievements Analytics",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Z-Score trends, Island Rank milestones, 28-day activity heatmap, curriculum mastery, and badges"
+          }
+        }
+      }
+    },
+    "/subjects": {
+      "get": {
+        "tags": [
+          "Subjects & Units"
+        ],
+        "summary": "List Subjects for Student's Stream & Medium",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Subjects matching student stream with Island Rank and completion rates"
+          }
+        }
+      }
+    },
+    "/subjects/{id}/units": {
+      "get": {
+        "tags": [
+          "Subjects & Units"
+        ],
+        "summary": "Get Units & Syllabus Accordion for Subject",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Units syllabus with nested lessons list"
+          }
+        }
+      }
+    },
+    "/subjects/{id}/lessonlist": {
+      "get": {
+        "tags": [
+          "Lessons & Video Player"
+        ],
+        "summary": "Get Lesson List Overview for Specific Subject",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Units with lesson status badges, subject progress, and mock widget"
+          }
+        }
+      }
+    },
+    "/lessonlist": {
+      "get": {
+        "tags": [
+          "Lessons & Video Player"
+        ],
+        "summary": "Get Default Lesson List Overview for Student",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default lesson list for primary subject"
+          }
+        }
+      }
+    },
+    "/lessons/{id}": {
+      "get": {
+        "tags": [
+          "Lessons & Video Player"
+        ],
+        "summary": "Get Lesson Player View (Notes, Tabs, Resources, Q&A)",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Complete lesson player context with structured notes, video URL, Q&A, and downloadable resources"
+          }
+        }
+      }
+    },
+    "/lessons/{id}/toggle-complete": {
+      "post": {
+        "tags": [
+          "Lessons & Video Player"
+        ],
+        "summary": "Toggle Lesson Completion Status",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Updated completion status"
+          }
+        }
+      }
+    },
+    "/lessons/{id}/progress": {
+      "post": {
+        "tags": [
+          "Lessons & Video Player"
+        ],
+        "summary": "Save Video Playback Progress Percentage",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "progress_percent"
+                ],
+                "properties": {
+                  "progress_percent": {
+                    "type": "integer",
+                    "example": 75
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Playback progress saved"
+          }
+        }
+      }
+    },
+    "/lessons/{id}/questions": {
+      "post": {
+        "tags": [
+          "Lessons & Video Player"
+        ],
+        "summary": "Post a New Student Question in Lesson Q&A Thread",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "question"
+                ],
+                "properties": {
+                  "question": {
+                    "type": "string",
+                    "example": "What is the key identifier of Prophase?"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Question submitted successfully"
+          }
+        }
+      }
+    },
+    "/lessons/{id}/questions/{questionId}/helpful": {
+      "post": {
+        "tags": [
+          "Lessons & Video Player"
+        ],
+        "summary": "Mark a Q&A Question / Answer as Helpful",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "questionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Helpful reaction count incremented"
+          }
+        }
+      }
+    },
+    "/subjects/{id}/revision": {
+      "get": {
+        "tags": [
+          "Revision & Past Papers"
+        ],
+        "summary": "Get Revision Modules & Short Notes for Subject",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Revision modules list with short notes PDF links"
+          }
+        }
+      }
+    },
+    "/subjects/{id}/past-papers": {
+      "get": {
+        "tags": [
+          "Revision & Past Papers"
+        ],
+        "summary": "Get Past Papers & Model Papers Archive",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Past papers list with paper PDFs and marking schemes"
+          }
+        }
+      }
+    },
+    "/exams/hub": {
+      "get": {
+        "tags": [
+          "Exams Hub & Mocks"
+        ],
+        "summary": "Get Exams Hub Analytics & Performance Breakdown",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Score breakdown (MCQ /40, Essay /60), predicted Z-score, Island Rank movement, and unlocked badges"
+          }
+        }
+      }
+    },
+    "/exams/mocks": {
+      "get": {
+        "tags": [
+          "Exams Hub & Mocks"
+        ],
+        "summary": "Get Mock Exams Schedule & Eligibility",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Mock sessions schedule, lock thresholds (e.g. 80%), eligibility progress, and registration stats"
+          }
+        }
+      }
+    },
+    "/quizzes": {
+      "get": {
+        "tags": [
+          "Quizzes & Submissions"
+        ],
+        "summary": "List Available Quizzes",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of active quizzes matching student stream and medium"
+          }
+        }
+      }
+    },
+    "/quizzes/{id}/start": {
+      "get": {
+        "tags": [
+          "Quizzes & Submissions"
+        ],
+        "summary": "Start Quiz & Load Questions",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Quiz questions and options (answers hidden)"
+          }
+        }
+      }
+    },
+    "/quizzes/{id}/leaderboard": {
+      "get": {
+        "tags": [
+          "Quizzes & Submissions"
+        ],
+        "summary": "Get Quiz Leaderboard",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Top ranked student scores"
+          }
+        }
+      }
+    },
+    "/submissions": {
+      "post": {
+        "tags": [
+          "Quizzes & Submissions"
+        ],
+        "summary": "Submit Quiz Answers for Auto-Grading",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "quiz_id",
+                  "answers"
+                ],
+                "properties": {
+                  "quiz_id": {
+                    "type": "integer",
+                    "example": 1
+                  },
+                  "answers": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "question_id"
+                      ],
+                      "properties": {
+                        "question_id": {
+                          "type": "integer",
+                          "example": 10
+                        },
+                        "selected_option": {
+                          "type": "string",
+                          "example": "b"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Quiz graded successfully with final score and timing logs"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Quizzes & Submissions"
+        ],
+        "summary": "Get Student's Past Submission History",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Past submission history list"
+          }
+        }
+      }
+    },
+    "/b2b/tickets": {
+      "post": {
+        "tags": [
+          "B2B SSO Tickets"
+        ],
+        "summary": "Issue 60-Second Single-Use SSO Ticket",
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "nic"
+                ],
+                "properties": {
+                  "nic": {
+                    "type": "string",
+                    "example": "200512345678"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "SSO ticket issued successfully"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "Enter student JWT token received from /auth/login or /auth/exchange"
+      },
+      "ApiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-API-Key",
+        "description": "Enter B2B API Key configured on the server"
+      }
+    }
+  }
+}

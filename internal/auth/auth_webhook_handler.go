@@ -20,9 +20,8 @@ type WebhookPayload struct {
 	Stream         string `json:"stream"`
 	Medium         string `json:"medium"`
 
-	// Updated to String
-	ALBatch   string `json:"al_batch"`
-	ALAttempt string `json:"al_attempt"`
+	ALYear    string `json:"al_year"`    // Replaces al_batch
+	ALAttempt string `json:"al_attempt"` // 1st, 2nd, or 3rd Attempt
 	Role      string `json:"role"`
 }
 

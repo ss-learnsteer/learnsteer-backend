@@ -76,11 +76,21 @@ func (s *Service) GradeAndSubmit(userID uint, req SubmitQuizPayload) (*Submissio
 
 	// 5. Create and save the final Submission record
 	now := time.Now()
+	startedAt := now
+	if req.StartedAt != nil {
+		startedAt = *req.StartedAt
+	}
+	completedAt := now
+	if req.CompletedAt != nil {
+		completedAt = *req.CompletedAt
+	}
+
 	submission := Submission{
 		UserID:      userID,
 		QuizID:      req.QuizID,
 		Score:       totalScore,
-		CompletedAt: &now, // Mark it as finished right now
+		StartedAt:   startedAt,
+		CompletedAt: &completedAt,
 		Answers:     submissionAnswers,
 	}
 
@@ -89,4 +99,17 @@ func (s *Service) GradeAndSubmit(userID uint, req SubmitQuizPayload) (*Submissio
 	}
 
 	return &submission, nil
+}
+
+// GetSubmissionsByUser retrieves all submissions for a given user with Quiz metadata
+func (s *Service) GetSubmissionsByUser(userID uint) ([]Submission, error) {
+	var submissions []Submission
+	err := s.db.Where("user_id = ?", userID).
+		Preload("Quiz").
+		Order("id desc").
+		Find(&submissions).Error
+	if err != nil {
+		return nil, err
+	}
+	return submissions, nil
 }

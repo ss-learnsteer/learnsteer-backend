@@ -14,8 +14,12 @@ import (
 
 	// Internal Modules
 	"github.com/sasnaka-learnsteer/ss-quiz-platform-backend/internal/auth"
+	"github.com/sasnaka-learnsteer/ss-quiz-platform-backend/internal/dashboard"
+	"github.com/sasnaka-learnsteer/ss-quiz-platform-backend/internal/examshub"
+	"github.com/sasnaka-learnsteer/ss-quiz-platform-backend/internal/lesson"
 	"github.com/sasnaka-learnsteer/ss-quiz-platform-backend/internal/platform/database"
 	"github.com/sasnaka-learnsteer/ss-quiz-platform-backend/internal/platform/middleware" // Added Middleware
+	"github.com/sasnaka-learnsteer/ss-quiz-platform-backend/internal/progress"
 	"github.com/sasnaka-learnsteer/ss-quiz-platform-backend/internal/quiz"
 	"github.com/sasnaka-learnsteer/ss-quiz-platform-backend/internal/submission"
 )
@@ -42,19 +46,33 @@ func main() {
 		log.Fatalf("❌ Database initialization failed: %v", err)
 	}
 
-	// 2. Migrations
-	err = db.AutoMigrate(
-		&auth.User{},
-		&quiz.Quiz{},
-		&quiz.Question{},
-		&submission.Submission{},
-		&submission.Answer{},
-		&quiz.Option{},
-		&auth.SSOTicket{},
-	)
-	if err != nil {
-		log.Fatalf("Failed to migrate database: %v", err)
-	}
+	// 2. Migrations (Run in background to guarantee instant Heroku port binding)
+	go func() {
+		log.Println("🔄 Running database AutoMigrate in background...")
+		if err := db.AutoMigrate(
+			&auth.User{},
+			&quiz.Quiz{},
+			&quiz.Question{},
+			&submission.Submission{},
+			&submission.Answer{},
+			&quiz.Option{},
+			&auth.SSOTicket{},
+			&lesson.Subject{},
+			&lesson.Unit{},
+			&lesson.Lesson{},
+			&lesson.LessonNote{},
+			&lesson.LessonResource{},
+			&lesson.UserLessonProgress{},
+			&lesson.RevisionModule{},
+			&lesson.PastPaper{},
+			&lesson.LessonQA{},
+			&lesson.AppConfig{},
+		); err != nil {
+			log.Printf("⚠️ Background migration warning: %v", err)
+		} else {
+			log.Println("✅ Database migration completed successfully")
+		}
+	}()
 
 	// 3. Initialize Services & Handlers (Dependency Injection)
 	// Auth Module
@@ -69,6 +87,22 @@ func main() {
 	submissionService := submission.NewService(db)
 	submissionHandler := submission.NewHandler(submissionService)
 
+	// Lesson Module
+	lessonService := lesson.NewService(db)
+	lessonHandler := lesson.NewHandler(lessonService)
+
+	// Dashboard Module
+	dashboardService := dashboard.NewService(db)
+	dashboardHandler := dashboard.NewHandler(dashboardService)
+
+	// Exams Hub Module
+	examsHubService := examshub.NewService(db)
+	examsHubHandler := examshub.NewHandler(examsHubService)
+
+	// Progress & Achievements Module
+	progressService := progress.NewService(db)
+	progressHandler := progress.NewHandler(progressService)
+
 	// 4. Setup Router
 	r := gin.Default()
 	r.Use(gzip.Gzip(gzip.DefaultCompression))
@@ -78,6 +112,7 @@ func main() {
 	config := cors.DefaultConfig()
 	config.AllowAllOrigins = true
 	config.AllowHeaders = []string{"Origin", "Content-Length", "Content-Type", "Authorization"}
+	config.AllowMethods = []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"}
 	r.Use(cors.New(config))
 
 	v1 := r.Group("/api/v1")
@@ -98,16 +133,100 @@ func main() {
 		// 3. Auth Routes (Register, Login)
 		authHandler.RegisterRoutes(v1)
 
+		// 4. Interactive Swagger UI & OpenAPI Specification
+		v1.GET("/swagger.json", func(c *gin.Context) {
+			c.File("swagger.json")
+		})
+		v1.GET("/docs", func(c *gin.Context) {
+			html := `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LearnSteer API — Swagger Documentation</title>
+  <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5/swagger-ui.css" />
+  <link rel="icon" type="image/png" href="https://unpkg.com/swagger-ui-dist@5/favicon-32x32.png" />
+  <style>body { margin: 0; background: #fafafa; }</style>
+</head>
+<body>
+  <div id="swagger-ui"></div>
+  <script src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-bundle.js"></script>
+  <script>
+    window.onload = () => {
+      SwaggerUIBundle({
+        url: '/api/v1/swagger.json',
+        dom_id: '#swagger-ui',
+        deepLinking: true,
+        presets: [SwaggerUIBundle.presets.apis],
+        layout: 'BaseLayout'
+      });
+    };
+  </script>
+</body>
+</html>`
+			c.Header("Content-Type", "text/html; charset=utf-8")
+			c.String(http.StatusOK, html)
+		})
+
+		// 5. Public Platform Configurations (Server-Driven Landing, About, Contact)
+		v1.GET("/public/config", func(c *gin.Context) {
+			c.JSON(http.StatusOK, gin.H{
+				"success": true,
+				"data": gin.H{
+					"platform_name": "LearnSteer by Sasnaka Sansada",
+					"tagline":       "Free A/L Students Sri Lanka - Learn Smarter. Score Higher.",
+					"description":   "The all-in-one free self-learning portal for Sri Lankan A/L students - videos, past papers, revision notes & mock exams.",
+					"badge":         "Official Platform For Sri Lankan Students",
+					"stats": gin.H{
+						"students_enrolled": "+50,000",
+						"video_lessons":     "+1,200",
+						"past_papers":       "+500",
+						"island_rank_coverage": "99.8%",
+					},
+				},
+			})
+		})
+
+		v1.GET("/public/about", func(c *gin.Context) {
+			c.JSON(http.StatusOK, gin.H{
+				"success": true,
+				"data": gin.H{
+					"title": "About Sasnaka Sansada LearnSteer",
+					"mission": "Empowering every Sri Lankan Advanced Level student with world-class, free educational resources.",
+					"vision": "Bridging the educational inequality gap across all 25 districts through technology and peer mentorship.",
+					"story": "Sasnaka Sansada is a non-profit youth organization committed to uplifting educational standards across Sri Lanka.",
+					"pillars": []string{"High Quality Video Lessons", "Structured Revision Notes", "Island-wide Mock Exams", "Real-Time Ranking & Z-Score Diagnostics"},
+				},
+			})
+		})
+
+		v1.GET("/public/contact", func(c *gin.Context) {
+			c.JSON(http.StatusOK, gin.H{
+				"success": true,
+				"data": gin.H{
+					"email": "support@learnsteer.lk",
+					"phone": "+94 11 234 5678",
+					"hotline": "+94 77 123 4567",
+					"office_address": "Sasnaka Sansada Headquarters, Colombo, Sri Lanka",
+					"working_hours": "Monday - Saturday: 8:30 AM - 5:30 PM",
+				},
+			})
+		})
+
 		// ----------------------------
 		// B. Protected Routes (Login Required)
 		// ----------------------------
 		protected := v1.Group("/")
 		protected.Use(middleware.AuthMiddleware())
 		{
-			// 3. Quiz Routes
-			// Now all quiz endpoints require a valid 'Authorization: Bearer <token>' header
+			// Quiz, Submission, Lesson, and Dashboard Routes
+			// Require a valid 'Authorization: Bearer <token>' header
 			quizHandler.RegisterRoutes(protected)
 			submissionHandler.RegisterRoutes(protected)
+			lessonHandler.RegisterRoutes(protected)
+			dashboardHandler.RegisterRoutes(protected)
+			examsHubHandler.RegisterRoutes(protected)
+			progressHandler.RegisterRoutes(protected)
 		}
 	}
 

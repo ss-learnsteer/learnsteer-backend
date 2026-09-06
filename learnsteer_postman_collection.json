@@ -1,0 +1,1019 @@
+{
+  "info": {
+    "_postman_id": "8f3e2b10-6c9a-4e2b-9a4d-7f1b2c3d4e5f",
+    "name": "LearnSteer API Collection",
+    "description": "Complete Postman Collection for LearnSteer (Sasnaka Sansada) Digital Self-Learning Platform for Sri Lankan A/L students.\n\nIncludes the redesigned frictionless student onboarding flow, auto-generated Student ID (LS-xxxxxxxxxx), cartoon mascot nicknames, multi-identifier login (Nickname / Email / NIC), profile enrichment, and all syllabus/quiz/dashboard endpoints.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080/api/v1",
+      "type": "string",
+      "description": "Local server URL. For staging/prod use: https://ss-quiz-platform-backend-8f9b2c83591e.herokuapp.com/api/v1"
+    },
+    {
+      "key": "jwt_token",
+      "value": "",
+      "type": "string",
+      "description": "Student JWT Bearer token automatically populated after login or create-student"
+    },
+    {
+      "key": "student_id",
+      "value": "LS-demo123456",
+      "type": "string",
+      "description": "Platform Student ID automatically saved upon Create Student or Login"
+    },
+    {
+      "key": "nickname",
+      "value": "BraveLion42",
+      "type": "string",
+      "description": "Auto-generated cartoon mascot nickname"
+    },
+    {
+      "key": "apiKey",
+      "value": "test-b2b-api-key",
+      "type": "string",
+      "description": "B2B SSO API key configured in server environment"
+    },
+    {
+      "key": "sso_ticket",
+      "value": "",
+      "type": "string",
+      "description": "60-second single-use SSO ticket generated from /b2b/tickets"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Authentication & Student Identity",
+      "description": "Frictionless 3-click onboarding, multi-identifier login, and profile enrichment endpoints",
+      "item": [
+        {
+          "name": "Create Student (3-Click Frictionless Onboarding)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var res = pm.response.json();",
+                  "    if (res.data) {",
+                  "        if (res.data.student_id) {",
+                  "            pm.collectionVariables.set('student_id', res.data.student_id);",
+                  "            console.log('Saved student_id: ' + res.data.student_id);",
+                  "        }",
+                  "        if (res.data.nickname) {",
+                  "            pm.collectionVariables.set('nickname', res.data.nickname);",
+                  "            console.log('Saved nickname: ' + res.data.nickname);",
+                  "        }",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"first_name\": \"Kasun\",\n  \"last_name\": \"Perera\",\n  \"email\": \"kasun.student@example.com\",\n  \"password\": \"Password123\",\n  \"nic\": \"200612345678\",\n  \"whatsapp_number\": \"0771234567\",\n  \"stream\": \"Bio Science\",\n  \"medium\": \"Sinhala\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/create-student",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "create-student"]
+            },
+            "description": "Registers a lazy A/L student collecting only the 8 absolute essentials. Auto-generates a unique Student ID (e.g. LS-a1b2c3d4) and cartoon mascot nickname (e.g. BraveLion42)."
+          }
+        },
+        {
+          "name": "Login - via Nickname",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var res = pm.response.json();",
+                  "    if (res.token) {",
+                  "        pm.collectionVariables.set('jwt_token', res.token);",
+                  "        console.log('Saved jwt_token');",
+                  "    }",
+                  "    if (res.user) {",
+                  "        pm.collectionVariables.set('student_id', res.user.student_id);",
+                  "        pm.collectionVariables.set('nickname', res.user.nickname);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"identifier\": \"{{nickname}}\",\n  \"password\": \"Password123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            },
+            "description": "Authenticates using the auto-assigned cartoon mascot Nickname."
+          }
+        },
+        {
+          "name": "Login - via Email",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var res = pm.response.json();",
+                  "    if (res.token) {",
+                  "        pm.collectionVariables.set('jwt_token', res.token);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"identifier\": \"kasun.student@example.com\",\n  \"password\": \"Password123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            },
+            "description": "Authenticates using standard Email address."
+          }
+        },
+        {
+          "name": "Login - via NIC",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var res = pm.response.json();",
+                  "    if (res.token) {",
+                  "        pm.collectionVariables.set('jwt_token', res.token);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"identifier\": \"200612345678\",\n  \"password\": \"Password123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            },
+            "description": "Authenticates using National Identity Card (NIC) number."
+          }
+        },
+        {
+          "name": "Update Student Profile (Enrichment / Activation)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"0112345678\",\n  \"district\": \"Colombo\",\n  \"school\": \"Ananda College\",\n  \"city\": \"Colombo 10\",\n  \"al_year\": \"2026\",\n  \"al_attempt\": \"1\",\n  \"date_of_birth\": \"2007-04-18\",\n  \"gender\": \"Male\",\n  \"guardian_phone\": \"0777654321\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/update-student",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "update-student"]
+            },
+            "description": "Protected endpoint for students to enrich their profile with optional demographic info once they are onboarded."
+          }
+        },
+        {
+          "name": "Get Profile by Student ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/profile/{{student_id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "profile", "{{student_id}}"]
+            },
+            "description": "Public demographic profile lookup using the platform Student ID."
+          }
+        },
+        {
+          "name": "Check NIC Exists",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"NIC\": \"200612345678\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/check-nic",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "check-nic"]
+            },
+            "description": "Checks if student NIC exists in database. Returns exists flag, student_id, and nickname."
+          }
+        },
+        {
+          "name": "Verify Password by NIC",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"NIC\": \"200612345678\",\n  \"password\": \"Password123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/verify-password",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "verify-password"]
+            },
+            "description": "Verifies student password hash against NIC."
+          }
+        },
+        {
+          "name": "Exchange SSO Ticket for JWT",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var res = pm.response.json();",
+                  "    if (res.token) {",
+                  "        pm.collectionVariables.set('jwt_token', res.token);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ticket\": \"{{sso_ticket}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/exchange",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "exchange"]
+            },
+            "description": "Consumes a single-use 60-second SSO ticket and issues a student JWT token."
+          }
+        },
+        {
+          "name": "Google Sheets Webhook Sync",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Webhook-Secret",
+                "value": "your-webhook-secret"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"timestamp\": \"2026-09-06T08:00:00Z\",\n  \"first_name\": \"Nadeesha\",\n  \"last_name\": \"Kavindi\",\n  \"nic\": \"200588889999\",\n  \"email\": \"nadeesha@example.com\",\n  \"whatsapp_number\": \"0711122334\",\n  \"school\": \"Visakha Vidyalaya\",\n  \"district\": \"Colombo\",\n  \"stream\": \"Physical Science\",\n  \"medium\": \"Sinhala\",\n  \"al_year\": \"2025\",\n  \"al_attempt\": \"1\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/webhook/google-sheets",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "webhook", "google-sheets"]
+            },
+            "description": "Receives automated sync records from Google Sheets and provisions Student ID / Nickname automatically."
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Dashboard & Progress Analytics",
+      "description": "Aggregated student dashboard, gamification stats, streak, syllabus coverage, and Z-score analytics",
+      "item": [
+        {
+          "name": "Get Aggregated Dashboard",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/dashboard",
+              "host": ["{{baseUrl}}"],
+              "path": ["dashboard"]
+            },
+            "description": "Fetches complete student dashboard: personal identity (student_id, nickname), day streak, XP, island rank, syllabus coverage %, next recommended mock exam, subject progress bars, and AI revision alert."
+          }
+        },
+        {
+          "name": "Get Progress & Achievements",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/progress",
+              "host": ["{{baseUrl}}"],
+              "path": ["progress"]
+            },
+            "description": "Fetches student analytics: predicted Z-score, 6-month and yearly trends, 28-day activity heatmap, curriculum mastery, and unlocked badges."
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Academic Syllabus & Video Player",
+      "description": "Subjects, syllabus breakdown, interactive lesson player with tabs, note phases, and Q&A",
+      "item": [
+        {
+          "name": "List Enrolled Subjects",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/subjects",
+              "host": ["{{baseUrl}}"],
+              "path": ["subjects"]
+            },
+            "description": "Retrieves all subjects matching the student's stream and medium with readiness percentages."
+          }
+        },
+        {
+          "name": "Get Subject Units Accordion",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/subjects/1/units",
+              "host": ["{{baseUrl}}"],
+              "path": ["subjects", "1", "units"]
+            },
+            "description": "Returns syllabus unit breakdown with lesson counts and completion stats."
+          }
+        },
+        {
+          "name": "Get Subject Lesson List Overview",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/subjects/1/lessonlist",
+              "host": ["{{baseUrl}}"],
+              "path": ["subjects", "1", "lessonlist"]
+            },
+            "description": "Returns full syllabus lesson cards with statuses ('Review', 'Watch Again', 'Start', 'Locked')."
+          }
+        },
+        {
+          "name": "Get Default Lesson List",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/lessonlist",
+              "host": ["{{baseUrl}}"],
+              "path": ["lessonlist"]
+            },
+            "description": "Default lesson overview for the student's primary subject."
+          }
+        },
+        {
+          "name": "Get Lesson Player Context",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/lessons/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["lessons", "1"]
+            },
+            "description": "Loads complete video lesson player: video URL, structured phase notes, downloadable PDF resources, next lesson widget, and community Q&A thread."
+          }
+        },
+        {
+          "name": "Toggle Lesson Complete",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/lessons/1/toggle-complete",
+              "host": ["{{baseUrl}}"],
+              "path": ["lessons", "1", "toggle-complete"]
+            },
+            "description": "Toggles 'Mark as Completed' status for a lesson."
+          }
+        },
+        {
+          "name": "Save Lesson Video Progress",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"progress_percent\": 75\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/lessons/1/progress",
+              "host": ["{{baseUrl}}"],
+              "path": ["lessons", "1", "progress"]
+            },
+            "description": "Saves student video playback progress (0-100%)."
+          }
+        },
+        {
+          "name": "Post Question in Lesson Q&A",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"question\": \"Could you please explain why standard electrode potential of hydrogen is taken as 0V?\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/lessons/1/questions",
+              "host": ["{{baseUrl}}"],
+              "path": ["lessons", "1", "questions"]
+            },
+            "description": "Posts student question to the lesson Q&A board. Automatically displays the student's cartoon Mascot Nickname!"
+          }
+        },
+        {
+          "name": "Upvote Lesson Q&A Question",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/lessons/1/questions/1/helpful",
+              "host": ["{{baseUrl}}"],
+              "path": ["lessons", "1", "questions", "1", "helpful"]
+            },
+            "description": "Increments helpful reaction count on a student Q&A question."
+          }
+        },
+        {
+          "name": "Get Subject Revision Modules",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/subjects/1/revision",
+              "host": ["{{baseUrl}}"],
+              "path": ["subjects", "1", "revision"]
+            },
+            "description": "Retrieves short notes, mind maps, and essay guides."
+          }
+        },
+        {
+          "name": "Get Subject Past Papers",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/subjects/1/past-papers?type=past",
+              "host": ["{{baseUrl}}"],
+              "path": ["subjects", "1", "past-papers"],
+              "query": [
+                {
+                  "key": "type",
+                  "value": "past"
+                }
+              ]
+            },
+            "description": "Returns past papers archive with marking scheme download links."
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Examinations, Quizzes & Gamified Leaderboards",
+      "description": "Published quizzes, online exams, auto-grading, and ranked leaderboards featuring cartoon nicknames",
+      "item": [
+        {
+          "name": "List Quizzes",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/quizzes",
+              "host": ["{{baseUrl}}"],
+              "path": ["quizzes"]
+            },
+            "description": "Lists published quizzes and mock exams for student's stream and medium."
+          }
+        },
+        {
+          "name": "Start Quiz (Load Questions)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/quizzes/1/start",
+              "host": ["{{baseUrl}}"],
+              "path": ["quizzes", "1", "start"]
+            },
+            "description": "Loads exam questions and options (correct answers concealed)."
+          }
+        },
+        {
+          "name": "Submit Exam Answers (Auto-Grading)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"quiz_id\": 1,\n  \"duration_seconds\": 540,\n  \"answers\": [\n    {\n      \"question_id\": 1,\n      \"selected_option_id\": 1\n    },\n    {\n      \"question_id\": 2,\n      \"selected_option_id\": 6\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/submissions",
+              "host": ["{{baseUrl}}"],
+              "path": ["submissions"]
+            },
+            "description": "Submits answers for real-time auto-grading and score calculation."
+          }
+        },
+        {
+          "name": "Get Student Exam Submissions History",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/submissions",
+              "host": ["{{baseUrl}}"],
+              "path": ["submissions"]
+            },
+            "description": "Retrieves the authenticated student's past exam results."
+          }
+        },
+        {
+          "name": "Get Quiz Leaderboard (Ranked with Nicknames)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/quizzes/1/leaderboard",
+              "host": ["{{baseUrl}}"],
+              "path": ["quizzes", "1", "leaderboard"]
+            },
+            "description": "Ranked quiz leaderboard displaying student_id and cartoon mascot nicknames (e.g. BraveLion42)."
+          }
+        },
+        {
+          "name": "Get Exams Hub Diagnostics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/exams/hub",
+              "host": ["{{baseUrl}}"],
+              "path": ["exams", "hub"]
+            },
+            "description": "Exams diagnostics: latest mock score, MCQ/Essay split, unit performance %, and predicted Z-score."
+          }
+        },
+        {
+          "name": "Get Mock Exams Schedule",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/exams/mocks",
+              "host": ["{{baseUrl}}"],
+              "path": ["exams", "mocks"]
+            },
+            "description": "Upcoming mock exam calendar and seat booking eligibility."
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. B2B SSO Integration",
+      "description": "Server-to-Server single sign-on ticket issuance requiring X-API-Key",
+      "item": [
+        {
+          "name": "Generate B2B SSO Ticket (via Student ID)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var res = pm.response.json();",
+                  "    if (res.ticket) {",
+                  "        pm.collectionVariables.set('sso_ticket', res.ticket);",
+                  "        console.log('Saved sso_ticket: ' + res.ticket);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"student_id\": \"{{student_id}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/b2b/tickets",
+              "host": ["{{baseUrl}}"],
+              "path": ["b2b", "tickets"]
+            },
+            "description": "Called by external servers (e.g. Node.js LMS) to generate a 60-second single-use SSO ticket by platform student_id."
+          }
+        },
+        {
+          "name": "Generate B2B SSO Ticket (via NIC)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var res = pm.response.json();",
+                  "    if (res.ticket) {",
+                  "        pm.collectionVariables.set('sso_ticket', res.ticket);",
+                  "        console.log('Saved sso_ticket: ' + res.ticket);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nic\": \"200612345678\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/b2b/tickets",
+              "host": ["{{baseUrl}}"],
+              "path": ["b2b", "tickets"]
+            },
+            "description": "Generates a 60-second single-use SSO ticket using student NIC."
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Public & System Utility",
+      "description": "Health checks, DB wake-up, landing page configuration, and documentation",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["health"]
+            },
+            "description": "Returns backend server status and database connectivity."
+          }
+        },
+        {
+          "name": "Wakeup Ping (Neon DB Warmup)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/wakeup",
+              "host": ["{{baseUrl}}"],
+              "path": ["wakeup"]
+            },
+            "description": "Triggers serverless PostgreSQL (Neon) DB to wake up from cold scale-to-zero state."
+          }
+        },
+        {
+          "name": "Public Landing Config",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/public/config",
+              "host": ["{{baseUrl}}"],
+              "path": ["public", "config"]
+            },
+            "description": "Dynamic landing page stats, hero tagline, and branding info."
+          }
+        },
+        {
+          "name": "Public About Page",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/public/about",
+              "host": ["{{baseUrl}}"],
+              "path": ["public", "about"]
+            },
+            "description": "Mission, vision, and core educational pillars."
+          }
+        },
+        {
+          "name": "Public Contact Page",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/public/contact",
+              "host": ["{{baseUrl}}"],
+              "path": ["public", "contact"]
+            },
+            "description": "Hotline, email, and office address info."
+          }
+        },
+        {
+          "name": "OpenAPI JSON Specification",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/swagger.json",
+              "host": ["{{baseUrl}}"],
+              "path": ["swagger.json"]
+            },
+            "description": "Serves the raw OpenAPI / Swagger JSON document."
+          }
+        }
+      ]
+    }
+  ]
+}
