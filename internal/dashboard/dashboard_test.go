@@ -43,7 +43,11 @@ func setupDashboardTestEnv() (*gin.Engine, *gorm.DB, uint) {
 		Role:      "student",
 		Stream:    "Bio Science",
 		Medium:    "Sinhala",
-		ALBatch:   "2024 Batch",
+		StudentID:      "LS-test12345",
+		Nickname:       "BraveLion42",
+		NIC:            "200112345678",
+		WhatsappNumber: "0771234567",
+		ALYear:         "2024 Batch",
 	}
 	db.Create(&user)
 

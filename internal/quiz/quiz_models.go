@@ -75,6 +75,8 @@ type Option struct {
 type LeaderboardEntry struct {
 	Rank        int        `json:"rank"`
 	UserID      uint       `json:"user_id"`
+	StudentID   string     `json:"student_id"`
+	Nickname    string     `json:"nickname"`
 	FirstName   string     `json:"first_name"`
 	LastName    string     `json:"last_name"`
 	School      string     `json:"school"`

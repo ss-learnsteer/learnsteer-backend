@@ -5,6 +5,8 @@ import "time"
 // DashboardUserDTO contains the student's personal details and gamification metrics
 type DashboardUserDTO struct {
 	ID         uint   `json:"id"`
+	StudentID  string `json:"student_id"`
+	Nickname   string `json:"nickname"`
 	FirstName  string `json:"first_name"`
 	LastName   string `json:"last_name"`
 	FullName   string `json:"full_name"`

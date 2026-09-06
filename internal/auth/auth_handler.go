@@ -2,6 +2,7 @@ package auth
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -14,6 +15,41 @@ type Handler struct {
 	service *Service
 }
 
+// ---------------------------------------------------------------------------
+// Request DTOs
+// ---------------------------------------------------------------------------
+
+// CreateStudentRequest — Collect essential data to get a student learning
+type CreateStudentRequest struct {
+	FirstName      string `json:"first_name" binding:"required"`
+	LastName       string `json:"last_name" binding:"required"`
+	Email          string `json:"email" binding:"required,email"`
+	Password       string `json:"password" binding:"required,min=6"`
+	NIC            string `json:"nic" binding:"required"`
+	WhatsappNumber string `json:"whatsapp_number" binding:"required"`
+	Stream         string `json:"stream" binding:"required"`  // Bio Science, Physical Science, Commerce, Technology, Arts
+	Medium         string `json:"medium" binding:"required"`  // Sinhala, Tamil, English
+}
+
+// UpdateStudentRequest — Profile completion, collected post-login (all optional)
+type UpdateStudentRequest struct {
+	Phone         string `json:"phone"`
+	District      string `json:"district"`
+	School        string `json:"school"`
+	City          string `json:"city"`
+	ALYear        string `json:"al_year"`
+	ALAttempt     string `json:"al_attempt"`
+	DateOfBirth   string `json:"date_of_birth"`
+	Gender        string `json:"gender"`
+	GuardianPhone string `json:"guardian_phone"`
+}
+
+// LoginRequest accepts Nickname, Email, or NIC as the identifier
+type LoginRequest struct {
+	Identifier string `json:"identifier" binding:"required"` // Nickname, Email, or NIC
+	Password   string `json:"password" binding:"required"`
+}
+
 // CheckNICRequest matches the incoming JSON payload exactly
 type CheckNICRequest struct {
 	NIC string `json:"NIC" binding:"required"`
@@ -24,24 +60,32 @@ type VerifyPasswordRequest struct {
 	Password string `json:"password" binding:"required"`
 }
 
-// UserProfileResponse is a safe DTO (Data Transfer Object) that hides the password hash
+// UserProfileResponse is a safe DTO that hides internal fields
 type UserProfileResponse struct {
+	StudentID      string `json:"student_id"`
+	Nickname       string `json:"nickname"`
 	FirstName      string `json:"first_name"`
 	LastName       string `json:"last_name"`
 	Email          string `json:"email"`
 	NIC            string `json:"nic"`
 	WhatsappNumber string `json:"whatsapp_number"`
+	Phone          string `json:"phone"`
 	School         string `json:"school"`
 	District       string `json:"district"`
+	City           string `json:"city"`
 	Stream         string `json:"stream"`
 	Medium         string `json:"medium"`
-	ALBatch        string `json:"al_batch"`
+	ALYear         string `json:"al_year"`
 	ALAttempt      string `json:"al_attempt"`
+	DateOfBirth    string `json:"date_of_birth"`
+	Gender         string `json:"gender"`
+	GuardianPhone  string `json:"guardian_phone"`
 	Role           string `json:"role"`
 }
 
 type CreateTicketRequest struct {
-	NIC string `json:"nic" binding:"required"`
+	NIC       string `json:"nic"`
+	StudentID string `json:"student_id"`
 }
 
 type ExchangeTicketRequest struct {
@@ -57,14 +101,22 @@ func NewHandler(service *Service) *Handler {
 func (h *Handler) RegisterRoutes(r *gin.RouterGroup) {
 	authGroup := r.Group("/auth")
 	{
-		authGroup.POST("/register", h.Register)
+		// Public routes
+		authGroup.POST("/create-student", h.CreateStudent)
 		authGroup.POST("/login", h.Login)
 		authGroup.POST("/webhook/google-sheets", h.HandleGoogleSheetWebhook)
 		authGroup.POST("/check-nic", h.CheckNIC)
 		authGroup.POST("/verify-password", h.VerifyPassword)
-		authGroup.GET("/profile/:nic", h.GetProfile)
+		authGroup.GET("/profile/:student_id", h.GetProfile)
 		// The React app calls this to trade the ticket for a JWT
 		authGroup.POST("/exchange", h.ExchangeSSOTicket)
+
+		// Protected routes (require JWT)
+		protectedAuth := authGroup.Group("/")
+		protectedAuth.Use(middleware.RequireAuth())
+		{
+			protectedAuth.PUT("/update-student", h.UpdateStudent)
+		}
 	}
 
 	// The B2B Server-to-Server Group
@@ -77,30 +129,13 @@ func (h *Handler) RegisterRoutes(r *gin.RouterGroup) {
 	}
 }
 
-// RegisterRequest defines the JSON payload for user registration
-type RegisterRequest struct {
-	// Identity & Security
-	Email     string `json:"email" binding:"required,email"`
-	Password  string `json:"password" binding:"required,min=6"`
-	FirstName string `json:"first_name" binding:"required"`
-	LastName  string `json:"last_name" binding:"required"`
+// ---------------------------------------------------------------------------
+// Create Student (replaces Register)
+// ---------------------------------------------------------------------------
 
-	// New Demographic Data (Required for Impact Analytics)
-	ExamYear int    `json:"exam_year" binding:"required"` // e.g., 2025
-	Stream   string `json:"stream" binding:"required"`    // e.g., "Physical Science"
-	District string `json:"district" binding:"required"`  // e.g., "Gampaha"
-	School   string `json:"school" binding:"required"`    // e.g., "Royal College"
-}
-
-// LoginRequest defines the JSON payload for user login
-type LoginRequest struct {
-	Email    string `json:"email" binding:"required,email"`
-	Password string `json:"password" binding:"required"`
-}
-
-// Register handles creating a new student account
-func (h *Handler) Register(c *gin.Context) {
-	var req RegisterRequest
+// CreateStudent handles creating a new student account
+func (h *Handler) CreateStudent(c *gin.Context) {
+	var req CreateStudentRequest
 
 	// 1. Validate JSON payload
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -109,27 +144,108 @@ func (h *Handler) Register(c *gin.Context) {
 	}
 
 	// 2. Map Request JSON to Service DTO
-	// This separates the API layer from the Domain layer
-	dto := RegisterDTO{
-		Email:     req.Email,
-		Password:  req.Password,
-		FirstName: req.FirstName,
-		LastName:  req.LastName,
-		ExamYear:  req.ExamYear,
-		Stream:    req.Stream,
-		District:  req.District,
-		School:    req.School,
+	dto := CreateStudentDTO{
+		FirstName:      req.FirstName,
+		LastName:       req.LastName,
+		Email:          req.Email,
+		Password:       req.Password,
+		NIC:            req.NIC,
+		WhatsappNumber: req.WhatsappNumber,
+		Stream:         req.Stream,
+		Medium:         req.Medium,
 	}
 
 	// 3. Call Service Logic
-	if err := h.service.Register(dto); err != nil {
-		// In a real app, check if error is "email exists" vs "db error" for better status codes
+	user, err := h.service.CreateStudent(dto)
+	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"message": "User registered successfully"})
+	// 4. Auto-login: Generate JWT so the student can start immediately
+	token, err := h.service.generateJWT(*user)
+	if err != nil {
+		// User was created but token generation failed — still a success
+		c.JSON(http.StatusCreated, gin.H{
+			"success":    true,
+			"message":    fmt.Sprintf("Welcome to LearnSteer, %s!", user.Nickname),
+			"student_id": user.StudentID,
+			"nickname":   user.Nickname,
+		})
+		return
+	}
+
+	c.JSON(http.StatusCreated, gin.H{
+		"success":    true,
+		"message":    fmt.Sprintf("Welcome to LearnSteer, %s!", user.Nickname),
+		"student_id": user.StudentID,
+		"nickname":   user.Nickname,
+		"token":      token,
+		"type":       "Bearer",
+	})
 }
+
+// ---------------------------------------------------------------------------
+// Update Student (profile completion)
+// ---------------------------------------------------------------------------
+
+// UpdateStudent handles updating a student's profile data post-login
+func (h *Handler) UpdateStudent(c *gin.Context) {
+	var req UpdateStudentRequest
+
+	// 1. Validate JSON payload
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request: " + err.Error()})
+		return
+	}
+
+	// 2. Extract user ID from JWT context
+	uid, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
+		return
+	}
+
+	// Convert user_id from JWT claims (float64 from JSON) to uint
+	var userID uint
+	switch v := uid.(type) {
+	case float64:
+		userID = uint(v)
+	case uint:
+		userID = v
+	default:
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid user identity"})
+		return
+	}
+
+	// 3. Map to DTO
+	dto := UpdateStudentDTO{
+		Phone:         req.Phone,
+		District:      req.District,
+		School:        req.School,
+		City:          req.City,
+		ALYear:        req.ALYear,
+		ALAttempt:     req.ALAttempt,
+		DateOfBirth:   req.DateOfBirth,
+		Gender:        req.Gender,
+		GuardianPhone: req.GuardianPhone,
+	}
+
+	// 4. Call Service Logic
+	if err := h.service.UpdateStudent(userID, dto); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"message": "Profile updated successfully",
+	})
+}
+
+// ---------------------------------------------------------------------------
+// Login (accepts Nickname, Email, or NIC)
+// ---------------------------------------------------------------------------
 
 // Login handles user authentication and JWT generation
 func (h *Handler) Login(c *gin.Context) {
@@ -141,11 +257,10 @@ func (h *Handler) Login(c *gin.Context) {
 		return
 	}
 
-	// 2. Call Service to get Token
-	token, user, err := h.service.Login(req.Email, req.Password)
+	// 2. Call Service to get Token (accepts nickname, email, or NIC)
+	token, user, err := h.service.Login(req.Identifier, req.Password)
 	if err != nil {
-		// We return 401 Unauthorized for login failures
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid email or password"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
 		return
 	}
 
@@ -154,11 +269,11 @@ func (h *Handler) Login(c *gin.Context) {
 		"token": token,
 		"type":  "Bearer",
 		"user": gin.H{
-			"id":         user.ID,
+			"student_id": user.StudentID,
+			"nickname":   user.Nickname,
 			"first_name": user.FirstName,
 			"last_name":  user.LastName,
 			"email":      user.Email,
-			"nic":        user.NIC,
 			"role":       user.Role,
 			"medium":     user.Medium,
 			"stream":     user.Stream,
@@ -166,13 +281,16 @@ func (h *Handler) Login(c *gin.Context) {
 	})
 }
 
+// ---------------------------------------------------------------------------
+// Check NIC
+// ---------------------------------------------------------------------------
+
 // CheckNIC responds to the frontend with success and exists boolean
 func (h *Handler) CheckNIC(c *gin.Context) {
 	var req CheckNICRequest
 
 	// 1. Bind the incoming JSON
 	if err := c.ShouldBindJSON(&req); err != nil {
-		// Return 400 Bad Request if the JSON is malformed or NIC is missing
 		c.JSON(http.StatusBadRequest, gin.H{
 			"success": false,
 			"error":   "Valid NIC is required in the payload",
@@ -202,11 +320,17 @@ func (h *Handler) CheckNIC(c *gin.Context) {
 
 	// NIC exists. Construct the response.
 	c.JSON(http.StatusOK, gin.H{
-		"success":       true,
-		"exists":        true,
-		"has_password":  user.PasswordHash != "",
+		"success":      true,
+		"exists":       true,
+		"student_id":   user.StudentID,
+		"nickname":     user.Nickname,
+		"has_password": user.PasswordHash != "",
 	})
 }
+
+// ---------------------------------------------------------------------------
+// Verify Password
+// ---------------------------------------------------------------------------
 
 // VerifyPassword responds to the microservice indicating if the credentials are valid
 func (h *Handler) VerifyPassword(c *gin.Context) {
@@ -238,20 +362,24 @@ func (h *Handler) VerifyPassword(c *gin.Context) {
 	})
 }
 
-// GetProfile fetches a user's safe profile data by their NIC
+// ---------------------------------------------------------------------------
+// Get Profile (by Student ID)
+// ---------------------------------------------------------------------------
+
+// GetProfile fetches a user's safe profile data by their Student ID
 func (h *Handler) GetProfile(c *gin.Context) {
-	// 1. Extract the NIC from the URL path parameter (e.g., /profile/200112345678)
-	nic := c.Param("nic")
-	if nic == "" {
+	// 1. Extract the student_id from the URL path parameter
+	studentID := c.Param("student_id")
+	if studentID == "" {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"success": false,
-			"error":   "NIC parameter is required",
+			"error":   "Student ID parameter is required",
 		})
 		return
 	}
 
-	// 2. Fetch the user using your existing service method
-	user, err := h.service.GetUserByNIC(nic)
+	// 2. Fetch the user using the student ID
+	user, err := h.service.GetUserByStudentID(studentID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusNotFound, gin.H{
@@ -269,17 +397,24 @@ func (h *Handler) GetProfile(c *gin.Context) {
 
 	// 3. Map the database model to our safe DTO
 	safeProfile := UserProfileResponse{
+		StudentID:      user.StudentID,
+		Nickname:       user.Nickname,
 		FirstName:      user.FirstName,
 		LastName:       user.LastName,
 		Email:          user.Email,
 		NIC:            user.NIC,
 		WhatsappNumber: user.WhatsappNumber,
+		Phone:          user.Phone,
 		School:         user.School,
 		District:       user.District,
+		City:           user.City,
 		Stream:         user.Stream,
 		Medium:         user.Medium,
-		ALBatch:        user.ALBatch,
+		ALYear:         user.ALYear,
 		ALAttempt:      user.ALAttempt,
+		DateOfBirth:    user.DateOfBirth,
+		Gender:         user.Gender,
+		GuardianPhone:  user.GuardianPhone,
 		Role:           user.Role,
 	}
 
@@ -290,16 +425,37 @@ func (h *Handler) GetProfile(c *gin.Context) {
 	})
 }
 
-// CreateB2BTicket is called by the external Node.js server
+// ---------------------------------------------------------------------------
+// B2B SSO Tickets
+// ---------------------------------------------------------------------------
+
+// CreateB2BTicket is called by external servers (e.g. Node.js backend)
 func (h *Handler) CreateB2BTicket(c *gin.Context) {
 	var req CreateTicketRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "NIC is required"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
 		return
 	}
 
-	// In a real B2B system, you might also verify the NIC exists here first
-	ticket, err := h.service.GenerateSSOTicket(req.NIC)
+	if req.NIC == "" && req.StudentID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Either nic or student_id is required in the payload"})
+		return
+	}
+
+	var user *User
+	var err error
+	if req.StudentID != "" {
+		user, err = h.service.GetUserByStudentID(req.StudentID)
+	} else {
+		user, err = h.service.GetUserByNIC(req.NIC)
+	}
+
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Student not found"})
+		return
+	}
+
+	ticket, err := h.service.GenerateSSOTicket(user.StudentID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate ticket"})
 		return
@@ -330,7 +486,7 @@ func (h *Handler) ExchangeSSOTicket(c *gin.Context) {
 		return
 	}
 
-	// 2. Generate the real Go JWT using your existing method!
+	// 2. Generate the real Go JWT
 	token, err := h.service.generateJWT(*user)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate session"})
@@ -342,8 +498,9 @@ func (h *Handler) ExchangeSSOTicket(c *gin.Context) {
 		"success": true,
 		"token":   token,
 		"user": gin.H{
-			"nic":  user.NIC,
-			"role": user.Role,
+			"student_id": user.StudentID,
+			"nickname":   user.Nickname,
+			"role":       user.Role,
 		},
 	})
 }

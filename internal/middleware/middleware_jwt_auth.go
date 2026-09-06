@@ -36,6 +36,20 @@ func RequireAuth() gin.HandlerFunc {
 			c.Set("user_id", claims["sub"])
 			c.Set("user_role", claims["role"])
 			
+			// Extract student_id (public platform identifier)
+			if studentID, ok := claims["student_id"].(string); ok {
+				c.Set("student_id", studentID)
+			} else {
+				c.Set("student_id", "")
+			}
+
+			// Extract nickname (cartoon display name)
+			if nickname, ok := claims["nickname"].(string); ok {
+				c.Set("nickname", nickname)
+			} else {
+				c.Set("nickname", "")
+			}
+
 			// Safely extract the medium (fallback to empty string if missing)
 			if medium, ok := claims["medium"].(string); ok {
 				c.Set("user_medium", medium)

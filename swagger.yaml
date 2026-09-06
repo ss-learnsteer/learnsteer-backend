@@ -100,47 +100,78 @@ paths:
         '200':
           description: Support phone, hotline, email, and office address
 
-  /auth/register:
+  /auth/create-student:
     post:
       tags: [Authentication & SSO]
-      summary: Register a New Student
+      summary: Create a New Student Account (Frictionless Registration)
+      description: Collects the 8 essential fields to immediately onboard the student, generating a unique Student ID (e.g. LS-a1b2c3d4) and cartoon-themed Nickname (e.g. BraveLion42).
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
-              required: [email, password, first_name, last_name, nic, stream, medium]
+              required: [first_name, last_name, email, password, nic, whatsapp_number, stream, medium]
               properties:
-                email: { type: string, example: "student@example.com" }
-                password: { type: string, example: "SecretPassword123" }
                 first_name: { type: string, example: "Kasun" }
                 last_name: { type: string, example: "Perera" }
+                email: { type: string, example: "student@example.com" }
+                password: { type: string, example: "SecretPassword123" }
                 nic: { type: string, example: "200512345678" }
                 whatsapp_number: { type: string, example: "0771234567" }
                 stream: { type: string, example: "Bio Science" }
                 medium: { type: string, example: "Sinhala" }
-                district: { type: string, example: "Colombo" }
-                school: { type: string, example: "Ananda College" }
       responses:
         '201':
-          description: Registration successful
+          description: Student created successfully with Student ID and Nickname
         '400':
-          description: Email or NIC already exists
+          description: Validation error or duplicate email/NIC/whatsapp
+        '409':
+          description: Conflict on unique field
+
+  /auth/update-student:
+    put:
+      tags: [Authentication & SSO]
+      summary: Update Student Profile (Profile Enrichment)
+      description: Update secondary demographics (school, district, phone, etc.) once the student is active. Protected by JWT.
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                phone: { type: string, example: "0712345678" }
+                district: { type: string, example: "Colombo" }
+                school: { type: string, example: "Ananda College" }
+                city: { type: string, example: "Colombo 10" }
+                al_year: { type: string, example: "2026" }
+                al_attempt: { type: string, example: "1" }
+                date_of_birth: { type: string, example: "2007-05-15" }
+                gender: { type: string, example: "Male" }
+                guardian_phone: { type: string, example: "0777654321" }
+      responses:
+        '200':
+          description: Profile updated successfully
+        '401':
+          description: Unauthorized - Invalid or missing JWT
 
   /auth/login:
     post:
       tags: [Authentication & SSO]
       summary: Student / Admin Login
+      description: Authenticates a student or admin using their Nickname, Email, or NIC along with their password.
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
-              required: [email, password]
+              required: [identifier, password]
               properties:
-                email: { type: string, example: "student@example.com" }
+                identifier: { type: string, example: "BraveLion42" }
                 password: { type: string, example: "SecretPassword123" }
       responses:
         '200':
@@ -151,6 +182,8 @@ paths:
                 token: "eyJhbGciOiJIUzI1NiIsIn..."
                 user:
                   id: 1
+                  student_id: "LS-9f4a12bc"
+                  nickname: "BraveLion42"
                   email: "student@example.com"
                   first_name: "Kasun"
                   last_name: "Perera"
@@ -158,7 +191,7 @@ paths:
                   stream: "Bio Science"
                   medium: "Sinhala"
         '401':
-          description: Invalid email or password
+          description: Invalid credentials
 
   /auth/check-nic:
     post:
@@ -177,15 +210,15 @@ paths:
         '200':
           description: Returns exists flag and registration status
 
-  /auth/profile/{nic}:
+  /auth/profile/{student_id}:
     get:
       tags: [Authentication & SSO]
-      summary: Fetch Public Demographic Profile by NIC
+      summary: Fetch Public Demographic Profile by Student ID
       parameters:
-        - name: nic
+        - name: student_id
           in: path
           required: true
-          schema: { type: string }
+          schema: { type: string, example: "LS-9f4a12bc" }
       responses:
         '200':
           description: Demographic profile details

@@ -70,11 +70,11 @@ Base URL: `https://ss-quiz-platform-backend-8f9b2c83591e.herokuapp.com/api/v1`
 | :--- | :--- | :--- |
 | `GET` | `/health` | Server and Database connectivity health check |
 | `GET` | `/wakeup` | Neon DB serverless pre-warm / wakeup ping |
-| `POST` | `/auth/login` | Student/Admin login with Email & Password ➔ Returns JWT + User |
-| `POST` | `/auth/register` | Student registration form submission |
+| `POST` | `/auth/login` | Student/Admin login with Nickname, Email, or NIC & Password ➔ Returns JWT + User |
+| `POST` | `/auth/create-student` | Frictionless student onboarding (first/last name, email, password, NIC, whatsapp, stream, medium) ➔ Auto-generates student_id + cartoon nickname |
 | `POST` | `/auth/check-nic` | Validates if student NIC is registered in the database |
 | `POST` | `/auth/verify-password` | Verifies student NIC and password hash |
-| `GET` | `/auth/profile/:nic` | Retrieves public student demographic details |
+| `GET` | `/auth/profile/:student_id` | Retrieves public student demographic details by student_id |
 | `POST` | `/auth/exchange` | Exchanges a short-lived (60s) B2B SSO ticket for a valid JWT token |
 | `POST` | `/auth/webhook/google-sheets` | Webhook for auto-syncing student records from Google Sheets |
 | `GET` | `/public/config` | Landing page dynamic branding, stats, and hero banner config |
@@ -87,6 +87,7 @@ Base URL: `https://ss-quiz-platform-backend-8f9b2c83591e.herokuapp.com/api/v1`
 
 | Method | Endpoint | Target View | Description |
 | :--- | :--- | :--- | :--- |
+| `PUT`  | `/auth/update-student` | `/profile` | Profile enrichment (phone, district, school, city, al_year, al_attempt, date_of_birth, gender, guardian_phone) |
 | `GET` | `/dashboard` | `/dashboard` | Complete aggregated dashboard (streak, coverage %, next mock, subject progress, AI Smart Revision alert, deadlines) |
 | `GET` | `/progress` | `/progress` | Progress & Achievements analytics (Z-Score + delta, Island Rank + milestone, 6-Month/Yearly trends, 28-day Activity Heatmap, badges, motivation quote) |
 | `GET` | `/subjects` | `/subjectlist` | Subjects matching student stream with readiness %, lessons count, papers count, completion %, and Island Rank |
@@ -222,23 +223,31 @@ CREATE TABLE IF NOT EXISTS users (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     deleted_at TIMESTAMP WITH TIME ZONE,
     
+    student_id VARCHAR(50) UNIQUE NOT NULL,
+    nickname VARCHAR(50) UNIQUE NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
-    password_hash VARCHAR(255),
-    first_name VARCHAR(100),
-    last_name VARCHAR(100),
+    password_hash VARCHAR(255) NOT NULL,
+    first_name VARCHAR(100) NOT NULL,
+    last_name VARCHAR(100) NOT NULL,
     role VARCHAR(50) DEFAULT 'student',
     
-    nic VARCHAR(50) UNIQUE,
-    whatsapp_number VARCHAR(50),
-    exam_year INT,
-    al_batch VARCHAR(50),
-    al_attempt VARCHAR(10),
-    stream VARCHAR(100),
-    medium VARCHAR(50) DEFAULT 'Sinhala',
+    nic VARCHAR(20) UNIQUE NOT NULL,
+    whatsapp_number VARCHAR(20) NOT NULL,
+    phone VARCHAR(20),
+    school VARCHAR(255),
     district VARCHAR(100),
-    school VARCHAR(255)
+    city VARCHAR(100),
+    stream VARCHAR(100) NOT NULL,
+    medium VARCHAR(50) NOT NULL DEFAULT 'Sinhala',
+    al_year VARCHAR(10),
+    al_attempt VARCHAR(10),
+    date_of_birth VARCHAR(20),
+    gender VARCHAR(20),
+    guardian_phone VARCHAR(20)
 );
 
+CREATE INDEX IF NOT EXISTS idx_users_student_id ON users(student_id);
+CREATE INDEX IF NOT EXISTS idx_users_nickname ON users(nickname);
 CREATE INDEX IF NOT EXISTS idx_users_deleted_at ON users(deleted_at);
 CREATE INDEX IF NOT EXISTS idx_users_stream ON users(stream);
 CREATE INDEX IF NOT EXISTS idx_users_medium ON users(medium);
@@ -246,7 +255,7 @@ CREATE INDEX IF NOT EXISTS idx_users_medium ON users(medium);
 CREATE TABLE IF NOT EXISTS sso_tickets (
     id BIGSERIAL PRIMARY KEY,
     ticket VARCHAR(255) UNIQUE NOT NULL,
-    nic VARCHAR(50) NOT NULL,
+    student_id VARCHAR(50) NOT NULL,
     expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );

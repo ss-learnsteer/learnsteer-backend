@@ -32,6 +32,8 @@ func MockAuthMiddleware() gin.HandlerFunc {
 
 type TestUser struct {
 	ID        uint   `gorm:"primaryKey"`
+	StudentID string `json:"student_id"`
+	Nickname  string `json:"nickname"`
 	FirstName string `json:"first_name"`
 	LastName  string `json:"last_name"`
 	School    string `json:"school"`

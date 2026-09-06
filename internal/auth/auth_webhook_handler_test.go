@@ -63,7 +63,7 @@ func TestHandleGoogleSheetWebhook(t *testing.T) {
 			District:       "Colombo",
 			Stream:         "Physical Science",
 			Medium:         "Sinhala",
-			ALBatch:        "2025",
+			ALYear:         "2025",
 			ALAttempt:      "1",
 		}
 

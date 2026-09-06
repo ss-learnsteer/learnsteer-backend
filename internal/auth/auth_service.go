@@ -1,12 +1,12 @@
 package auth
 
 import (
-	"errors"
-	"time"
-
 	"crypto/rand"
-	"encoding/hex"
+	"errors"
+	"fmt"
+	"math/big"
 	"os"
+	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
@@ -23,69 +23,229 @@ func NewService(db *gorm.DB) *Service {
 	return &Service{db: db}
 }
 
-// RegisterDTO holds all the data needed for registration
-type RegisterDTO struct {
-	Email     string
-	Password  string
-	FirstName string
-	LastName  string
-	ExamYear  int
-	Stream    string
-	District  string
-	School    string
+// ---------------------------------------------------------------------------
+// Student ID & Nickname Generators
+// ---------------------------------------------------------------------------
+
+// generateStudentID creates a unique LS-xxxxxxxxxx platform identifier
+func generateStudentID() (string, error) {
+	const charset = "abcdefghjkmnpqrstuvwxyz23456789" // Ambiguity-safe (no 0/o/1/l/i)
+	const length = 10
+	b := make([]byte, length)
+	for i := range b {
+		n, err := rand.Int(rand.Reader, big.NewInt(int64(len(charset))))
+		if err != nil {
+			return "", err
+		}
+		b[i] = charset[n.Int64()]
+	}
+	return "LS-" + string(b), nil
 }
 
-// Register now accepts the DTO object
-func (s *Service) Register(req RegisterDTO) error {
-	// 1. Check if user exists
+// Adjective + Animal word lists for cartoon-themed nicknames
+var adjectives = []string{
+	"Brave", "Swift", "Clever", "Mighty", "Lucky", "Cosmic", "Blazing", "Turbo", "Epic", "Super",
+	"Hyper", "Mega", "Ultra", "Astro", "Nitro", "Pixel", "Neon", "Thunder", "Storm", "Flash",
+	"Sonic", "Rocket", "Stellar", "Zen", "Quantum", "Mystic", "Crystal", "Shadow", "Golden", "Silver",
+	"Frost", "Ember", "Nova", "Volt", "Blaze", "Apex", "Prime", "Chill", "Dusk", "Dawn",
+	"Iron", "Steel", "Aqua", "Solar", "Lunar", "Arctic", "Rapid", "Bold", "Noble", "Vivid",
+}
+
+var animals = []string{
+	"Panda", "Fox", "Owl", "Tiger", "Eagle", "Falcon", "Wolf", "Bear", "Shark", "Phoenix",
+	"Dragon", "Lion", "Hawk", "Dolphin", "Koala", "Penguin", "Rabbit", "Turtle", "Cheetah", "Panther",
+	"Otter", "Lynx", "Raven", "Cobra", "Gecko", "Puma", "Bison", "Crane", "Parrot", "Jaguar",
+	"Whale", "Husky", "Badger", "Viper", "Mantis", "Toucan", "Condor", "Ibis", "Flamingo", "Chameleon",
+}
+
+// generateNickname creates a cartoon-themed nickname like BravePanda42
+func generateNickname() (string, error) {
+	adjIdx, err := rand.Int(rand.Reader, big.NewInt(int64(len(adjectives))))
+	if err != nil {
+		return "", err
+	}
+	aniIdx, err := rand.Int(rand.Reader, big.NewInt(int64(len(animals))))
+	if err != nil {
+		return "", err
+	}
+	numVal, err := rand.Int(rand.Reader, big.NewInt(90)) // 10–99
+	if err != nil {
+		return "", err
+	}
+	return fmt.Sprintf("%s%s%d", adjectives[adjIdx.Int64()], animals[aniIdx.Int64()], numVal.Int64()+10), nil
+}
+
+// ---------------------------------------------------------------------------
+// DTOs (Data Transfer Objects)
+// ---------------------------------------------------------------------------
+
+// CreateStudentDTO holds data needed for student creation
+type CreateStudentDTO struct {
+	FirstName      string
+	LastName       string
+	Email          string
+	Password       string
+	NIC            string
+	WhatsappNumber string
+	Stream         string
+	Medium         string
+}
+
+// UpdateStudentDTO holds data for profile completion (all optional)
+type UpdateStudentDTO struct {
+	Phone         string
+	District      string
+	School        string
+	City          string
+	ALYear        string
+	ALAttempt     string
+	DateOfBirth   string
+	Gender        string
+	GuardianPhone string
+}
+
+// ---------------------------------------------------------------------------
+// Create Student (replaces Register)
+// ---------------------------------------------------------------------------
+
+// CreateStudent creates a new student account with auto-generated StudentID and Nickname
+func (s *Service) CreateStudent(req CreateStudentDTO) (*User, error) {
+	// 1. Check if email already exists
 	var existing User
 	if err := s.db.Where("email = ?", req.Email).First(&existing).Error; err == nil {
-		return errors.New("email already registered")
+		return nil, errors.New("email already registered")
 	}
 
-	// 2. Hash Password
+	// 2. Check if NIC already exists
+	if err := s.db.Where("nic = ?", req.NIC).First(&existing).Error; err == nil {
+		return nil, errors.New("NIC already registered")
+	}
+
+	// 3. Hash Password
 	hashed, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	// 3. Create User with ALL new fields
+	// 4. Generate unique StudentID (retry up to 5 times on collision)
+	var studentID string
+	for i := 0; i < 5; i++ {
+		studentID, err = generateStudentID()
+		if err != nil {
+			return nil, err
+		}
+		var count int64
+		s.db.Model(&User{}).Where("student_id = ?", studentID).Count(&count)
+		if count == 0 {
+			break
+		}
+		if i == 4 {
+			return nil, errors.New("failed to generate unique student ID")
+		}
+	}
+
+	// 5. Generate unique Nickname (retry up to 5 times on collision)
+	var nickname string
+	for i := 0; i < 5; i++ {
+		nickname, err = generateNickname()
+		if err != nil {
+			return nil, err
+		}
+		var count int64
+		s.db.Model(&User{}).Where("nickname = ?", nickname).Count(&count)
+		if count == 0 {
+			break
+		}
+		if i == 4 {
+			return nil, errors.New("failed to generate unique nickname")
+		}
+	}
+
+	// 6. Create User
 	user := User{
-		Email:        req.Email,
-		PasswordHash: string(hashed),
-		FirstName:    req.FirstName,
-		LastName:     req.LastName,
-		Role:         "student",
-		// New Demographic Data
-		ExamYear: req.ExamYear,
-		Stream:   req.Stream,
-		District: req.District,
-		School:   req.School,
+		StudentID:      studentID,
+		Nickname:       nickname,
+		Email:          req.Email,
+		PasswordHash:   string(hashed),
+		FirstName:      req.FirstName,
+		LastName:       req.LastName,
+		NIC:            req.NIC,
+		WhatsappNumber: req.WhatsappNumber,
+		Role:           "student",
+		Stream:         req.Stream,
+		Medium:         req.Medium,
 	}
 
-	return s.db.Create(&user).Error
+	if err := s.db.Create(&user).Error; err != nil {
+		return nil, err
+	}
+
+	return &user, nil
 }
 
-func (s *Service) Login(email, password string) (string, *User, error) {
+// ---------------------------------------------------------------------------
+// Update Student (profile completion)
+// ---------------------------------------------------------------------------
+
+// UpdateStudent updates a student's profile with additional data (only non-empty fields)
+func (s *Service) UpdateStudent(userID uint, dto UpdateStudentDTO) error {
+	updates := map[string]interface{}{}
+
+	if dto.Phone != "" {
+		updates["phone"] = dto.Phone
+	}
+	if dto.District != "" {
+		updates["district"] = dto.District
+	}
+	if dto.School != "" {
+		updates["school"] = dto.School
+	}
+	if dto.City != "" {
+		updates["city"] = dto.City
+	}
+	if dto.ALYear != "" {
+		updates["al_year"] = dto.ALYear
+	}
+	if dto.ALAttempt != "" {
+		updates["al_attempt"] = dto.ALAttempt
+	}
+	if dto.DateOfBirth != "" {
+		updates["date_of_birth"] = dto.DateOfBirth
+	}
+	if dto.Gender != "" {
+		updates["gender"] = dto.Gender
+	}
+	if dto.GuardianPhone != "" {
+		updates["guardian_phone"] = dto.GuardianPhone
+	}
+
+	if len(updates) == 0 {
+		return errors.New("no fields to update")
+	}
+
+	return s.db.Model(&User{}).Where("id = ?", userID).Updates(updates).Error
+}
+
+// ---------------------------------------------------------------------------
+// Login (accepts Nickname, Email, or NIC)
+// ---------------------------------------------------------------------------
+
+func (s *Service) Login(identifier, password string) (string, *User, error) {
 	var user User
 
-	// 1. Check if the user exists
-	err := s.db.Where("email = ?", email).First(&user).Error
+	// 1. Find user by nickname, email, or NIC
+	err := s.db.Where("nickname = ? OR email = ? OR nic = ?", identifier, identifier, identifier).First(&user).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			// Security Best Practice: Return a generic error so attackers
-			// don't know if the email exists or the password was just wrong.
-			return "", nil, errors.New("invalid email or password")
+			return "", nil, errors.New("invalid credentials")
 		}
 		return "", nil, err
 	}
 
 	// 2. Verify the Password
-	// For students synced via the webhook, this compares the plain text NIC they
-	// typed into the login form against the bcrypt hash in the database.
 	err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(password))
 	if err != nil {
-		return "", nil, errors.New("invalid email or password")
+		return "", nil, errors.New("invalid credentials")
 	}
 
 	// 3. Generate the JWT Token
@@ -97,32 +257,38 @@ func (s *Service) Login(email, password string) (string, *User, error) {
 	return token, &user, nil
 }
 
-// generateJWT is a private helper to create the token payload (claims)
+// ---------------------------------------------------------------------------
+// JWT Generation
+// ---------------------------------------------------------------------------
+
+// generateJWT creates a token with both internal ID and public student_id/nickname
 func (s *Service) generateJWT(user User) (string, error) {
-	// Define the claims (the data embedded inside the token)
 	claims := jwt.MapClaims{
-		"sub":    user.ID,                               // Subject (User ID)
-		"role":   user.Role,                             // Important for Role-Based Access Control (student vs ss_member)
-		"medium": user.Medium,
-		"stream": user.Stream,
-		"exp":    time.Now().Add(time.Hour * 24).Unix(), // Token expires in 24 hours
-		"iat":    time.Now().Unix(),                     // Issued at
+		"sub":        user.ID,        // Internal numeric PK (for DB queries)
+		"student_id": user.StudentID, // Public platform ID (for API responses)
+		"nickname":   user.Nickname,  // Cartoon display name
+		"role":       user.Role,
+		"medium":     user.Medium,
+		"stream":     user.Stream,
+		"exp":        time.Now().Add(time.Hour * 24).Unix(),
+		"iat":        time.Now().Unix(),
 	}
 
-	// Create a new token object, specifying the signing method and the claims
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
-	// Sign the token with your server's secret key
 	secret := os.Getenv("JWT_SECRET")
 	if secret == "" {
 		return "", errors.New("JWT_SECRET environment variable is missing")
 	}
 
-	// Generate the encoded, secure token string
 	return token.SignedString([]byte(secret))
 }
 
-// ProcessWebhookRegistration handles the "Upsert" logic
+// ---------------------------------------------------------------------------
+// Webhook Registration (Google Sheets sync)
+// ---------------------------------------------------------------------------
+
+// ProcessWebhookRegistration handles the "Upsert" logic for webhook-synced users
 func (s *Service) ProcessWebhookRegistration(data WebhookPayload) error {
 	var user User
 
@@ -130,7 +296,6 @@ func (s *Service) ProcessWebhookRegistration(data WebhookPayload) error {
 	result := s.db.Where("email = ?", data.Email).First(&user)
 
 	// 2. Prepare the Default Password (NIC)
-	// We hash the NIC so they can use it to login
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(data.NIC), bcrypt.DefaultCost)
 	if err != nil {
 		return err
@@ -145,7 +310,6 @@ func (s *Service) ProcessWebhookRegistration(data WebhookPayload) error {
 	switch result.Error {
 	case nil:
 		// --- UPDATE EXISTING USER ---
-		// We update everything EXCEPT the password (in case they changed it manually)
 		user.FirstName = data.FirstName
 		user.LastName = data.LastName
 		user.NIC = data.NIC
@@ -154,7 +318,7 @@ func (s *Service) ProcessWebhookRegistration(data WebhookPayload) error {
 		user.District = data.District
 		user.Stream = data.Stream
 		user.Medium = data.Medium
-		user.ALBatch = data.ALBatch
+		user.ALYear = data.ALYear
 		user.ALAttempt = data.ALAttempt
 		user.Role = assignedRole
 
@@ -162,9 +326,19 @@ func (s *Service) ProcessWebhookRegistration(data WebhookPayload) error {
 
 	case gorm.ErrRecordNotFound:
 		// --- CREATE NEW USER ---
-		// Use OnConflict so that if the NIC already exists (e.g. a duplicate
-		// submission from the sheet), we update instead of crashing.
+		// Auto-generate StudentID and Nickname for webhook-created users
+		studentID, err := generateStudentID()
+		if err != nil {
+			return err
+		}
+		nickname, err := generateNickname()
+		if err != nil {
+			return err
+		}
+
 		newUser := User{
+			StudentID:      studentID,
+			Nickname:       nickname,
 			Email:          data.Email,
 			PasswordHash:   string(hashedPassword), // Default Password = NIC
 			Role:           assignedRole,
@@ -176,7 +350,7 @@ func (s *Service) ProcessWebhookRegistration(data WebhookPayload) error {
 			District:       data.District,
 			Stream:         data.Stream,
 			Medium:         data.Medium,
-			ALBatch:        data.ALBatch,
+			ALYear:         data.ALYear,
 			ALAttempt:      data.ALAttempt,
 		}
 		return s.db.Clauses(clause.OnConflict{
@@ -184,7 +358,7 @@ func (s *Service) ProcessWebhookRegistration(data WebhookPayload) error {
 			DoUpdates: clause.AssignmentColumns([]string{
 				"email", "first_name", "last_name", "whatsapp_number",
 				"school", "district", "stream", "medium",
-				"al_batch", "al_attempt", "role", "updated_at",
+				"al_year", "al_attempt", "role", "updated_at",
 			}),
 		}).Create(&newUser).Error
 	}
@@ -192,26 +366,36 @@ func (s *Service) ProcessWebhookRegistration(data WebhookPayload) error {
 	return result.Error
 }
 
+// ---------------------------------------------------------------------------
+// NIC & Profile Lookups
+// ---------------------------------------------------------------------------
+
 // CheckNICExists queries the database to see if the NIC is already registered
 func (s *Service) CheckNICExists(nic string) (bool, error) {
 	var count int64
-
-	// Query the User table where the nic matches
 	err := s.db.Model(&User{}).Where("nic = ?", nic).Count(&count).Error
 	if err != nil {
 		return false, err
 	}
-
-	// If count is greater than 0, the NIC exists
 	return count > 0, nil
 }
 
-// GetUserByNIC fetches the user by NIC so we can access their password hash
+// GetUserByNIC fetches the user by NIC
 func (s *Service) GetUserByNIC(nic string) (*User, error) {
 	var user User
 	err := s.db.Where("nic = ?", nic).First(&user).Error
 	if err != nil {
-		return nil, err // Returns gorm.ErrRecordNotFound if they don't exist
+		return nil, err
+	}
+	return &user, nil
+}
+
+// GetUserByStudentID fetches the user by their platform student ID
+func (s *Service) GetUserByStudentID(studentID string) (*User, error) {
+	var user User
+	err := s.db.Where("student_id = ?", studentID).First(&user).Error
+	if err != nil {
+		return nil, err
 	}
 	return &user, nil
 }
@@ -220,42 +404,40 @@ func (s *Service) GetUserByNIC(nic string) (*User, error) {
 func (s *Service) VerifyPasswordByNIC(nic, password string) (bool, error) {
 	var user User
 
-	// 1. Find the user by NIC
 	err := s.db.Where("nic = ?", nic).First(&user).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			// User doesn't exist, so the password is automatically invalid
 			return false, nil
 		}
-		// An actual database connection error occurred
 		return false, err
 	}
 
-	// 2. Compare the provided password with the stored hash
 	err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(password))
 	if err != nil {
-		// Password does not match
 		return false, nil
 	}
 
-	// Password matches perfectly
 	return true, nil
 }
 
+// ---------------------------------------------------------------------------
+// SSO Tickets (B2B Single Sign-On)
+// ---------------------------------------------------------------------------
+
 // GenerateSSOTicket creates a 60-second secure ticket for a user
-func (s *Service) GenerateSSOTicket(nic string) (string, error) {
+func (s *Service) GenerateSSOTicket(studentID string) (string, error) {
 	// 1. Generate a 32-byte secure random string
 	bytes := make([]byte, 32)
 	if _, err := rand.Read(bytes); err != nil {
 		return "", err
 	}
-	ticketStr := hex.EncodeToString(bytes)
+	ticketStr := fmt.Sprintf("%x", bytes)
 
 	// 2. Save it to the database with a 60-second lifespan
 	ticket := SSOTicket{
 		Ticket:    ticketStr,
-		NIC:       nic,
-		ExpiresAt: time.Now().Add(60 * time.Second), // Very short window!
+		StudentID: studentID,
+		ExpiresAt: time.Now().Add(60 * time.Second),
 	}
 
 	if err := s.db.Create(&ticket).Error; err != nil {
@@ -270,7 +452,6 @@ func (s *Service) ConsumeSSOTicket(ticketStr string) (*User, error) {
 	var ticket SSOTicket
 	var user User
 
-	// 1. We use a Database Transaction to ensure this ticket is only used EXACTLY once
 	err := s.db.Transaction(func(tx *gorm.DB) error {
 		// Find the ticket
 		if err := tx.Where("ticket = ?", ticketStr).First(&ticket).Error; err != nil {
@@ -279,12 +460,12 @@ func (s *Service) ConsumeSSOTicket(ticketStr string) (*User, error) {
 
 		// Check expiration
 		if time.Now().After(ticket.ExpiresAt) {
-			tx.Delete(&ticket) // Clean up the expired ticket
+			tx.Delete(&ticket)
 			return errors.New("ticket has expired")
 		}
 
-		// Fetch the actual user associated with this NIC
-		if err := tx.Where("nic = ?", ticket.NIC).First(&user).Error; err != nil {
+		// Fetch the actual user associated with this StudentID
+		if err := tx.Where("student_id = ?", ticket.StudentID).First(&user).Error; err != nil {
 			return errors.New("user not found")
 		}
 

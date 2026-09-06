@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"strings"
 	"time"
 
 	"gorm.io/gorm"
@@ -560,11 +561,21 @@ func (s *Service) PostLessonQuestion(lessonID uint, userID uint, questionText st
 	type userRow struct {
 		FirstName string
 		LastName  string
+		Nickname  string
 	}
 	var u userRow
-	if s.db.Table("users").Where("id = ?", userID).First(&u).Error == nil && u.FirstName != "" {
-		userName = fmt.Sprintf("%s %s.", u.FirstName, string(u.LastName[0]))
-		avatar = fmt.Sprintf("%s%s", string(u.FirstName[0]), string(u.LastName[0]))
+	if s.db.Table("users").Where("id = ?", userID).First(&u).Error == nil {
+		if u.Nickname != "" {
+			userName = u.Nickname
+			if len(u.Nickname) >= 2 {
+				avatar = strings.ToUpper(u.Nickname[:2])
+			} else {
+				avatar = strings.ToUpper(u.Nickname)
+			}
+		} else if u.FirstName != "" {
+			userName = fmt.Sprintf("%s %s.", u.FirstName, string(u.LastName[0]))
+			avatar = fmt.Sprintf("%s%s", string(u.FirstName[0]), string(u.LastName[0]))
+		}
 	}
 
 	record := LessonQA{

@@ -35,13 +35,9 @@ func (s *Service) GetDashboard(userID uint) (*DashboardResponseDTO, error) {
 		fullName = "Student"
 	}
 
-	batch := user.ALBatch
+	batch := user.ALYear
 	if batch == "" {
-		if user.ExamYear > 0 {
-			batch = fmt.Sprintf("%d Batch", user.ExamYear)
-		} else {
-			batch = "2024 Batch"
-		}
+		batch = "2025"
 	}
 
 	stream := user.Stream
@@ -63,6 +59,8 @@ func (s *Service) GetDashboard(userID uint) (*DashboardResponseDTO, error) {
 
 	userDTO := DashboardUserDTO{
 		ID:         user.ID,
+		StudentID:  user.StudentID,
+		Nickname:   user.Nickname,
 		FirstName:  user.FirstName,
 		LastName:   user.LastName,
 		FullName:   fullName,

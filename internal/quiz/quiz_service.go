@@ -331,6 +331,8 @@ func (s *Service) GetLeaderboard(quizID uint, limit int) ([]LeaderboardEntry, er
 
 	type QueryResult struct {
 		UserID      uint       `gorm:"column:user_id"`
+		StudentID   string     `gorm:"column:student_id"`
+		Nickname    string     `gorm:"column:nickname"`
 		FirstName   string     `gorm:"column:first_name"`
 		LastName    string     `gorm:"column:last_name"`
 		School      string     `gorm:"column:school"`
@@ -342,10 +344,10 @@ func (s *Service) GetLeaderboard(quizID uint, limit int) ([]LeaderboardEntry, er
 	var rawResults []QueryResult
 
 	err := s.db.Table("submissions").
-		Select("users.id as user_id, users.first_name, users.last_name, users.school, users.district, MAX(submissions.score) as score, MAX(submissions.completed_at) as completed_at").
+		Select("users.id as user_id, users.student_id, users.nickname, users.first_name, users.last_name, users.school, users.district, MAX(submissions.score) as score, MAX(submissions.completed_at) as completed_at").
 		Joins("JOIN users ON users.id = submissions.user_id").
 		Where("submissions.quiz_id = ?", quizID).
-		Group("users.id, users.first_name, users.last_name, users.school, users.district").
+		Group("users.id, users.student_id, users.nickname, users.first_name, users.last_name, users.school, users.district").
 		Order("score DESC, completed_at ASC").
 		Limit(limit).
 		Scan(&rawResults).Error
@@ -359,6 +361,8 @@ func (s *Service) GetLeaderboard(quizID uint, limit int) ([]LeaderboardEntry, er
 		leaderboard[i] = LeaderboardEntry{
 			Rank:        i + 1,
 			UserID:      r.UserID,
+			StudentID:   r.StudentID,
+			Nickname:    r.Nickname,
 			FirstName:   r.FirstName,
 			LastName:    r.LastName,
 			School:      r.School,
